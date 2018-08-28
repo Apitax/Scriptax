@@ -2,8 +2,9 @@ from something.Symbol import Symbol
 
 
 class SymbolScope:
-    def __init__(self):
+    def __init__(self, name=None):
         self.symbols = []
+        self.name = name
 
     def addSymbol(self, symbol: Symbol):
         if(self.getSymbol(symbol.name, symbol.symbolType)):
