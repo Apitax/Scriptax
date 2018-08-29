@@ -1,0 +1,61 @@
+*.cpython-36.pyc
+v8-compile-cache-0/
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+
+.idea/
+venv/
+3415-ref/
+*.jar
+*.bat
+grammar/src/
+*.log*
+
+log.txt
+
+*venv/
+
+*.bak
+
+/build/
+
+dist/
+
+/apitax/drivers/plugins/scriptax/*/
+
+config.txt
+users.json
+
+# Compiled python modules.
+*.pyc
+
+# Setuptools distribution folder.
+/dist/
+
+# Node distribution folder
+/apitax/ah/api/dashboard/dist/
+
+*-lock.json
+
+# Python egg metadata, regenerated from source files by setuptools.
+/*.egg-info
+/*.egg
+
+__pycache__/
+
+
+__pycache__
+
+# Compiled binary addons (https://nodejs.org/api/addons.html)
+build/Release
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+

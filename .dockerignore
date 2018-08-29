@@ -1,0 +1,135 @@
+.travis.yaml
+.swagger-codegen-ignore
+tox.ini
+git_push.sh
+test-requirements.txt
+images/
+
+.git/
+logs/
+scripts/
+apitax-tests/
+docker/
+
+config.txt
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*,cover
+.hypothesis/
+venv/
+.python-version
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+
+#Ipython Notebook
+.ipynb_checkpoints
+
+*.cpython-36.pyc
+v8-compile-cache-0/
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+
+.idea/
+venv/
+3415-ref/
+*.jar
+*.bat
+grammar/src/
+*.log*
+
+log.txt
+
+/build/
+
+dist/
+
+/apitax/drivers/plugins/scriptax/*/
+
+config.txt
+users.json
+
+# Compiled python modules.
+*.pyc
+
+# Setuptools distribution folder.
+/dist/
+
+# Node distribution folder
+/apitax/ah/api/dashboard/dist/
+
+*-lock.json
+
+# Python egg metadata, regenerated from source files by setuptools.
+/*.egg-info
+/*.egg
+
+__pycache__/
+
+
+__pycache__
+
+# Compiled binary addons (https://nodejs.org/api/addons.html)
+build/Release
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Optional npm cache directory
+.npm
