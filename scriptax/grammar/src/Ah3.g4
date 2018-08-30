@@ -85,7 +85,7 @@ flow :
 
 create_instance : NEW label LPAREN optional_parameters_block RPAREN ; 
 
-method_statement : attribute+ ASYNC? label LPAREN optional_parameters_block RPAREN block ;
+method_statement : attribute+ ASYNC? label LPAREN sig_parameter_block RPAREN block ;
 
 method_call : AWAIT? labels LPAREN optional_parameters_block RPAREN callback? ;
 
@@ -106,6 +106,8 @@ callback : (LPAREN optional_parameters_block RPAREN ARROW)? callback_block ;
 callback_block : EXECUTEOPEN statements EXECUTECLOSE ;
 
 optional_parameters_block : optional_parameter? (COMMA optional_parameter)* ;
+
+sig_parameter_block : sig_parameter? (COMMA sig_parameter)* ;
 
 sig_parameter : labels | optional_parameter ;
 
@@ -139,7 +141,7 @@ attribute : API | SCRIPT ;
 
 extends_statement : EXTENDS LPAREN labels RPAREN ; 
 
-sig_statement : SIG LPAREN sig_parameter (COMMA sig_parameter)* RPAREN ;
+sig_statement : SIG LPAREN sig_parameter_block RPAREN ;
 
 options_statement : OPTIONS LPAREN optional_parameters_block RPAREN;
 
