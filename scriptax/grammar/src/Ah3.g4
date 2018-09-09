@@ -123,7 +123,7 @@ commandtax :
         | PATCH 
         | DELETE 
         | COMMANDTAX 
-      ) LPAREN expr (COMMA obj_dict)? (COMMA optional_parameter)* RPAREN ;
+      ) LPAREN expr (COMMA atom_obj_dict)? (COMMA optional_parameter)* RPAREN ;
 
 execute : commandtax callback? ;
 
@@ -155,7 +155,7 @@ login_statement : LOGIN LPAREN optional_parameters_block RPAREN ;
 
 endpoint_statement : ENDPOINT LPAREN expr RPAREN ; 
 
-import_statement : (FROM label)? IMPORT labels (AS label)?
+import_statement : (FROM label)? IMPORT labels (AS label)? ;
 
 casting : 
       (
@@ -180,21 +180,27 @@ reflection : AT labels ;
 inject : MUSTACHEOPEN expr MUSTACHECLOSE ;
 
 atom: 
-      obj_dict
-      | obj_list
-      | string
-      | number
-      | boolean ;
+      atom_obj_dict
+      | atom_obj_list
+      | atom_string
+      | atom_number
+      | atom_boolean
+      | atom_hex
+      | atom_none ;
 
-obj_dict : BLOCKOPEN (expr COLON expr)? (COMMA (expr COLON expr)?)* BLOCKCLOSE ; 
+atom_obj_dict : BLOCKOPEN (expr COLON expr)? (COMMA (expr COLON expr)?)* BLOCKCLOSE ;
 
-obj_list : SOPEN expr? (COMMA expr?)* SCLOSE ;
+atom_obj_list : SOPEN expr? (COMMA expr?)* SCLOSE ;
 
-string : STRING ;
+atom_string : STRING ;
 
-number : INT | FLOAT ;
+atom_number : INT | FLOAT ;
 
-boolean : TRUE | FALSE ;
+atom_boolean : TRUE | FALSE ;
+
+atom_hex : HEX ;
+
+atom_none : NONE ;
 
 
 /**********
@@ -245,6 +251,8 @@ FALSE : F A L S E ;
 TRUE : T R U E ;
 STRING : QUOTE (ESC|~["\r\n])*? QUOTE | SQUOTE (ESC|~['\r\n])*? SQUOTE ;
 HEX : ('0x'|'0X')(HEXDIGIT)HEXDIGIT*;
+NONE : N O N E | N U L L ;
+
 /** BLOCKS AND ENCLOSURES **/
 EXECUTEOPEN : '{%' ;
 EXECUTECLOSE : '%}' ;
@@ -256,15 +264,18 @@ LPAREN : '(';
 RPAREN : ')';
 SOPEN : '[';
 SCLOSE : ']';
+
 /** KEY SYMBOLS **/
 VARIABLE_ID : '$' ;
 TERMINATOR : ';' ;
 HASH : '#' ;
 ARROW : '->' ;
 AT : '@' ;
+
 /** KEYWORD COMBINATORS **/
 AND : A N D | SAND ;
 OR : O R | SOR ;
+
 /** FLOW **/
 RETURNS : R E T U R N ;
 EACH : E A C H;
@@ -274,6 +285,7 @@ ELSE : E L S E ;
 FOR : F O R ;
 WHILE : W H I L E ;
 ERROR : E R R O R ;
+
 /** HELPER FUNCTIONS **/  // These use ()'s and CAN return values
 TYPE_INT : I N T ;
 TYPE_DICT : D I C T ;
@@ -284,6 +296,7 @@ TYPE_BOOL : B O O L ;
 LOGIN : L O G I N ;
 LOG : L O G ;
 ENDPOINT : E N D P O I N T ;
+
 /** METHODS **/           // These don't return any values
 SIG : S I G ;
 OPTIONS : O P T I O N S ;
@@ -292,6 +305,7 @@ DEL : D E L ;
 URL : U R L ;
 AUTH : A U T H ;
 EXTENDS : E X T E N D S ;
+
 /** COMMANDTAX METHODS **/
 COMMANDTAX : C T ;
 GET : G E T ;
@@ -299,9 +313,11 @@ POST : P O S T ;
 PUT : P U T ;
 PATCH : P A T C H ;
 DELETE : D E L E T E ;
+
 /** Attributes **/
 SCRIPT : S C R I P T ;
 API : A P I ;
+
 /** KEYWORDS **/
 IN : I N ;
 AS : A S ;
@@ -310,14 +326,19 @@ SET : S E T ;
 ASYNC : A S Y N C ;
 AWAIT : A W A I T ;
 NEW : N E W ;
+
 /** VARIABLES **/
 LABEL : VARIABLE_ID? (LETTER | ULINE | DIGIT | INT | FLOAT)+ ;
+
 /** COMMENTS **/
 BLOCK_COMMENT : DIV MUL .*? MUL DIV -> channel(HIDDEN) ;
 LINE_COMMENT : DIV DIV ~[\r\n]* -> channel(HIDDEN) ;
+
 /** NEWLINES AND WHITESPACE **/
 NEWLINE : '\r'? '\n' -> skip;
 WS : (' ' | '\t')+ -> skip ;
+
+
 /********
 FRAGMENTS
 ********/

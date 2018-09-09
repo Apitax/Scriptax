@@ -1,4 +1,4 @@
-from something.Symbol import Symbol
+from scriptax.parser.symbols.Symbol import Symbol
 
 
 class SymbolScope:

@@ -1,4 +1,4 @@
-from something.SymbolScope import SymbolScope
+from scriptax.parser.symbols.SymbolScope import SymbolScope
 
 
 class SymbolTable:

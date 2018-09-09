@@ -1,12 +1,12 @@
 # System import
 
 # Application import
-from apitax.grammar.build.Ah210Lexer import Ah210Lexer
-from apitax.grammar.build.Ah210Parser import Ah210Parser
-from apitax.grammar.AhVisitor import AhVisitor
-from apitax.utilities.Files import getPath
-from apitax.ah.flow.LoadedDrivers import LoadedDrivers
-from apitax.ah.models.State import State
+from scriptax.grammar.build.Ah3Lexer import Ah3Lexer
+from scriptax.grammar.build.Ah3Parser import Ah3Parser
+from scriptax.parser.Visitor import AhVisitor
+from apitaxcore.utilities.Files import getPath
+from apitaxcore.flow.LoadedDrivers import LoadedDrivers
+from apitaxcore.models.State import State
 
 from antlr4 import *
 
@@ -31,9 +31,9 @@ class Scriptax():
         input = InputStream(self.options.driver.getDriverScript(filepath))
 
         # input = FileStream(filepath)
-        lexer = Ah210Lexer(input)
+        lexer = Ah3Lexer(input)
         stream = CommonTokenStream(lexer)
-        parser = Ah210Parser(stream)
+        parser = Ah3Parser(stream)
         tree = parser.prog()
         #printer = AhListener()
 

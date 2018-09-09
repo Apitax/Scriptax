@@ -1,4 +1,4 @@
-from apitax.ah.catalog.Catalog import Catalog
+from apitaxcore.catalog.Catalog import Catalog
 
 
 class ScriptCatalog(Catalog):

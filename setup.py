@@ -21,7 +21,7 @@ setup(
   ),
   install_requires = [
     'antlr4-python3-runtime',
-    'apitaxcore', 
-    'commandtax',
+    'apitaxcore==3.0.1',
+    'commandtax==0.0.2',
   ],
 )
