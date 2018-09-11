@@ -27,9 +27,9 @@ import threading
 #     assignment
 #
 #   scope creators:
-#     method_statement (ADD SYMBOL TO GLOBAL SCOPE & ADD AS CHILD SCOPE OF TYPE METHOD)
-#     block            (ADD AS CHILD SCOPE OF TYPE BLOCK)
-#     callback_block   (ADD AS CHILD SCOPE OF TYPE CALLBACK)
+#     v method_statement (ADD SYMBOL TO GLOBAL SCOPE & ADD AS CHILD SCOPE OF TYPE METHOD)
+#     v block            (ADD AS CHILD SCOPE OF TYPE BLOCK)
+#     v callback_block   (ADD AS CHILD SCOPE OF TYPE CALLBACK)
 #
 #     run recursively when encountering and merge into global scope:
 #       extends_statement  (MERGE SCOPES & SYMBOLS INTO GLOBAL OF SUB SCRIPT PRIOR TO CURRENT SCRIPT)
@@ -279,6 +279,16 @@ class AhVisitor(AhVisitorOriginal):
     # Visit a parse tree produced by AhParser#expr.
     # TODO: add support for method, instance, reflection etc.
     def visitExpr(self, ctx):  # Get number of terms and loop this code for #terms - 1
+
+        if(ctx.reflection()):
+            return self.visit(ctx.reflection())
+
+        if(ctx.create_instance()):
+            return self.visit(ctx.create_instance())
+
+        if(ctx.method_call()):
+            return self.visit(ctx.method_call())
+
         if (ctx.execute()):
             return self.visit(ctx.execute())['result']
 
@@ -301,7 +311,7 @@ class AhVisitor(AhVisitorOriginal):
             return self.visit(ctx.count())
 
         if (ctx.labels()):
-            return self.getVariable(ctx.labels(), isRequest=ctx.REQUEST())
+            return self.getVariable(ctx.labels(), isRequest=False) # TODO: Remove isRequest from here as it is no longer a thing
 
         if (ctx.inject()):
             return self.visit(ctx.inject())
@@ -374,7 +384,9 @@ class AhVisitor(AhVisitorOriginal):
             value = self.visit(ctx.expr())
 
         if (not ctx.EQUAL()):
-            var = self.data.getVar(label)
+            # TODO: Double check that this still works
+            var = self.symbol_table.getSymbol(name=label)
+            #var = self.data.getVar(label)
             if (ctx.D_PLUS()):
                 value = var + 1
             elif (ctx.D_MINUS()):

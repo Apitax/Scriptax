@@ -26,7 +26,14 @@ class SymbolScope:
         self.type = scopeType
 
     def printScope(self):
-        pass
+        print('{ ' + str(self.name) + ":" + str(self.type))
+        if(self.parent):
+            print('   parent: ' + str(self.parent.name))
+        for symbol in self.symbols:
+            print('   + ' + symbol.name + ':' + str(symbol.symbolType) + ':' + str(symbol.dataType) + ':' + str(symbol.value))
+        for child in self.children:
+            child.printScope()
+        print('}')
 
     def printScopeDebug(self):
         pass

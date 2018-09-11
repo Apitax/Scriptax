@@ -10,10 +10,11 @@ class SymbolTable:
         self.current = self.current.nextChild()
 
     def exitScope(self):
-        self.current = self.current.getParent()
+        self.current = self.current.parent
 
     def printTable(self):
-        pass
+        print('>>Symbol Table<<')
+        self.root.printScope()
 
     def resetTable(self):
         self.root.resetScope()
