@@ -1,5 +1,8 @@
 from scriptax.grammar.build.Ah3Parser import Ah3Parser as AhParser
 from scriptax.grammar.build.Ah3Visitor import Ah3Visitor as AhVisitorOriginal
+from scriptax.parser.symbols.SymbolTable import SymbolTable
+from scriptax.parser.symbols.Symbol import *
+from scriptax.parser.symbols.SymbolScope import SCOPE_BLOCK, SCOPE_CALLBACK, SCOPE_METHOD, SCOPE_SCRIPT
 from apitaxcore.models.State import State
 from apitaxcore.utilities.Async import GenericExecution
 from apitaxcore.utilities.Json import isJson
@@ -12,21 +15,58 @@ import re
 import threading
 
 
+# TODO: SCOPE GENERATION:
+#   basic symbol creators:
+#     assignment
+#     sig_statement
+#
+#   symbol value adjusters:
+#     assignment
+#
+#   symbol type adjusters/verifiers:
+#     assignment
+#
+#   scope creators:
+#     method_statement (ADD SYMBOL TO GLOBAL SCOPE & ADD AS CHILD SCOPE OF TYPE METHOD)
+#     block            (ADD AS CHILD SCOPE OF TYPE BLOCK)
+#     callback_block   (ADD AS CHILD SCOPE OF TYPE CALLBACK)
+#
+#     run recursively when encountering and merge into global scope:
+#       extends_statement  (MERGE SCOPES & SYMBOLS INTO GLOBAL OF SUB SCRIPT PRIOR TO CURRENT SCRIPT)
+#       import_statement   (ADD AS SCRIPT SYMBOL TYPE INTO GLOBAL SCOPE)
+# TODO: METHOD CALLS:
+#  Because the symbol table contains all the relevant data, all that must be saved is the method block context.
+#  As long as we ensure the correct scope is set when we visit that block context, everything **SHOULD** work fine
+
 class AhVisitor(AhVisitorOriginal):
 
-    def __init__(self, credentials: Credentials = Credentials(), parameters={}, options: Options = Options(), file=''):
-        self.data = DataStore()
+    def __init__(self, credentials: Credentials = Credentials(), parameters={}, options: Options = Options(), file='',
+                 symbol_table=SymbolTable()):
+        # Aliases
         self.log = State.log
-        self.appOptions = options
         self.config = State.config
-        self.parser = None
-        self.options = {}
+
+        # Parameters
+        self.appOptions = options
         self.credentials = credentials
-        self.data.storeVar("params.passed", parameters)
-        self.state = {'file': file, 'line': 0, 'char': 0}
+        self.parameters = parameters
+
+        # Async Threading
         self.threads = []
 
-        # Replace the below functionality if possible
+        # TODO: Evalutate nessecitity of these
+        self.state = {'file': file, 'line': 0, 'char': 0}
+        self.parser = None
+        self.options = {}
+
+        # Parsing status
+        # Values: ok, error, exit, return
+        self.status = 'ok'
+
+        # Symbol Table
+        self.symbol_table = symbol_table
+
+        # Used for mustache syntax dynamic replacement
         self.regexVar = '{{[ ]{0,}[A-z0-9_$.\-]{1,}[ ]{0,}}}'
 
     def setState(self, file='', line=-1, char=-1):
@@ -37,15 +77,7 @@ class AhVisitor(AhVisitorOriginal):
         if (char != -1):
             self.state['char'] = char
 
-    def importCommandRequest(self, commandHandler, export=False):
-        from apitaxcore.commandtax.commands.Custom import Custom as CustomCommand
-
-        if (commandHandler.getRequest().getResponseBody().strip() != ''):
-            if (not isinstance(commandHandler.getRequest(), CustomCommand)):
-                self.data.importScriptsExports(commandHandler.getRequest().parser.data, export=export)
-            else:
-                self.data.storeRequest(commandHandler.getRequest().getResponseBody(), export=export)
-
+    # TODO: Redo, this is garbage
     def executeCommand(self, resolvedCommand, logPrefix=''):
         from apitaxcore.flow.Connector import Connector
         if (self.appOptions.debug):
@@ -83,6 +115,7 @@ class AhVisitor(AhVisitorOriginal):
 
         return dict({"command": resolvedCommand['command'], "commandHandler": commandHandler, "result": returnResult})
 
+    # TODO: Repurpose to utilize symbol table
     def getVariable(self, label, isRequest=False, convert=True):
         if (convert):
             label = self.visit(label)
@@ -95,6 +128,7 @@ class AhVisitor(AhVisitorOriginal):
 
             return None
 
+    # TODO: WTF?
     def useOptions(self):
         if (self.options['params']):
 
@@ -108,6 +142,7 @@ class AhVisitor(AhVisitorOriginal):
                     self.data.storeVar('params.' + param, self.data.getVar('params.passed.' + param))
                     i += 1
 
+    # Dynamic mustache syntax injection
     def inject(self, line):
         matches = re.findall(self.regexVar, line)
         for match in matches:
@@ -116,7 +151,9 @@ class AhVisitor(AhVisitorOriginal):
             line = line.replace(match, replacer)
         return line
 
-    def executeIsolatedCallback(self, callback, resultScope, logPrefix=''):
+    # TODO: Repurpose to use symbol table
+    # TODO: Repurpose to execute a block context generically
+    def executeCallback(self, callback, resultScope, logPrefix=''):
         visitor = AhVisitor(options=Options(debug=self.appOptions.debug, sensitive=self.appOptions.sensitive))
         visitor.setState(file=self.state['file'])
         visitor.log.prefix = logPrefix
@@ -127,19 +164,25 @@ class AhVisitor(AhVisitorOriginal):
         callbackResult = visitor.visit(block)
         return visitor.data.getVar('result')
 
+    # TODO: Find a way to incorporate this into a parser status field
     def error(self, message, logprefix=''):
         self.data.error(message, logprefix=logprefix)
+        self.status = 'error'
+
+    def isOk(self):
+        return self.status == 'ok'
 
     def isError(self):
-        return self.data.getFlow('error')
+        return self.status == 'error'
 
     def isExit(self):
-        return self.data.getFlow('exit')
+        return self.status == 'exit'
 
     def isReturn(self):
-        return self.data.getFlow('return')
+        return self.status == 'return'
 
     # Visit a parse tree produced by AhParser#prog.
+    # TODO: Improve error message format
     def visitProg(self, ctx: AhParser.ProgContext):
         self.parser = ctx.parser
         temp = self.visitChildren(ctx)
@@ -156,11 +199,15 @@ class AhVisitor(AhVisitorOriginal):
         return self
 
     # Visit a parse tree produced by Ah3Parser#script_structure.
-    def visitScript_structure(self, ctx:AhParser.Script_structureContext):
+    def visitScript_structure(self, ctx: AhParser.Script_structureContext):
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by Ah3Parser#global_statements.
-    def visitGlobal_statements(self, ctx:AhParser.Global_statementsContext):
+    def visitGlobal_statements(self, ctx: AhParser.Global_statementsContext):
+        return self.visitChildren(ctx)
+
+    # Visit a parse tree produced by Ah3Parser#root_level_statements.
+    def visitRoot_level_statements(self, ctx: AhParser.Root_level_statementsContext):
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by AhParser#statements.
@@ -230,6 +277,7 @@ class AhVisitor(AhVisitorOriginal):
             return thread
 
     # Visit a parse tree produced by AhParser#expr.
+    # TODO: add support for method, instance, reflection etc.
     def visitExpr(self, ctx):  # Get number of terms and loop this code for #terms - 1
         if (ctx.execute()):
             return self.visit(ctx.execute())['result']
@@ -368,18 +416,26 @@ class AhVisitor(AhVisitorOriginal):
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by Ah3Parser#create_instance.
-    def visitCreate_instance(self, ctx:AhParser.Create_instanceContext):
+    def visitCreate_instance(self, ctx: AhParser.Create_instanceContext):
         return self.visitChildren(ctx)
-
 
     # Visit a parse tree produced by Ah3Parser#method_statement.
-    def visitMethod_statement(self, ctx:AhParser.Method_statementContext):
-        return self.visitChildren(ctx)
-
+    def visitMethod_statement(self, ctx: AhParser.Method_statementContext):
+        self.symbol_table.current.addSymbol(
+            symbol=Symbol(name=self.visit(ctx.label()), symbolType=SYMBOL_METHOD, dataType=DATA_CONTEXT,
+                          value=ctx))
+        #return self.visitChildren(ctx)
 
     # Visit a parse tree produced by Ah3Parser#method_call.
-    def visitMethod_call(self, ctx:AhParser.Method_callContext):
-        return self.visitChildren(ctx)
+    def visitMethod_call(self, ctx: AhParser.Method_callContext):
+        self.symbol_table.enterScope()
+        self.symbol_table.current.setMeta(scopeType=SCOPE_METHOD)
+        # TODO: Check to ensure that the passed parameters mesh with symbol_table.method_statement.value.optional_block
+        # TODO: In the current scope we need to insert the parameters to the method
+        # TODO: Check to see whether ASYNC should be used here
+        temp = self.visitChildren(ctx)
+        self.symbol_table.exitScope()
+        return temp
 
     # Visit a parse tree produced by AhParser#if_statement.
     def visitIf_statement(self, ctx: AhParser.If_statementContext):
@@ -475,7 +531,11 @@ class AhVisitor(AhVisitorOriginal):
 
     # Visit a parse tree produced by AhParser#block.
     def visitBlock(self, ctx: AhParser.BlockContext):
-        return self.visitChildren(ctx)
+        self.symbol_table.enterScope()
+        self.symbol_table.current.setMeta(scopeType=SCOPE_BLOCK)
+        temp = self.visitChildren(ctx)
+        self.symbol_table.exitScope()
+        return temp
 
     # Visit a parse tree produced by AhParser#callback.
     def visitCallback(self, ctx: AhParser.CallbackContext):
@@ -486,7 +546,8 @@ class AhVisitor(AhVisitorOriginal):
 
     # Visit a parse tree produced by AhParser#callback_block.
     def visitCallback_block(self, ctx: AhParser.Callback_blockContext):
-        return self.visitChildren(ctx)
+        temp = self.visitChildren(ctx)
+        return temp
 
     # Visit a parse tree produced by AhParser#optional_parameters_block.
     def visitOptional_parameters_block(self, ctx: AhParser.Optional_parameters_blockContext):
@@ -499,7 +560,7 @@ class AhVisitor(AhVisitorOriginal):
         return parameters
 
     # Visit a parse tree produced by Ah3Parser#sig_parameter_block.
-    def visitSig_parameter_block(self, ctx:AhParser.Sig_parameter_blockContext):
+    def visitSig_parameter_block(self, ctx: AhParser.Sig_parameter_blockContext):
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by AhParser#sig_parameter.
@@ -627,18 +688,16 @@ class AhVisitor(AhVisitorOriginal):
         else:
             return self.visit(ctx.inject())
 
-
     # Visit a parse tree produced by Ah3Parser#label.
-    def visitLabel(self, ctx:AhParser.LabelContext):
+    def visitLabel(self, ctx: AhParser.LabelContext):
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by Ah3Parser#attribute.
-    def visitAttribute(self, ctx:AhParser.AttributeContext):
+    def visitAttribute(self, ctx: AhParser.AttributeContext):
         return self.visitChildren(ctx)
 
-
     # Visit a parse tree produced by Ah3Parser#extends_statement.
-    def visitExtends_statement(self, ctx:AhParser.Extends_statementContext):
+    def visitExtends_statement(self, ctx: AhParser.Extends_statementContext):
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by AhParser#params_statement.
@@ -743,7 +802,23 @@ class AhVisitor(AhVisitorOriginal):
             return None
 
     # Visit a parse tree produced by Ah3Parser#import_statement.
-    def visitImport_statement(self, ctx:AhParser.Import_statementContext):
+    def visitImport_statement(self, ctx: AhParser.Import_statementContext):
+        driver = 'default'
+        labelIndex = 0
+        if ctx.FROM():
+            driver = self.visit(ctx.label(labelIndex))
+            labelIndex += 1
+
+        path = self.visit(ctx.labels())
+
+        name = None
+        if ctx.AS():
+            name = self.visit(ctx.label(labelIndex))
+        else:
+            name = path.split()[-1]
+
+        # TODO: Execute a visitor
+
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by AhParser#casting.
@@ -834,7 +909,7 @@ class AhVisitor(AhVisitorOriginal):
         return len(self.visit(ctx.expr()))
 
     # Visit a parse tree produced by Ah3Parser#reflection.
-    def visitReflection(self, ctx:AhParser.ReflectionContext):
+    def visitReflection(self, ctx: AhParser.ReflectionContext):
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by AhParser#inject.
@@ -922,10 +997,9 @@ class AhVisitor(AhVisitorOriginal):
             return False
 
     # Visit a parse tree produced by Ah3Parser#atom_hex.
-    def visitAtom_hex(self, ctx:AhParser.Atom_hexContext):
+    def visitAtom_hex(self, ctx: AhParser.Atom_hexContext):
         return str(ctx.HEX().getText())
 
-
     # Visit a parse tree produced by Ah3Parser#atom_none.
-    def visitAtom_none(self, ctx:AhParser.Atom_noneContext):
+    def visitAtom_none(self, ctx: AhParser.Atom_noneContext):
         return None

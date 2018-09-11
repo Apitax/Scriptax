@@ -35,6 +35,15 @@ class Ah3Listener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by Ah3Parser#root_level_statements.
+    def enterRoot_level_statements(self, ctx:Ah3Parser.Root_level_statementsContext):
+        pass
+
+    # Exit a parse tree produced by Ah3Parser#root_level_statements.
+    def exitRoot_level_statements(self, ctx:Ah3Parser.Root_level_statementsContext):
+        pass
+
+
     # Enter a parse tree produced by Ah3Parser#statements.
     def enterStatements(self, ctx:Ah3Parser.StatementsContext):
         pass

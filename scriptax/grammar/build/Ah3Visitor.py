@@ -24,6 +24,11 @@ class Ah3Visitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by Ah3Parser#root_level_statements.
+    def visitRoot_level_statements(self, ctx:Ah3Parser.Root_level_statementsContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by Ah3Parser#statements.
     def visitStatements(self, ctx:Ah3Parser.StatementsContext):
         return self.visitChildren(ctx)

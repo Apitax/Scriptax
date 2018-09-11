@@ -1,45 +1,42 @@
-from scriptax.parser.symbols.SymbolScope import SymbolScope
+from scriptax.parser.symbols.SymbolScope import SymbolScope, SCOPE_PROGRAM
 
 
 class SymbolTable:
     def __init__(self):
-        self.table = []
-        self.table.append(SymbolScope(name="global"))
-        
+        self.root: SymbolScope = SymbolScope(scopeType=SCOPE_PROGRAM, name="global")
+        self.current: SymbolScope = self.root
+
+    def enterScope(self):
+        self.current = self.current.nextChild()
+
+    def exitScope(self):
+        self.current = self.current.getParent()
+
+    def printTable(self):
+        pass
+
+    def resetTable(self):
+        self.root.resetScope()
+
+    def printDebugScopeTree(self):
+        self.root.printScopeDebug()
+
     def getSymbol(self, name, symbolType=None):
-        for scope in reversed(self.table):
-            symbol = scope.getSymbol(name, symbolType)
-            if(symbol):
+        node: SymbolScope = self.current
+        while node is not None:
+            symbol = node.getSymbol(name, symbolType)
+            if (symbol):
                 return symbol
+            node = node.parent
         return None
-        
+
     def isSymbolExists(self, name, symbolType=None):
-        if(self.getSymbol(name, symbolType)):
+        if (self.getSymbol(name, symbolType)):
             return True
         return False
-        
-    def getCurrentScope(self):
-        return self.table[len(self.table) - 1]
-        
+
     def getGlobalScope(self):
-        return self.table[0]
-        
-    def popScope(self):
-        return self.table.pop()
-        
-    def addScope(self, name=None):
-        self.table.append(SymbolScope(name=name))
-        
-    def printSymbolTable(self):
-        length = 0
-        for scope in self.table:
-            indent = ""
-            for i in range(0, length):
-                indent += "  "
-            print(indent + "> " + scope.name)
-            indent += "  "
-            for symbol in scope.symbols:
-                print(indent + "+" + symbol.name)
-            length += 1
-                
-                
+        return self.root
+
+    def getCurrentScope(self):
+        return self.current

@@ -6,7 +6,7 @@ PARSER RULES
 
 prog : script_structure EOF ;
 
-script_structure : global_statements statements ;
+script_structure : global_statements root_level_statements statements ;
 
 global_statements : 
       (extends_statement TERMINATOR)? 
@@ -14,6 +14,8 @@ global_statements :
       (options_statement TERMINATOR)? 
       (import_statement TERMINATOR)* 
       ;
+
+root_level_statements : method_statement* ;
 
 statements : statement* ;
 
@@ -39,8 +41,7 @@ terminated :
       ) TERMINATOR ;
 
 non_terminated : 
-      flow
-      | method_statement ;
+      flow ;
 
 execute_statement : execute
          | async_execute ;
