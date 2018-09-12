@@ -3,6 +3,9 @@ from scriptax.grammar.build.Ah3Visitor import Ah3Visitor as AhVisitorOriginal
 from scriptax.parser.symbols.SymbolTable import SymbolTable
 from scriptax.parser.symbols.Symbol import *
 from scriptax.parser.symbols.SymbolScope import SCOPE_BLOCK, SCOPE_CALLBACK, SCOPE_METHOD, SCOPE_SCRIPT
+
+from commandtax.models.Command import Command
+
 from apitaxcore.models.State import State
 from apitaxcore.utilities.Async import GenericExecution
 from apitaxcore.utilities.Json import isJson
@@ -17,14 +20,14 @@ import threading
 
 # TODO: SCOPE GENERATION:
 #   basic symbol creators:
-#     assignment
+#     v assignment
 #     sig_statement
 #
 #   symbol value adjusters:
-#     assignment
+#     v assignment
 #
 #   symbol type adjusters/verifiers:
-#     assignment
+#     v assignment
 #
 #   scope creators:
 #     v method_statement (ADD SYMBOL TO GLOBAL SCOPE & ADD AS CHILD SCOPE OF TYPE METHOD)
@@ -62,6 +65,7 @@ class AhVisitor(AhVisitorOriginal):
         # Parsing status
         # Values: ok, error, exit, return
         self.status = 'ok'
+        self.message = ''
 
         # Symbol Table
         self.symbol_table = symbol_table
@@ -78,7 +82,7 @@ class AhVisitor(AhVisitorOriginal):
             self.state['char'] = char
 
     # TODO: Redo, this is garbage
-    def executeCommand(self, resolvedCommand, logPrefix=''):
+    def executeCommand(self, command: Command):
         from apitaxcore.flow.Connector import Connector
         if (self.appOptions.debug):
             self.log.log('> Executing Commandtax: \'' + resolvedCommand['command'] + '\' ' + 'with parameters: ' + str(
@@ -115,14 +119,23 @@ class AhVisitor(AhVisitorOriginal):
 
         return dict({"command": resolvedCommand['command'], "commandHandler": commandHandler, "result": returnResult})
 
-    # TODO: Repurpose to utilize symbol table
-    def getVariable(self, label, isRequest=False, convert=True):
+    def getVariable(self, label, convert=True):
         if (convert):
             label = self.visit(label)
         try:
             return self.symbol_table.getSymbol(name=label, symbolType=SYMBOL_VARIABLE).value
         except:
+            self.error(message="Symbol `" + label + "` not found.")
+            return None
 
+    # TODO: Repurpose to utilize symbol table
+    def getSymbol(self, label, convert=True):
+        if convert:
+            label = self.visit(label)
+        try:
+            return self.symbol_table.getSymbol(name=label, symbolType=SYMBOL_VARIABLE)
+        except:
+            self.error(message="Symbol `" + label + "` not found.")
             return None
 
     # TODO: WTF?
@@ -162,9 +175,19 @@ class AhVisitor(AhVisitorOriginal):
         return visitor.data.getVar('result')
 
     # TODO: Find a way to incorporate this into a parser status field
-    def error(self, message, logprefix=''):
-        self.data.error(message, logprefix=logprefix)
+    # Sets the program into error mode
+    def error(self, message):
+        self.message = message
         self.status = 'error'
+
+    def setStatusReturn(self):
+        self.status = 'return'
+
+    def setStatusExit(self):
+        self.status = 'exit'
+
+    def setStatusOk(self):
+        self.status = 'ok'
 
     def isOk(self):
         return self.status == 'ok'
@@ -668,7 +691,7 @@ class AhVisitor(AhVisitorOriginal):
         return thread
 
     # Visit a parse tree produced by AhParser#await.
-    def visitAwait(self, ctx: AhParser.AwaitContext):
+    def await_statement(self):
         if (not ctx.labels()):
             for thread in self.threads:
                 thread.join()

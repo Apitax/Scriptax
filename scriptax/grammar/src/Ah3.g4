@@ -33,7 +33,7 @@ terminated :
         | delete_statement
         | execute_statement
         | method_call
-        | await
+        | await_statement
         | assignment
         | log
         | auth
@@ -130,7 +130,7 @@ execute : commandtax callback? ;
 
 async_execute: ASYNC commandtax callback? ; // (labels EQUAL)? 
 
-await: AWAIT labels? ;
+await_statement: AWAIT labels? ;
 
 labels : label_comp (DOT label_comp)* ;
 

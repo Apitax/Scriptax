@@ -1,4 +1,4 @@
-# Generated from D:/Programming/Projects/Apitax/Scriptax/scriptax/grammar/src\Ah3.g4 by ANTLR 4.7
+# Generated from C:/Users/Shawn/PycharmProjects/Scriptax/scriptax/grammar/src\Ah3.g4 by ANTLR 4.7
 # encoding: utf-8
 from antlr4 import *
 from io import StringIO
@@ -346,7 +346,7 @@ class Ah3Parser ( Parser ):
     RULE_commandtax = 28
     RULE_execute = 29
     RULE_async_execute = 30
-    RULE_await = 31
+    RULE_await_statement = 31
     RULE_labels = 32
     RULE_label_comp = 33
     RULE_label = 34
@@ -384,7 +384,7 @@ class Ah3Parser ( Parser ):
                    "callback", "callback_block", "optional_parameters_block", 
                    "sig_parameter_block", "sig_parameter", "call_parameter", 
                    "optional_parameter", "commandtax", "execute", "async_execute", 
-                   "await", "labels", "label_comp", "label", "attribute", 
+                   "await_statement", "labels", "label_comp", "label", "attribute", 
                    "extends_statement", "sig_statement", "options_statement", 
                    "delete_statement", "error_statement", "return_statement", 
                    "login_statement", "endpoint_statement", "import_statement", 
@@ -936,8 +936,8 @@ class Ah3Parser ( Parser ):
             return self.getTypedRuleContext(Ah3Parser.Method_callContext,0)
 
 
-        def await(self):
-            return self.getTypedRuleContext(Ah3Parser.AwaitContext,0)
+        def await_statement(self):
+            return self.getTypedRuleContext(Ah3Parser.Await_statementContext,0)
 
 
         def assignment(self):
@@ -1017,7 +1017,7 @@ class Ah3Parser ( Parser ):
 
             elif la_ == 7:
                 self.state = 175
-                self.await()
+                self.await_statement()
                 pass
 
             elif la_ == 8:
@@ -3101,7 +3101,7 @@ class Ah3Parser ( Parser ):
             self.exitRule()
         return localctx
 
-    class AwaitContext(ParserRuleContext):
+    class Await_statementContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
@@ -3115,29 +3115,29 @@ class Ah3Parser ( Parser ):
 
 
         def getRuleIndex(self):
-            return Ah3Parser.RULE_await
+            return Ah3Parser.RULE_await_statement
 
         def enterRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "enterAwait" ):
-                listener.enterAwait(self)
+            if hasattr( listener, "enterAwait_statement" ):
+                listener.enterAwait_statement(self)
 
         def exitRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "exitAwait" ):
-                listener.exitAwait(self)
+            if hasattr( listener, "exitAwait_statement" ):
+                listener.exitAwait_statement(self)
 
         def accept(self, visitor:ParseTreeVisitor):
-            if hasattr( visitor, "visitAwait" ):
-                return visitor.visitAwait(self)
+            if hasattr( visitor, "visitAwait_statement" ):
+                return visitor.visitAwait_statement(self)
             else:
                 return visitor.visitChildren(self)
 
 
 
 
-    def await(self):
+    def await_statement(self):
 
-        localctx = Ah3Parser.AwaitContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 62, self.RULE_await)
+        localctx = Ah3Parser.Await_statementContext(self, self._ctx, self.state)
+        self.enterRule(localctx, 62, self.RULE_await_statement)
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)

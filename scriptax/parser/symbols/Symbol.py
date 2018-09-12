@@ -5,6 +5,7 @@ SYMBOL_SCRIPT = 'script'
 SYMBOL_METHOD = 'method'
 SYMBOL_VARIABLE = 'variable'
 
+# Used for SYMBOL_VARIABLE
 DATA_NUMBER = 'number'
 DATA_BOOLEAN = 'boolean'
 DATA_HEX = 'hex'
@@ -12,10 +13,15 @@ DATA_NONE = 'none'
 DATA_STRING = 'string'
 DATA_DICT = 'dict'
 DATA_LIST = 'list'
-DATA_THREAD = 'thread'
+DATA_THREAD = 'thread'      # Holds python threading object
 DATA_PYTHONIC = 'pythonic'  # Some other arbitrary python class/object
-DATA_CONTEXT = 'context'
+DATA_INSTANCE = 'instance'  # Holds an instance of a class/script type
 
+# Used for SYMBOL_METHOD
+DATA_CONTEXT = 'context'    # Parser contextual object used to point towards method blocks
+
+# Used for SYMBOL_SCRIPT
+DATA_CLASS = 'class'        # Class types point towards a script scope for an import statement; also used for reflection
 
 # Type inference helper method
 def valueToType(value):

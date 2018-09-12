@@ -67,19 +67,21 @@ class SymbolScope:
         self.symbols.append(symbol)
         return True
 
-    def removeSymbol(self,  name, symbolType=SYMBOL_VARIABLE):
-        symbol = self.getSymbol(name, symbolType)
+    def removeSymbol(self,  name, symbolType=SYMBOL_VARIABLE, dataType=None):
+        symbol = self.getSymbol(name, symbolType=symbolType, dataType=dataType)
         if not symbol:
             return False
         self.symbols.remove(symbol)
         return symbol
 
-    def getSymbol(self, name, symbolType=None):
+    def getSymbol(self, name, symbolType=None, dataType=None):
         for symbol in self.symbols:
             if (symbol.name == name):
-                if (not symbolType):
+                correct = True
+                if symbolType and symbol.symbolType != symbolType:
+                    correct = False
+                if dataType and symbol.dataType != dataType:
+                    correct = False
+                if correct:
                     return symbol
-                else:
-                    if (symbol.symbolType == symbolType):
-                        return symbol
         return None

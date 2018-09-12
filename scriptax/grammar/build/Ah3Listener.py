@@ -1,4 +1,4 @@
-# Generated from D:/Programming/Projects/Apitax/Scriptax/scriptax/grammar/src\Ah3.g4 by ANTLR 4.7
+# Generated from C:/Users/Shawn/PycharmProjects/Scriptax/scriptax/grammar/src\Ah3.g4 by ANTLR 4.7
 from antlr4 import *
 if __name__ is not None and "." in __name__:
     from .Ah3Parser import Ah3Parser
@@ -287,12 +287,12 @@ class Ah3Listener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by Ah3Parser#await.
-    def enterAwait(self, ctx:Ah3Parser.AwaitContext):
+    # Enter a parse tree produced by Ah3Parser#await_statement.
+    def enterAwait_statement(self, ctx:Ah3Parser.Await_statementContext):
         pass
 
-    # Exit a parse tree produced by Ah3Parser#await.
-    def exitAwait(self, ctx:Ah3Parser.AwaitContext):
+    # Exit a parse tree produced by Ah3Parser#await_statement.
+    def exitAwait_statement(self, ctx:Ah3Parser.Await_statementContext):
         pass
 
 

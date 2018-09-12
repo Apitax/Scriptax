@@ -1,4 +1,4 @@
-# Generated from D:/Programming/Projects/Apitax/Scriptax/scriptax/grammar/src\Ah3.g4 by ANTLR 4.7
+# Generated from C:/Users/Shawn/PycharmProjects/Scriptax/scriptax/grammar/src\Ah3.g4 by ANTLR 4.7
 from antlr4 import *
 if __name__ is not None and "." in __name__:
     from .Ah3Parser import Ah3Parser
@@ -164,8 +164,8 @@ class Ah3Visitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by Ah3Parser#await.
-    def visitAwait(self, ctx:Ah3Parser.AwaitContext):
+    # Visit a parse tree produced by Ah3Parser#await_statement.
+    def visitAwait_statement(self, ctx:Ah3Parser.Await_statementContext):
         return self.visitChildren(ctx)
 
 
