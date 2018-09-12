@@ -1012,7 +1012,7 @@ class AhVisitor(AhVisitorOriginal):
 
     # Visit a parse tree produced by Ah3Parser#atom_hex.
     def visitAtom_hex(self, ctx: AhParser.Atom_hexContext):
-        return str(ctx.HEX().getText())
+        return '0x' + str(ctx.HEX().getText())[2:].upper()
 
     # Visit a parse tree produced by Ah3Parser#atom_none.
     def visitAtom_none(self, ctx: AhParser.Atom_noneContext):

@@ -4,6 +4,7 @@ from typing import TypeVar
 import string
 import random
 
+# Required to facilitate type hinting inside of the SymbolScope class
 SymbolScopeType = TypeVar("SymbolScopeType", bound="SymbolScope")
 
 SCOPE_PROGRAM = "program"
@@ -43,6 +44,8 @@ class SymbolScope:
     def printScopeDebug(self):
         pass
 
+    # When generating and using the symbol table occur in independent stages, this method is used to create new child
+    # scopes or use existing ones where possible.
     def nextChild(self) -> SymbolScopeType:
         nextChild: SymbolScope = None
         if (self.index >= len(self.children)):

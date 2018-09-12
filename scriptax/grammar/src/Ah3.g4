@@ -251,7 +251,7 @@ FLOAT : '-'? DIGIT* DOT DIGIT+ ;
 FALSE : F A L S E ;
 TRUE : T R U E ;
 STRING : QUOTE (ESC|~["\r\n])*? QUOTE | SQUOTE (ESC|~['\r\n])*? SQUOTE ;
-HEX : ('0x'|'0X')(HEXDIGIT)HEXDIGIT*;
+HEX : ('0x'|'0X')(DIGIT|A|B|C|D|E|F)+;
 NONE : N O N E | N U L L ;
 
 /** BLOCKS AND ENCLOSURES **/
@@ -362,5 +362,3 @@ fragment DIGIT : [0-9] ;
 
 fragment QUOTE : '"' ;
 fragment SQUOTE : '\'' ;
-
-fragment HEXDIGIT : '0..9'|'a..f'|'A'..'F' ;

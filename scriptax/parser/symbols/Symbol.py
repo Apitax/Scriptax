@@ -17,6 +17,7 @@ DATA_PYTHONIC = 'pythonic'  # Some other arbitrary python class/object
 DATA_CONTEXT = 'context'
 
 
+# Type inference helper method
 def valueToType(value):
     if type(value) is bool:
         return DATA_BOOLEAN
