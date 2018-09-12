@@ -8,11 +8,11 @@ prog : script_structure EOF ;
 
 script_structure : global_statements root_level_statements statements ;
 
-global_statements : 
+global_statements :
+      (import_statement TERMINATOR)*
       (extends_statement TERMINATOR)? 
       (sig_statement TERMINATOR)? 
-      (options_statement TERMINATOR)? 
-      (import_statement TERMINATOR)* 
+      (options_statement TERMINATOR)?
       ;
 
 root_level_statements : method_statement* ;

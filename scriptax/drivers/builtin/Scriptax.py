@@ -58,4 +58,4 @@ class Scriptax(Driver):
             return self.handleDriverScript(command)
 
     def getDriverScript(self, path) -> str:
-        return "log('Received filepath: " + path + "');"
+        return "log('Received filepath: " + path + "'); path='" + path + "';"

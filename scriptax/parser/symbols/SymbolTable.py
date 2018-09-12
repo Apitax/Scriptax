@@ -13,6 +13,9 @@ class SymbolTable:
     def exitScope(self):
         self.current = self.current.parent
 
+    def insertScope(self, scope: SymbolScope):
+        self.current = self.current.insertScope(scope)
+
     def printTable(self):
         print('>>Symbol Table<<')
         self.root.printScope()

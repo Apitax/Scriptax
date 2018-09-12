@@ -21,10 +21,11 @@ DATA_INSTANCE = 'instance'  # Holds an instance of a class/script type
 DATA_CONTEXT = 'context'    # Parser contextual object used to point towards method blocks
 
 # Used for SYMBOL_SCRIPT
-DATA_CLASS = 'class'        # Class types point towards a script scope for an import statement; also used for reflection
+DATA_SCRIPT = 'script'      # Class types point towards a script scope for an import statement; also used for reflection
 
 # Type inference helper method
 def valueToType(value):
+    from scriptax.parser.symbols.SymbolScope import SymbolScope
     if type(value) is bool:
         return DATA_BOOLEAN
     if isinstance(value, (float, int)):
@@ -43,6 +44,8 @@ def valueToType(value):
         return DATA_THREAD
     if isinstance(value, ParserRuleContext):
         return DATA_CONTEXT
+    if isinstance(value, SymbolScope):
+        return DATA_INSTANCE
     return DATA_PYTHONIC
 
 
@@ -55,3 +58,6 @@ class Symbol:
         else:
             self.dataType = dataType
         self.value = value
+
+    def getSymbolDebug(self):
+        return self.name + ':' + str(self.symbolType) + ':' + str(self.dataType) + ':' + str(self.value)

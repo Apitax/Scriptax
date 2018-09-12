@@ -1,4 +1,4 @@
-# Generated from C:/Users/Shawn/PycharmProjects/Scriptax/scriptax/grammar/src\Ah3.g4 by ANTLR 4.7
+# Generated from D:/Programming/Projects/Apitax/Scriptax/scriptax/grammar/src\Ah3.g4 by ANTLR 4.7
 # encoding: utf-8
 from antlr4 import *
 from io import StringIO
@@ -18,9 +18,9 @@ def serializedATN():
         buf.write("/\t/\4\60\t\60\4\61\t\61\4\62\t\62\4\63\t\63\4\64\t\64")
         buf.write("\4\65\t\65\4\66\t\66\4\67\t\67\48\t8\49\t9\4:\t:\4;\t")
         buf.write(";\4<\t<\4=\t=\3\2\3\2\3\2\3\3\3\3\3\3\3\3\3\4\3\4\3\4")
-        buf.write("\5\4\u0085\n\4\3\4\3\4\3\4\5\4\u008a\n\4\3\4\3\4\3\4\5")
-        buf.write("\4\u008f\n\4\3\4\3\4\3\4\7\4\u0094\n\4\f\4\16\4\u0097")
-        buf.write("\13\4\3\5\7\5\u009a\n\5\f\5\16\5\u009d\13\5\3\6\7\6\u00a0")
+        buf.write("\7\4\u0085\n\4\f\4\16\4\u0088\13\4\3\4\3\4\3\4\5\4\u008d")
+        buf.write("\n\4\3\4\3\4\3\4\5\4\u0092\n\4\3\4\3\4\3\4\5\4\u0097\n")
+        buf.write("\4\3\5\7\5\u009a\n\5\f\5\16\5\u009d\13\5\3\6\7\6\u00a0")
         buf.write("\n\6\f\6\16\6\u00a3\13\6\3\7\5\7\u00a6\n\7\3\7\3\7\5\7")
         buf.write("\u00aa\n\7\3\b\3\b\3\b\3\b\3\b\3\b\3\b\3\b\3\b\3\b\3\b")
         buf.write("\5\b\u00b7\n\b\3\b\3\b\3\t\3\t\3\n\3\n\5\n\u00bf\n\n\3")
@@ -64,7 +64,7 @@ def serializedATN():
         buf.write("$&(*,.\60\62\64\668:<>@BDFHJLNPRTVXZ\\^`bdfhjlnprtvx\2")
         buf.write("\13\3\2\24\25\3\2\22\23\3\2\3\6\3\2\7\b\3\2MR\3\2ST\3")
         buf.write("\2=B\3\2\35\36\3\2\37 \2\u024f\2z\3\2\2\2\4}\3\2\2\2\6")
-        buf.write("\u0084\3\2\2\2\b\u009b\3\2\2\2\n\u00a1\3\2\2\2\f\u00a5")
+        buf.write("\u0086\3\2\2\2\b\u009b\3\2\2\2\n\u00a1\3\2\2\2\f\u00a5")
         buf.write("\3\2\2\2\16\u00b6\3\2\2\2\20\u00ba\3\2\2\2\22\u00be\3")
         buf.write("\2\2\2\24\u00d5\3\2\2\2\26\u00f2\3\2\2\2\30\u0108\3\2")
         buf.write("\2\2\32\u010a\3\2\2\2\34\u0111\3\2\2\2\36\u011f\3\2\2")
@@ -82,16 +82,16 @@ def serializedATN():
         buf.write("\3\2\2\2p\u022a\3\2\2\2r\u022c\3\2\2\2t\u022e\3\2\2\2")
         buf.write("v\u0230\3\2\2\2x\u0232\3\2\2\2z{\5\4\3\2{|\7\2\2\3|\3")
         buf.write("\3\2\2\2}~\5\6\4\2~\177\5\b\5\2\177\u0080\5\n\6\2\u0080")
-        buf.write("\5\3\2\2\2\u0081\u0082\5J&\2\u0082\u0083\7/\2\2\u0083")
-        buf.write("\u0085\3\2\2\2\u0084\u0081\3\2\2\2\u0084\u0085\3\2\2\2")
-        buf.write("\u0085\u0089\3\2\2\2\u0086\u0087\5L\'\2\u0087\u0088\7")
-        buf.write("/\2\2\u0088\u008a\3\2\2\2\u0089\u0086\3\2\2\2\u0089\u008a")
-        buf.write("\3\2\2\2\u008a\u008e\3\2\2\2\u008b\u008c\5N(\2\u008c\u008d")
-        buf.write("\7/\2\2\u008d\u008f\3\2\2\2\u008e\u008b\3\2\2\2\u008e")
-        buf.write("\u008f\3\2\2\2\u008f\u0095\3\2\2\2\u0090\u0091\5Z.\2\u0091")
-        buf.write("\u0092\7/\2\2\u0092\u0094\3\2\2\2\u0093\u0090\3\2\2\2")
-        buf.write("\u0094\u0097\3\2\2\2\u0095\u0093\3\2\2\2\u0095\u0096\3")
-        buf.write("\2\2\2\u0096\7\3\2\2\2\u0097\u0095\3\2\2\2\u0098\u009a")
+        buf.write("\5\3\2\2\2\u0081\u0082\5Z.\2\u0082\u0083\7/\2\2\u0083")
+        buf.write("\u0085\3\2\2\2\u0084\u0081\3\2\2\2\u0085\u0088\3\2\2\2")
+        buf.write("\u0086\u0084\3\2\2\2\u0086\u0087\3\2\2\2\u0087\u008c\3")
+        buf.write("\2\2\2\u0088\u0086\3\2\2\2\u0089\u008a\5J&\2\u008a\u008b")
+        buf.write("\7/\2\2\u008b\u008d\3\2\2\2\u008c\u0089\3\2\2\2\u008c")
+        buf.write("\u008d\3\2\2\2\u008d\u0091\3\2\2\2\u008e\u008f\5L\'\2")
+        buf.write("\u008f\u0090\7/\2\2\u0090\u0092\3\2\2\2\u0091\u008e\3")
+        buf.write("\2\2\2\u0091\u0092\3\2\2\2\u0092\u0096\3\2\2\2\u0093\u0094")
+        buf.write("\5N(\2\u0094\u0095\7/\2\2\u0095\u0097\3\2\2\2\u0096\u0093")
+        buf.write("\3\2\2\2\u0096\u0097\3\2\2\2\u0097\7\3\2\2\2\u0098\u009a")
         buf.write("\5\34\17\2\u0099\u0098\3\2\2\2\u009a\u009d\3\2\2\2\u009b")
         buf.write("\u0099\3\2\2\2\u009b\u009c\3\2\2\2\u009c\t\3\2\2\2\u009d")
         buf.write("\u009b\3\2\2\2\u009e\u00a0\5\f\7\2\u009f\u009e\3\2\2\2")
@@ -268,7 +268,7 @@ def serializedATN():
         buf.write("-\2\2\u0229o\3\2\2\2\u022a\u022b\7!\2\2\u022bq\3\2\2\2")
         buf.write("\u022c\u022d\t\t\2\2\u022ds\3\2\2\2\u022e\u022f\t\n\2")
         buf.write("\2\u022fu\3\2\2\2\u0230\u0231\7\"\2\2\u0231w\3\2\2\2\u0232")
-        buf.write("\u0233\7#\2\2\u0233y\3\2\2\2\64\u0084\u0089\u008e\u0095")
+        buf.write("\u0233\7#\2\2\u0233y\3\2\2\2\64\u0086\u008c\u0091\u0096")
         buf.write("\u009b\u00a1\u00a5\u00a9\u00b6\u00be\u00d5\u00ec\u00ee")
         buf.write("\u00f2\u00f7\u00fe\u0103\u0108\u0113\u0116\u011f\u0126")
         buf.write("\u0132\u0137\u0150\u0157\u0160\u0166\u016a\u0170\u0175")
@@ -611,8 +611,11 @@ class Ah3Parser ( Parser ):
             super().__init__(parent, invokingState)
             self.parser = parser
 
-        def extends_statement(self):
-            return self.getTypedRuleContext(Ah3Parser.Extends_statementContext,0)
+        def import_statement(self, i:int=None):
+            if i is None:
+                return self.getTypedRuleContexts(Ah3Parser.Import_statementContext)
+            else:
+                return self.getTypedRuleContext(Ah3Parser.Import_statementContext,i)
 
 
         def TERMINATOR(self, i:int=None):
@@ -621,19 +624,16 @@ class Ah3Parser ( Parser ):
             else:
                 return self.getToken(Ah3Parser.TERMINATOR, i)
 
+        def extends_statement(self):
+            return self.getTypedRuleContext(Ah3Parser.Extends_statementContext,0)
+
+
         def sig_statement(self):
             return self.getTypedRuleContext(Ah3Parser.Sig_statementContext,0)
 
 
         def options_statement(self):
             return self.getTypedRuleContext(Ah3Parser.Options_statementContext,0)
-
-
-        def import_statement(self, i:int=None):
-            if i is None:
-                return self.getTypedRuleContexts(Ah3Parser.Import_statementContext)
-            else:
-                return self.getTypedRuleContext(Ah3Parser.Import_statementContext,i)
 
 
         def getRuleIndex(self):
@@ -663,47 +663,47 @@ class Ah3Parser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 130
-            self._errHandler.sync(self)
-            _la = self._input.LA(1)
-            if _la==Ah3Parser.EXTENDS:
-                self.state = 127
-                self.extends_statement()
-                self.state = 128
-                self.match(Ah3Parser.TERMINATOR)
-
-
-            self.state = 135
-            self._errHandler.sync(self)
-            _la = self._input.LA(1)
-            if _la==Ah3Parser.SIG:
-                self.state = 132
-                self.sig_statement()
-                self.state = 133
-                self.match(Ah3Parser.TERMINATOR)
-
-
-            self.state = 140
-            self._errHandler.sync(self)
-            _la = self._input.LA(1)
-            if _la==Ah3Parser.OPTIONS:
-                self.state = 137
-                self.options_statement()
-                self.state = 138
-                self.match(Ah3Parser.TERMINATOR)
-
-
-            self.state = 147
+            self.state = 132
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             while _la==Ah3Parser.IMPORT or _la==Ah3Parser.FROM:
-                self.state = 142
+                self.state = 127
                 self.import_statement()
-                self.state = 143
+                self.state = 128
                 self.match(Ah3Parser.TERMINATOR)
-                self.state = 149
+                self.state = 134
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
+
+            self.state = 138
+            self._errHandler.sync(self)
+            _la = self._input.LA(1)
+            if _la==Ah3Parser.EXTENDS:
+                self.state = 135
+                self.extends_statement()
+                self.state = 136
+                self.match(Ah3Parser.TERMINATOR)
+
+
+            self.state = 143
+            self._errHandler.sync(self)
+            _la = self._input.LA(1)
+            if _la==Ah3Parser.SIG:
+                self.state = 140
+                self.sig_statement()
+                self.state = 141
+                self.match(Ah3Parser.TERMINATOR)
+
+
+            self.state = 148
+            self._errHandler.sync(self)
+            _la = self._input.LA(1)
+            if _la==Ah3Parser.OPTIONS:
+                self.state = 145
+                self.options_statement()
+                self.state = 146
+                self.match(Ah3Parser.TERMINATOR)
+
 
         except RecognitionException as re:
             localctx.exception = re

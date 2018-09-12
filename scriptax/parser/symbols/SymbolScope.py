@@ -7,6 +7,7 @@ import random
 # Required to facilitate type hinting inside of the SymbolScope class
 SymbolScopeType = TypeVar("SymbolScopeType", bound="SymbolScope")
 
+SCOPE_ROOT = "root"
 SCOPE_PROGRAM = "program"
 SCOPE_SCRIPT = "script"
 SCOPE_METHOD = "method"
@@ -20,23 +21,24 @@ class SymbolScope:
         self.symbols: List[Symbol] = []
         self.children: List[SymbolScope] = []
         self.parent: SymbolScope = parent
-        self.name: str = name
+        if not name:
+            self.name = ''.join(random.choices(string.ascii_uppercase + string.digits, k=4))
+        else:
+            self.name: str = name
         self.type: str = scopeType
         self.index: int = 0
 
     def setMeta(self, name=None, scopeType=SCOPE_UNKNOWN):
-        if not name:
-            self.name = ''.join(random.choices(string.ascii_uppercase + string.digits, k=4))
-        else:
+        if name:
             self.name = name
         self.type = scopeType
 
     def printScope(self):
-        print('{ \n' + '   ' + str(self.name) + ":" + str(self.type))
+        print('{ \n' + '   ' + str(self.name) + ":" + str(self.type) + ":" + hex(id(self)).upper())
         if(self.parent):
             print('   parent: ' + str(self.parent.name))
         for symbol in self.symbols:
-            print('   + ' + symbol.name + ':' + str(symbol.symbolType) + ':' + str(symbol.dataType) + ':' + str(symbol.value))
+            print('   + ' + symbol.getSymbolDebug())
         for child in self.children:
             child.printScope()
         print('}')
@@ -55,6 +57,12 @@ class SymbolScope:
             nextChild = self.children[self.index]
         self.index += 1
         return nextChild
+
+    def insertScope(self, scope: SymbolScopeType):
+        scope.parent = self
+        self.children.append(scope)
+        self.index += 1
+        return scope
 
     def resetScope(self):
         self.index = 0

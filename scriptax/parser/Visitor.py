@@ -2,16 +2,18 @@ from scriptax.grammar.build.Ah3Parser import Ah3Parser as AhParser, Ah3Parser
 from scriptax.grammar.build.Ah3Visitor import Ah3Visitor as AhVisitorOriginal
 from scriptax.parser.symbols.SymbolTable import SymbolTable
 from scriptax.parser.symbols.Symbol import *
+from scriptax.parser.symbols.ScriptSymbol import ScriptSymbol
 from scriptax.parser.symbols.SymbolScope import SCOPE_BLOCK, SCOPE_CALLBACK, SCOPE_METHOD, SCOPE_SCRIPT
+from scriptax.drivers.Driver import Driver
 
 from commandtax.models.Command import Command
 
 from apitaxcore.models.State import State
+from apitaxcore.models.Credentials import Credentials
+from apitaxcore.models.Options import Options
 from apitaxcore.utilities.Async import GenericExecution
 from apitaxcore.utilities.Json import isJson
 from apitaxcore.flow.LoadedDrivers import LoadedDrivers
-from apitaxcore.models.Credentials import Credentials
-from apitaxcore.models.Options import Options
 
 import json
 import re
@@ -37,6 +39,9 @@ import threading
 #     run recursively when encountering and merge into global scope:
 #       extends_statement  (MERGE SCOPES & SYMBOLS INTO GLOBAL OF SUB SCRIPT PRIOR TO CURRENT SCRIPT)
 #       import_statement   (ADD AS SCRIPT SYMBOL TYPE INTO GLOBAL SCOPE)
+#
+#   Scope ordering: imports, program path
+#
 # TODO: METHOD CALLS:
 #  Because the symbol table contains all the relevant data, all that must be saved is the method block context.
 #  As long as we ensure the correct scope is set when we visit that block context, everything **SHOULD** work fine
@@ -44,13 +49,14 @@ import threading
 class AhVisitor(AhVisitorOriginal):
 
     def __init__(self, credentials: Credentials = Credentials(), parameters={}, options: Options = Options(), file='',
-                 symbol_table=SymbolTable()):
+                 symbol_table=None):
         # Aliases
         self.log = State.log
         self.config = State.config
 
         # Parameters
         self.appOptions = options
+        #self.appOptions.debug = True
         self.credentials = credentials
         self.parameters = parameters
 
@@ -68,10 +74,17 @@ class AhVisitor(AhVisitorOriginal):
         self.message = ''
 
         # Symbol Table
-        self.symbol_table = symbol_table
+        if not symbol_table:
+            self.symbol_table = SymbolTable()
+        else:
+            self.symbol_table = symbol_table
 
         # Used for mustache syntax dynamic replacement
         self.regexVar = '{{[ ]{0,}[A-z0-9_$.\-]{1,}[ ]{0,}}}'
+
+    def parseScript(self, scriptax: str):
+        from scriptax.parser.utils.BoilerPlate import standardParser
+        return standardParser(scriptax)
 
     def setState(self, file='', line=-1, char=-1):
         if (file != ''):
@@ -204,6 +217,8 @@ class AhVisitor(AhVisitorOriginal):
     # Visit a parse tree produced by AhParser#prog.
     # TODO: Improve error message format
     def visitProg(self, ctx: AhParser.ProgContext):
+        self.symbol_table.enterScope()
+        self.symbol_table.current.setMeta(scopeType=SCOPE_SCRIPT)
         self.parser = ctx.parser
         temp = self.visitChildren(ctx)
 
@@ -215,7 +230,7 @@ class AhVisitor(AhVisitorOriginal):
             if (self.appOptions.debug):
                 self.log.log('')
                 self.log.log('')
-
+        self.symbol_table.exitScope()
         return self
 
     # Visit a parse tree produced by Ah3Parser#script_structure.
@@ -331,8 +346,7 @@ class AhVisitor(AhVisitorOriginal):
             return self.visit(ctx.count())
 
         if (ctx.labels()):
-            return self.getVariable(ctx.labels(),
-                                    isRequest=False)  # TODO: Remove isRequest from here as it is no longer a thing
+            return self.getVariable(ctx.labels())  # TODO: Remove isRequest from here as it is no longer a thing
 
         if (ctx.inject()):
             return self.visit(ctx.inject())
@@ -453,7 +467,16 @@ class AhVisitor(AhVisitorOriginal):
 
     # Visit a parse tree produced by Ah3Parser#create_instance.
     def visitCreate_instance(self, ctx: AhParser.Create_instanceContext):
-        return self.visitChildren(ctx)
+        label = self.visit(ctx.label())
+        symbol: ScriptSymbol = self.symbol_table.getSymbol(name=label, symbolType=SYMBOL_SCRIPT)
+        scriptax = symbol.driver.getDriverScript(symbol.path)
+        parser = self.parseScript(scriptax)
+        instanceTable: SymbolTable = parser.symbol_table
+        instanceTable.resetTable()
+        instanceTable.enterScope() #SymbolTable()
+        instanceScope = instanceTable.current
+        instanceScope.setMeta(name=label, scopeType=SCOPE_SCRIPT)
+        return instanceScope
 
     # Visit a parse tree produced by Ah3Parser#method_statement.
     def visitMethod_statement(self, ctx: AhParser.Method_statementContext):
@@ -839,10 +862,11 @@ class AhVisitor(AhVisitorOriginal):
 
     # Visit a parse tree produced by Ah3Parser#import_statement.
     def visitImport_statement(self, ctx: AhParser.Import_statementContext):
-        driver = 'default'
+        driver: Driver = LoadedDrivers.getPrimaryDriver()
         labelIndex = 0
         if ctx.FROM():
             driver = self.visit(ctx.label(labelIndex))
+            driver = LoadedDrivers.getDriver(driver)
             labelIndex += 1
 
         path = self.visit(ctx.labels())
@@ -851,11 +875,23 @@ class AhVisitor(AhVisitorOriginal):
         if ctx.AS():
             name = self.visit(ctx.label(labelIndex))
         else:
-            name = path.split()[-1]
+            name = path.split('.')[-1]
 
-        # TODO: Execute a visitor
+        path = path.replace('.', '/') + '.ah'
 
-        return self.visitChildren(ctx)
+        scriptax = driver.getDriverScript(path)
+        parser = self.parseScript(scriptax)
+        importTable: SymbolTable = parser.symbol_table
+        importTable.resetTable()
+        importTable.enterScope() #SymbolTable()
+        importScope = importTable.current
+        importScope.setMeta(name=name, scopeType=SCOPE_SCRIPT)
+
+        # Insert the script scope into our scope and add a symbol to reference it
+        reference = self.symbol_table.current.parent.insertScope(importScope)
+        #self.symbol_table.exitScope()
+        self.symbol_table.current.addSymbol(symbol=ScriptSymbol(name=name, symbolType=SYMBOL_SCRIPT, dataType=DATA_SCRIPT, value=reference, path=path, driver=driver))
+        #return self.visitChildren(ctx)
 
     # Visit a parse tree produced by AhParser#casting.
     def visitCasting(self, ctx: AhParser.CastingContext):
