@@ -1,4 +1,4 @@
-from scriptax.grammar.build.Ah3Parser import Ah3Parser as AhParser
+from scriptax.grammar.build.Ah3Parser import Ah3Parser as AhParser, Ah3Parser
 from scriptax.grammar.build.Ah3Visitor import Ah3Visitor as AhVisitorOriginal
 from scriptax.parser.symbols.SymbolTable import SymbolTable
 from scriptax.parser.symbols.Symbol import *
@@ -54,7 +54,7 @@ class AhVisitor(AhVisitorOriginal):
         # Async Threading
         self.threads = []
 
-        # TODO: Evalutate nessecitity of these
+        # TODO: Evaluate necessity of these
         self.state = {'file': file, 'line': 0, 'char': 0}
         self.parser = None
         self.options = {}
@@ -120,10 +120,7 @@ class AhVisitor(AhVisitorOriginal):
         if (convert):
             label = self.visit(label)
         try:
-            if (isRequest):
-                return self.data.getRequest(label)
-            else:
-                return self.data.getVar(label)
+            return self.symbol_table.getSymbol(name=label, symbolType=SYMBOL_VARIABLE).value
         except:
 
             return None
@@ -268,7 +265,7 @@ class AhVisitor(AhVisitorOriginal):
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by AhParser#executers.
-    def visitExecuters(self, ctx: AhParser.ExecutersContext):
+    def visitExecute_statement(self, ctx: AhParser.Execute_statementContext):
         if (ctx.execute()):
             return self.visit(ctx.execute())
         if (ctx.async_execute()):
@@ -280,13 +277,13 @@ class AhVisitor(AhVisitorOriginal):
     # TODO: add support for method, instance, reflection etc.
     def visitExpr(self, ctx):  # Get number of terms and loop this code for #terms - 1
 
-        if(ctx.reflection()):
+        if (ctx.reflection()):
             return self.visit(ctx.reflection())
 
-        if(ctx.create_instance()):
+        if (ctx.create_instance()):
             return self.visit(ctx.create_instance())
 
-        if(ctx.method_call()):
+        if (ctx.method_call()):
             return self.visit(ctx.method_call())
 
         if (ctx.execute()):
@@ -311,7 +308,8 @@ class AhVisitor(AhVisitorOriginal):
             return self.visit(ctx.count())
 
         if (ctx.labels()):
-            return self.getVariable(ctx.labels(), isRequest=False) # TODO: Remove isRequest from here as it is no longer a thing
+            return self.getVariable(ctx.labels(),
+                                    isRequest=False)  # TODO: Remove isRequest from here as it is no longer a thing
 
         if (ctx.inject()):
             return self.visit(ctx.inject())
@@ -386,7 +384,7 @@ class AhVisitor(AhVisitorOriginal):
         if (not ctx.EQUAL()):
             # TODO: Double check that this still works
             var = self.symbol_table.getSymbol(name=label)
-            #var = self.data.getVar(label)
+            # var = self.data.getVar(label)
             if (ctx.D_PLUS()):
                 value = var + 1
             elif (ctx.D_MINUS()):
@@ -402,25 +400,28 @@ class AhVisitor(AhVisitorOriginal):
                     value = var / value
 
         if (ctx.SOPEN()):
-            var = self.data.getVar(label)
+            var = self.symbol_table.getSymbol(name=label)
             if (not isinstance(var, list)):
                 self.error("Appending to a list requires the variable being a list")
                 return
             var.append(value)
             tval = value
             value = var
-            self.data.storeVar(label, value)
+            # TODO: Double check that this still works
+            self.symbol_table.putSymbol(symbol=Symbol(name=label, symbolType=SYMBOL_VARIABLE, value=value))
+            # self.data.storeVar(label, value)
             if (isinstance(tval, threading.Thread)):
                 tval.label = label + "." + str(len(value) - 1)
                 tval.start()
         else:
-            self.data.storeVar(label, value)
+            self.symbol_table.putSymbol(symbol=Symbol(name=label, symbolType=SYMBOL_VARIABLE, value=value))
             if (isinstance(value, threading.Thread)):
                 value.label = label
                 value.start()
 
         if (self.appOptions.debug):
-            self.log.log('> Assigning Variable: ' + label + ' = ' + str(self.data.getVar(label)))
+            self.log.log('> Assigning Variable: ' + label + ' = ' + str(
+                self.symbol_table.getSymbol(name=label, symbolType=SYMBOL_VARIABLE)))
             self.log.log('')
 
     # Visit a parse tree produced by AhParser#flow.
@@ -436,7 +437,7 @@ class AhVisitor(AhVisitorOriginal):
         self.symbol_table.current.addSymbol(
             symbol=Symbol(name=self.visit(ctx.label()), symbolType=SYMBOL_METHOD, dataType=DATA_CONTEXT,
                           value=ctx))
-        #return self.visitChildren(ctx)
+        # return self.visitChildren(ctx)
 
     # Visit a parse tree produced by Ah3Parser#method_call.
     def visitMethod_call(self, ctx: AhParser.Method_callContext):
@@ -695,14 +696,14 @@ class AhVisitor(AhVisitorOriginal):
 
     # Visit a parse tree produced by AhParser#label_comp.
     def visitLabel_comp(self, ctx: AhParser.Label_compContext):
-        if (ctx.LABEL()):
-            return ctx.LABEL().getText()
+        if (ctx.label()):
+            return self.visit(ctx.label())
         else:
             return self.visit(ctx.inject())
 
     # Visit a parse tree produced by Ah3Parser#label.
     def visitLabel(self, ctx: AhParser.LabelContext):
-        return self.visitChildren(ctx)
+        return ctx.LABEL().getText()
 
     # Visit a parse tree produced by Ah3Parser#attribute.
     def visitAttribute(self, ctx: AhParser.AttributeContext):
@@ -912,7 +913,7 @@ class AhVisitor(AhVisitorOriginal):
 
     # Visit a parse tree produced by AhParser#log.
     def visitLog(self, ctx: AhParser.LogContext):
-        if (ctx.expr()):
+        if ctx.expr():
             self.log.log('> Logging: ' + json.dumps(self.visit(ctx.expr())))
             self.log.log('')
 
@@ -934,6 +935,7 @@ class AhVisitor(AhVisitorOriginal):
 
     # Visit a parse tree produced by AhParser#atom.
     def visitAtom(self, ctx: AhParser.AtomContext):
+
         if (ctx.atom_obj_dict()):
             return self.visit(ctx.atom_obj_dict())
 
@@ -956,7 +958,7 @@ class AhVisitor(AhVisitorOriginal):
             return self.visit(ctx.atom_none())
 
     # Visit a parse tree produced by AhParser#obj_dict.
-    def visitAtom_Obj_dict(self, ctx: AhParser.Atom_obj_dictContext):
+    def visitAtom_obj_dict(self, ctx: AhParser.Atom_obj_dictContext):
         dictionary = {}
         i = 0
         if (ctx.COLON(0)):
@@ -968,7 +970,7 @@ class AhVisitor(AhVisitorOriginal):
         return dictionary
 
     # Visit a parse tree produced by AhParser#obj_list.
-    def visitAtom_Obj_list(self, ctx: AhParser.Atom_obj_listContext):
+    def visitAtom_obj_list(self, ctx: AhParser.Atom_obj_listContext):
         parameters = []
         i = 0
         if (ctx.expr(0)):
@@ -979,7 +981,7 @@ class AhVisitor(AhVisitorOriginal):
         return parameters
 
     # Visit a parse tree produced by AhParser#string.
-    def visitAtom_String(self, ctx: AhParser.Atom_stringContext):
+    def visitAtom_string(self, ctx: AhParser.Atom_stringContext):
         line = ctx.STRING().getText()[1:-1]
         line = line.replace('\\"', '"')
         line = line.replace('\\\'', '\'')

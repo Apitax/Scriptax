@@ -1,6 +1,8 @@
-from scriptax.parser.symbols.Symbol import Symbol
+from scriptax.parser.symbols.Symbol import *
 from typing import List
 from typing import TypeVar
+import string
+import random
 
 SymbolScopeType = TypeVar("SymbolScopeType", bound="SymbolScope")
 
@@ -22,11 +24,14 @@ class SymbolScope:
         self.index: int = 0
 
     def setMeta(self, name=None, scopeType=SCOPE_UNKNOWN):
-        self.name = name
+        if not name:
+            self.name = ''.join(random.choices(string.ascii_uppercase + string.digits, k=4))
+        else:
+            self.name = name
         self.type = scopeType
 
     def printScope(self):
-        print('{ ' + str(self.name) + ":" + str(self.type))
+        print('{ \n' + '   ' + str(self.name) + ":" + str(self.type))
         if(self.parent):
             print('   parent: ' + str(self.parent.name))
         for symbol in self.symbols:
@@ -59,11 +64,12 @@ class SymbolScope:
         self.symbols.append(symbol)
         return True
 
-    def removeSymbol(self, symbol: Symbol):
-        symbol = self.getSymbol(symbol.name, symbol.symbolType)
-        if (not symbol):
+    def removeSymbol(self,  name, symbolType=SYMBOL_VARIABLE):
+        symbol = self.getSymbol(name, symbolType)
+        if not symbol:
             return False
         self.symbols.remove(symbol)
+        return symbol
 
     def getSymbol(self, name, symbolType=None):
         for symbol in self.symbols:

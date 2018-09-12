@@ -1,4 +1,5 @@
 from scriptax.parser.symbols.SymbolScope import SymbolScope, SCOPE_PROGRAM
+from scriptax.parser.symbols.Symbol import *
 
 
 class SymbolTable:
@@ -26,14 +27,32 @@ class SymbolTable:
         node: SymbolScope = self.current
         while node is not None:
             symbol = node.getSymbol(name, symbolType)
-            if (symbol):
+            if symbol:
                 return symbol
             node = node.parent
         return None
 
     def isSymbolExists(self, name, symbolType=None):
-        if (self.getSymbol(name, symbolType)):
-            return True
+        symbol = self.getSymbol(name, symbolType)
+        if symbol:
+            return symbol
+        return False
+
+    def putSymbol(self, symbol: Symbol):
+        temp = self.isSymbolExists(symbol.name, symbolType=symbol.symbolType)
+        if temp:
+            temp.value = symbol.value
+            temp.dataType = symbol.dataType
+        else:
+            self.current.addSymbol(symbol=symbol)
+
+    def deleteSymbol(self, name, symbolType=SYMBOL_VARIABLE):
+        node: SymbolScope = self.current
+        while node is not None:
+            symbol = node.removeSymbol(name, symbolType)
+            if symbol:
+                return symbol
+            node = node.parent
         return False
 
     def getGlobalScope(self):
