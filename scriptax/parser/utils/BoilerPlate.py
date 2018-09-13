@@ -17,3 +17,9 @@ def standardParser(scriptax: str) -> AhVisitor:
     visitor = AhVisitor()
     visitor.visit(tree)
     return visitor
+
+def customizableContextParser(context, symbol_table=None) -> AhVisitor:
+    visitor = AhVisitor(symbol_table=symbol_table)
+    visitor.visit(context)
+    return visitor
+

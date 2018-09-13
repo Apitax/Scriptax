@@ -1,9 +1,9 @@
 from scriptax.grammar.build.Ah3Parser import Ah3Parser as AhParser, Ah3Parser
 from scriptax.grammar.build.Ah3Visitor import Ah3Visitor as AhVisitorOriginal
-from scriptax.parser.symbols.SymbolTable import SymbolTable
+from scriptax.parser.symbols.SymbolTable import SymbolTable, createTableFromScope
 from scriptax.parser.symbols.Symbol import *
 from scriptax.parser.symbols.ScriptSymbol import ScriptSymbol
-from scriptax.parser.symbols.SymbolScope import SCOPE_BLOCK, SCOPE_CALLBACK, SCOPE_METHOD, SCOPE_SCRIPT
+from scriptax.parser.symbols.SymbolScope import SymbolScope, SCOPE_BLOCK, SCOPE_CALLBACK, SCOPE_METHOD, SCOPE_SCRIPT
 from scriptax.drivers.Driver import Driver
 
 from commandtax.models.Command import Command
@@ -86,6 +86,10 @@ class AhVisitor(AhVisitorOriginal):
         from scriptax.parser.utils.BoilerPlate import standardParser
         return standardParser(scriptax)
 
+    def parseScriptCustom(self, context, symbol_table: SymbolTable = None):
+        from scriptax.parser.utils.BoilerPlate import customizableContextParser
+        return customizableContextParser(context, symbol_table=symbol_table)
+
     def setState(self, file='', line=-1, char=-1):
         if (file != ''):
             self.state['file'] = file
@@ -138,7 +142,7 @@ class AhVisitor(AhVisitorOriginal):
         try:
             return self.symbol_table.getSymbol(name=label, symbolType=SYMBOL_VARIABLE).value
         except:
-            self.error(message="Symbol `" + label + "` not found.")
+            self.error(message="Symbol `" + label + "` not found in scope `" + self.symbol_table.current.name + "`")
             return None
 
     # TODO: Repurpose to utilize symbol table
@@ -148,7 +152,7 @@ class AhVisitor(AhVisitorOriginal):
         try:
             return self.symbol_table.getSymbol(name=label, symbolType=SYMBOL_VARIABLE)
         except:
-            self.error(message="Symbol `" + label + "` not found.")
+            self.error(message="Symbol `" + label + "` not found in scope `" + self.symbol_table.current.name + "`")
             return None
 
     # TODO: WTF?
@@ -225,8 +229,8 @@ class AhVisitor(AhVisitorOriginal):
         if (self.isError()):
             error = self.isError()
             self.log.error(
-                error['message'] + ' in ' + str(self.state['file']) + ' @' + str(self.state['line']) + ':' + str(
-                    self.state['char']), prefix=error['logprefix'])
+                self.message + ' in ' + str(self.state['file']) + ' @' + str(self.state['line']) + ':' + str(
+                    self.state['char']))
             if (self.appOptions.debug):
                 self.log.log('')
                 self.log.log('')
@@ -492,9 +496,23 @@ class AhVisitor(AhVisitorOriginal):
         # TODO: Check to ensure that the passed parameters mesh with symbol_table.method_statement.value.optional_block
         # TODO: In the current scope we need to insert the parameters to the method
         # TODO: Check to see whether ASYNC should be used here
-        temp = self.visitChildren(ctx)
-        self.symbol_table.exitScope()
-        return temp
+        label = self.visit(ctx.labels())
+        labels = label.split('.')
+        result = None
+
+        if len(labels) < 2:
+            # Executing a method on the current scope
+            table: SymbolTable = createTableFromScope(self.symbol_table.root)
+            table.deleteOnExit = True # Prevents hanging method & block scopes when debugging
+            result = self.parseScriptCustom(self.symbol_table.getSymbol(name=labels[0]).value.block(), table)
+        else:
+            # Executing a method on an instance variable or imported script
+            scope: SymbolScope = self.symbol_table.getSymbol(name=labels[0]).value
+            table: SymbolTable = createTableFromScope(scope)
+            table.deleteOnExit = True # Prevents hanging method & block scopes when debugging
+            result = self.parseScriptCustom(scope.getSymbol(name=labels[1]).value.block(), table)
+        self.symbol_table.exitScopeAndDelete() # This way we dont get a bunch of hanging method scopes when we debug
+        return result
 
     # Visit a parse tree produced by AhParser#if_statement.
     def visitIf_statement(self, ctx: AhParser.If_statementContext):

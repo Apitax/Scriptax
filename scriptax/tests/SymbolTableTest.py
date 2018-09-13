@@ -8,7 +8,7 @@ from apitaxcore.models.State import State
 from apitaxcore.flow.LoadedDrivers import LoadedDrivers
 from apitaxcore.drivers.Drivers import Drivers
 
-State.log = Log(StandardLog())
+State.log = Log(StandardLog(), logColorize=False)
 
 State.log.log("> test")
 
@@ -17,7 +17,9 @@ LoadedDrivers.load("scriptax")
 
 scriptax = "from scriptax import test.testing as Tester;"
 scriptax += "from scriptax import test.meow as MEOWWW;"
+scriptax += "api someMethod () {log('TESTING SOME METHOD');}"
 scriptax += "log(\"test\"); log(2+4/4); variableTest=5; variableTest='okay'; shawn=True; tristan=None; jen=0X678; if(shawn) {bob=42;log(jen); if(True) {log('help me pls');log(variableTest + 5 / 3);}} someInstance = new Tester();"
+scriptax += "someMethod();someInstance.getPath();someInstance.resetPath();someInstance.getPath();Tester.getPath();Tester.resetPath();MEOWWW.getPath();"
 
 visitor = standardParser(scriptax)
 

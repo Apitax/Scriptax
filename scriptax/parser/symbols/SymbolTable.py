@@ -2,21 +2,27 @@ from scriptax.parser.symbols.SymbolScope import SymbolScope, SCOPE_PROGRAM
 from scriptax.parser.symbols.Symbol import *
 import json
 
-
-def findOccurrences(s, ch):
-    return [i for i, letter in enumerate(s) if letter == ch]
-
-
 class SymbolTable:
     def __init__(self):
         self.root: SymbolScope = SymbolScope(scopeType=SCOPE_PROGRAM, name="global")
         self.current: SymbolScope = self.root
+        self.deleteOnExit = False
 
     def enterScope(self):
         self.current = self.current.nextChild()
 
     def exitScope(self):
+        temp = None
+        if self.deleteOnExit:
+            temp = self.current
         self.current = self.current.parent
+        if self.deleteOnExit:
+            self.current.children.remove(temp)
+
+    def exitScopeAndDelete(self):
+        temp = self.current
+        self.current = self.current.parent
+        self.current.children.remove(temp)
 
     def insertScope(self, scope: SymbolScope):
         self.current = self.current.insertScope(scope)
@@ -68,3 +74,11 @@ class SymbolTable:
 
     def getCurrentScope(self):
         return self.current
+
+
+def createTableFromScope(scope: SymbolScope) -> SymbolTable:
+    table = SymbolTable()
+    table.root = scope
+    table.current = scope
+    return table
+

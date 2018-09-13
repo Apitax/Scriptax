@@ -58,4 +58,4 @@ class Scriptax(Driver):
             return self.handleDriverScript(command)
 
     def getDriverScript(self, path) -> str:
-        return "log('Received filepath: " + path + "'); path='" + path + "';"
+        return "api getPath () {log('method in script with path: ' + path);} api resetPath () {path='RESET';} api test () {log('testing method');} log('Received filepath: " + path + "'); path='" + path + "';"
