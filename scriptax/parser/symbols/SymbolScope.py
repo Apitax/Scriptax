@@ -33,15 +33,24 @@ class SymbolScope:
             self.name = name
         self.type = scopeType
 
-    def printScope(self):
-        print('{ \n' + '   ' + str(self.name) + ":" + str(self.type) + ":" + hex(id(self)).upper())
-        if(self.parent):
-            print('   parent: ' + str(self.parent.name))
+    def getScopeDebug(self):
+        debug = {}
+        debug['scope'] = {
+            'name': str(self.name),
+            'scope-type': str(self.type),
+            'address': hex(id(self)).upper(),
+        }
+        if self.parent:
+            debug['scope']['parent'] = str(self.parent.name)
+        else:
+            debug['scope']['parent'] = "None"
+        debug['scope']['symbols'] = []
+        debug['scope']['children'] = []
         for symbol in self.symbols:
-            print('   + ' + symbol.getSymbolDebug())
+            debug['scope']['symbols'].append(symbol.getSymbolDebug())
         for child in self.children:
-            child.printScope()
-        print('}')
+            debug['scope']['children'].append(child.getScopeDebug())
+        return debug
 
     def printScopeDebug(self):
         pass

@@ -1,5 +1,10 @@
 from scriptax.parser.symbols.SymbolScope import SymbolScope, SCOPE_PROGRAM
 from scriptax.parser.symbols.Symbol import *
+import json
+
+
+def findOccurrences(s, ch):
+    return [i for i, letter in enumerate(s) if letter == ch]
 
 
 class SymbolTable:
@@ -18,7 +23,7 @@ class SymbolTable:
 
     def printTable(self):
         print('>>Symbol Table<<')
-        self.root.printScope()
+        print(json.dumps(self.root.getScopeDebug(), indent=2))
 
     def resetTable(self):
         self.root.resetScope()

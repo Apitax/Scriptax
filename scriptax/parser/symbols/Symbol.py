@@ -60,4 +60,9 @@ class Symbol:
         self.value = value
 
     def getSymbolDebug(self):
-        return self.name + ':' + str(self.symbolType) + ':' + str(self.dataType) + ':' + str(self.value)
+        return {
+            'name': self.name,
+            'symbol-type': str(self.symbolType),
+            'data-type': str(self.dataType),
+            'value': str(self.value)
+        }

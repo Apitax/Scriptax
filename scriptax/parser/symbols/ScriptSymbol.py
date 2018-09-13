@@ -8,5 +8,8 @@ class ScriptSymbol(Symbol):
         self.driver = driver
 
     def getSymbolDebug(self):
-        return super().getSymbolDebug() + ':' + self.path + ':' + self.driver.getDriverName()
+        debug = super().getSymbolDebug()
+        debug['path'] = self.path
+        debug['driver-name'] = self.driver.getDriverName()
+        return debug
 
