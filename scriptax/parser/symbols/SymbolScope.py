@@ -84,7 +84,7 @@ class SymbolScope:
         self.symbols.append(symbol)
         return True
 
-    def removeSymbol(self,  name, symbolType=SYMBOL_VARIABLE, dataType=None):
+    def removeSymbol(self, name, symbolType=SYMBOL_VARIABLE, dataType=None):
         symbol = self.getSymbol(name, symbolType=symbolType, dataType=dataType)
         if not symbol:
             return False
