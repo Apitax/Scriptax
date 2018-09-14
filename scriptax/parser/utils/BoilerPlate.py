@@ -5,7 +5,7 @@ from scriptax.parser.Visitor import AhVisitor
 from antlr4 import *
 
 
-def standardParser(scriptax: str) -> AhVisitor:
+def standardParser(scriptax: str) -> tuple:
     input = InputStream(scriptax)
     # input = FileStream(filepath)
     lexer = Ah3Lexer(input)
@@ -15,11 +15,29 @@ def standardParser(scriptax: str) -> AhVisitor:
     # printer = AhListener()
 
     visitor = AhVisitor()
-    visitor.visit(tree)
-    return visitor
+    result = visitor.visit(tree)
+    return result, visitor
 
-def customizableContextParser(context, symbol_table=None) -> AhVisitor:
-    visitor = AhVisitor(symbol_table=symbol_table)
-    visitor.visit(context)
-    return visitor
+def customizableParser(scriptax: str, symbol_table=None, file=None) -> tuple:
+    input = InputStream(scriptax)
+    # input = FileStream(filepath)
+    lexer = Ah3Lexer(input)
+    stream = CommonTokenStream(lexer)
+    parser = Ah3Parser(stream)
+    tree = parser.prog()
+    # printer = AhListener()
+
+    visitor = AhVisitor(symbol_table=symbol_table, file=file)
+    result = visitor.visit(tree)
+    return result, visitor
+
+def standardContextParser(context) -> tuple:
+    visitor = AhVisitor()
+    result = visitor.visit(context)
+    return result, visitor
+
+def customizableContextParser(context, symbol_table=None, file=None) -> tuple:
+    visitor = AhVisitor(symbol_table=symbol_table, file=file)
+    result = visitor.visit(context)
+    return result, visitor
 

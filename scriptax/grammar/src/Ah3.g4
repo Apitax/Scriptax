@@ -22,7 +22,7 @@ statements : statement* ;
 statement : 
       NOT? (
         terminated
-        | non_terminated 
+        | non_terminated
       );
 
 terminated : 
