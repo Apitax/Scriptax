@@ -42,9 +42,11 @@ import threading
 #
 #   Scope ordering: imports, program path
 #
-# TODO: METHOD CALLS:
-#  Because the symbol table contains all the relevant data, all that must be saved is the method block context.
-#  As long as we ensure the correct scope is set when we visit that block context, everything **SHOULD** work fine
+# TODO: Variable access in DOT notation (dict, list, symbol, straight up data)
+# TODO: Variable setting in DOT notation (dict, list, symbol, straight up data)
+# TODO: Test returns in unscoped scripts
+# TODO: Implement class signatures using `sig`
+# TODO: Implement reflection according to GitHub issue
 
 class AhVisitor(AhVisitorOriginal):
 
