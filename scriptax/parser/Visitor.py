@@ -39,15 +39,18 @@ import traceback
 #
 #     run recursively when encountering and merge into global scope:
 #       extends_statement  (MERGE SCOPES & SYMBOLS INTO GLOBAL OF SUB SCRIPT PRIOR TO CURRENT SCRIPT)
-#       import_statement   (ADD AS SCRIPT SYMBOL TYPE INTO GLOBAL SCOPE)
+#       v import_statement   (ADD AS SCRIPT SYMBOL TYPE INTO GLOBAL SCOPE)
 #
 #   Scope ordering: imports, program path
 #
 # TODO: Variable access in DOT notation (dict, list, symbol, straight up data)
 # TODO: Variable setting in DOT notation (dict, list, symbol, straight up data)
-# TODO: Test returns in unscoped scripts
 # TODO: Implement class signatures using `sig`
 # TODO: Implement reflection according to GitHub issue
+# TODO: Pull code out of newInstance and extends to another method
+# TODO: Support sig polymorphism for extends
+# TODO: Method recursion does not protect variable scopes
+#    TODO: Calling a method from inside of a method inherits the scope of the calling method. THIS IS BAD
 
 class AhVisitor(AhVisitorOriginal):
 
@@ -87,11 +90,19 @@ class AhVisitor(AhVisitorOriginal):
 
     def parseScript(self, scriptax: str) -> tuple:
         from scriptax.parser.utils.BoilerPlate import standardParser
-        return standardParser(scriptax)
+        result = standardParser(scriptax)
+        if result[1].isError():
+            self.error(message=result[1].message)
+            return None, None
+        return result
 
     def parseScriptCustom(self, context, symbol_table: SymbolTable = None) -> tuple:
         from scriptax.parser.utils.BoilerPlate import customizableContextParser
-        return customizableContextParser(context, symbol_table=symbol_table)
+        result = customizableContextParser(context, symbol_table=symbol_table)
+        if result[1].isError():
+            self.error(message=result[1].message)
+            return None, None
+        return result
 
     def setState(self, file='', line=-1, char=-1):
         if (file != ''):
@@ -140,16 +151,16 @@ class AhVisitor(AhVisitorOriginal):
         return dict({"command": resolvedCommand['command'], "commandHandler": commandHandler, "result": returnResult})
 
     def getVariable(self, label, convert=True):
-        if (convert):
+        if convert:
             label = self.visit(label)
         try:
-            return self.symbol_table.getSymbol(name=label, symbolType=SYMBOL_VARIABLE).value
+            return self.getSymbol(label, convert=False).value
         except:
             self.error(message="Symbol `" + label + "` not found in scope `" + self.symbol_table.current.name + "`")
             return None
 
     # TODO: Repurpose to utilize symbol table
-    def getSymbol(self, label, convert=True):
+    def getSymbol(self, label, convert=True, symbolType=SYMBOL_VARIABLE):
         if convert:
             label = self.visit(label)
         try:
@@ -439,7 +450,7 @@ class AhVisitor(AhVisitorOriginal):
 
         if (not ctx.EQUAL()):
             # TODO: Double check that this still works
-            var = self.symbol_table.getSymbol(name=label)
+            var = self.getVariable(label=label, convert=False)
             # var = self.data.getVar(label)
             if (ctx.D_PLUS()):
                 value = var + 1
@@ -456,7 +467,7 @@ class AhVisitor(AhVisitorOriginal):
                     value = var / value
 
         if (ctx.SOPEN()):
-            var = self.symbol_table.getSymbol(name=label)
+            var = self.getVariable(label=label, convert=False)
             if (not isinstance(var, list)):
                 self.error("Appending to a list requires the variable being a list")
                 return
@@ -523,6 +534,10 @@ class AhVisitor(AhVisitorOriginal):
         if len(labels) == 1:
             # Executing a method on the current scope
             scope = self.symbol_table.current
+            # This is so that method calls inside of methods don't become child scopes of the calling method
+            # Weird things happen if method scopes are children of method scopes
+            if scope.parent.type == SCOPE_METHOD:
+                scope = scope.parent.parent
             context = self.symbol_table.getSymbol(name=labels[0]).value
             if not context:
                 self.error(message="Method not found:" + labels[0])
@@ -533,7 +548,7 @@ class AhVisitor(AhVisitorOriginal):
             if not scope:
                 self.error(message="Symbol not found:" + labels[0])
                 return None, None
-            context = scope.getSymbol(name=labels[1]).value
+            context = createTableFromScope(scope).getSymbol(name=labels[1]).value
             if not context:
                 self.error(message="Method not found:" + labels[1])
                 return None, None
@@ -559,6 +574,7 @@ class AhVisitor(AhVisitorOriginal):
         table.deleteOnExit = True  # Prevents hanging method & block scopes when debugging
         table.enterScope()
         table.current.setMeta(scopeType=SCOPE_METHOD)
+        table.current.variableScanBlocked = True
 
         # Adding parameters as symbols
         for key, value in parameters.items():
@@ -849,7 +865,25 @@ class AhVisitor(AhVisitorOriginal):
 
     # Visit a parse tree produced by Ah3Parser#extends_statement.
     def visitExtends_statement(self, ctx: AhParser.Extends_statementContext):
-        return self.visitChildren(ctx)
+        label = self.visit(ctx.label())
+        symbol: ScriptSymbol = self.symbol_table.getSymbol(name=label, symbolType=SYMBOL_SCRIPT)
+        scriptax = symbol.driver.getDriverScript(symbol.path)
+        parser = self.parseScript(scriptax)[1]
+
+        extendsTable: SymbolTable = parser.symbol_table
+        extendsTable.resetTable()
+        extendsTable.enterScope()
+        extendsScope: SymbolScope = extendsTable.current
+        extendsScope.setMeta(name=label, scopeType=SCOPE_SCRIPT)
+
+        #print(extendsTable.printTable())
+
+
+        current = self.symbol_table.current
+        self.symbol_table.exitScopeAndDelete()
+        self.symbol_table.insertScope(scope=extendsScope)
+        self.symbol_table.insertScope(scope=current)
+        #print(self.symbol_table.printTable())
 
     # Visit a parse tree produced by AhParser#params_statement.
     def visitSig_statement(self, ctx: AhParser.Sig_statementContext):

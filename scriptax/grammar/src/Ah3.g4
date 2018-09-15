@@ -10,8 +10,8 @@ script_structure : global_statements root_level_statements statements ;
 
 global_statements :
       (import_statement TERMINATOR)*
-      (extends_statement TERMINATOR)? 
-      (sig_statement TERMINATOR)? 
+      (sig_statement TERMINATOR)?
+      (extends_statement TERMINATOR)?
       (options_statement TERMINATOR)?
       ;
 
@@ -140,7 +140,7 @@ label : LABEL ;
 
 attribute : API | SCRIPT ; 
 
-extends_statement : EXTENDS LPAREN labels RPAREN ; 
+extends_statement : EXTENDS LPAREN label RPAREN ;
 
 sig_statement : SIG LPAREN sig_parameter_block RPAREN ;
 

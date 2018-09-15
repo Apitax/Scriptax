@@ -1,4 +1,4 @@
-from scriptax.parser.symbols.SymbolScope import SymbolScope, SCOPE_PROGRAM
+from scriptax.parser.symbols.SymbolScope import SymbolScope, SCOPE_PROGRAM, SCOPE_SCRIPT
 from scriptax.parser.symbols.Symbol import *
 import json
 
@@ -39,10 +39,22 @@ class SymbolTable:
 
     def getSymbol(self, name, symbolType=None):
         node: SymbolScope = self.current
+
+        comps = name.split('.')
+        while comps[0] == 'parent' and len(comps) > 1:
+            while node.type != SCOPE_SCRIPT:
+                node = node.parent
+                if not node:
+                    return None
+            del comps[0]
+        name = ".".join(comps)
+
         while node is not None:
             symbol = node.getSymbol(name, symbolType)
             if symbol:
                 return symbol
+            if symbolType == SYMBOL_VARIABLE and node.variableScanBlocked:
+                return None
             node = node.parent
         return None
 
@@ -78,7 +90,7 @@ class SymbolTable:
 
 def createTableFromScope(scope: SymbolScope) -> SymbolTable:
     table = SymbolTable()
-    table.root = scope
+    table.root = scope # TODO: This should be come the parent node until NONE
     table.current = scope
     return table
 

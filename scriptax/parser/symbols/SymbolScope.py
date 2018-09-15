@@ -27,6 +27,7 @@ class SymbolScope:
             self.name: str = name
         self.type: str = scopeType
         self.index: int = 0
+        self.variableScanBlocked = False
 
     def setMeta(self, name=None, scopeType=SCOPE_UNKNOWN):
         if name:
@@ -72,6 +73,14 @@ class SymbolScope:
         self.children.append(scope)
         self.index += 1
         return scope
+
+    def mergeScopes(self, scope: SymbolScopeType, append=False):
+        self.symbols = scope.symbols + self.symbols
+        if append:
+            self.children = self.children + scope.children
+        else:
+            self.children = scope.children + self.children
+            self.index += len(scope.children)
 
     def resetScope(self):
         self.index = 0

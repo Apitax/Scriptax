@@ -85,9 +85,9 @@ def serializedATN():
         buf.write("\2\2\u0081\u0082\5Z.\2\u0082\u0083\7\61\2\2\u0083\u0085")
         buf.write("\3\2\2\2\u0084\u0081\3\2\2\2\u0085\u0088\3\2\2\2\u0086")
         buf.write("\u0084\3\2\2\2\u0086\u0087\3\2\2\2\u0087\u008c\3\2\2\2")
-        buf.write("\u0088\u0086\3\2\2\2\u0089\u008a\5J&\2\u008a\u008b\7\61")
-        buf.write("\2\2\u008b\u008d\3\2\2\2\u008c\u0089\3\2\2\2\u008c\u008d")
-        buf.write("\3\2\2\2\u008d\u0091\3\2\2\2\u008e\u008f\5L\'\2\u008f")
+        buf.write("\u0088\u0086\3\2\2\2\u0089\u008a\5L\'\2\u008a\u008b\7")
+        buf.write("\61\2\2\u008b\u008d\3\2\2\2\u008c\u0089\3\2\2\2\u008c")
+        buf.write("\u008d\3\2\2\2\u008d\u0091\3\2\2\2\u008e\u008f\5J&\2\u008f")
         buf.write("\u0090\7\61\2\2\u0090\u0092\3\2\2\2\u0091\u008e\3\2\2")
         buf.write("\2\u0091\u0092\3\2\2\2\u0092\u0096\3\2\2\2\u0093\u0094")
         buf.write("\5N(\2\u0094\u0095\7\61\2\2\u0095\u0097\3\2\2\2\u0096")
@@ -216,7 +216,7 @@ def serializedATN():
         buf.write("\5h\65\2\u01a6\u01a4\3\2\2\2\u01a6\u01a5\3\2\2\2\u01a7")
         buf.write("E\3\2\2\2\u01a8\u01a9\7\\\2\2\u01a9G\3\2\2\2\u01aa\u01ab")
         buf.write("\t\7\2\2\u01abI\3\2\2\2\u01ac\u01ad\7L\2\2\u01ad\u01ae")
-        buf.write("\7,\2\2\u01ae\u01af\5B\"\2\u01af\u01b0\7-\2\2\u01b0K\3")
+        buf.write("\7,\2\2\u01ae\u01af\5F$\2\u01af\u01b0\7-\2\2\u01b0K\3")
         buf.write("\2\2\2\u01b1\u01b2\7F\2\2\u01b2\u01b3\7,\2\2\u01b3\u01b4")
         buf.write("\5\62\32\2\u01b4\u01b5\7-\2\2\u01b5M\3\2\2\2\u01b6\u01b7")
         buf.write("\7G\2\2\u01b7\u01b8\7,\2\2\u01b8\u01b9\5\60\31\2\u01b9")
@@ -625,12 +625,12 @@ class Ah3Parser ( Parser ):
             else:
                 return self.getToken(Ah3Parser.TERMINATOR, i)
 
-        def extends_statement(self):
-            return self.getTypedRuleContext(Ah3Parser.Extends_statementContext,0)
-
-
         def sig_statement(self):
             return self.getTypedRuleContext(Ah3Parser.Sig_statementContext,0)
+
+
+        def extends_statement(self):
+            return self.getTypedRuleContext(Ah3Parser.Extends_statementContext,0)
 
 
         def options_statement(self):
@@ -679,9 +679,9 @@ class Ah3Parser ( Parser ):
             self.state = 138
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==Ah3Parser.EXTENDS:
+            if _la==Ah3Parser.SIG:
                 self.state = 135
-                self.extends_statement()
+                self.sig_statement()
                 self.state = 136
                 self.match(Ah3Parser.TERMINATOR)
 
@@ -689,9 +689,9 @@ class Ah3Parser ( Parser ):
             self.state = 143
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==Ah3Parser.SIG:
+            if _la==Ah3Parser.EXTENDS:
                 self.state = 140
-                self.sig_statement()
+                self.extends_statement()
                 self.state = 141
                 self.match(Ah3Parser.TERMINATOR)
 
@@ -3402,8 +3402,8 @@ class Ah3Parser ( Parser ):
         def LPAREN(self):
             return self.getToken(Ah3Parser.LPAREN, 0)
 
-        def labels(self):
-            return self.getTypedRuleContext(Ah3Parser.LabelsContext,0)
+        def label(self):
+            return self.getTypedRuleContext(Ah3Parser.LabelContext,0)
 
 
         def RPAREN(self):
@@ -3440,7 +3440,7 @@ class Ah3Parser ( Parser ):
             self.state = 427
             self.match(Ah3Parser.LPAREN)
             self.state = 428
-            self.labels()
+            self.label()
             self.state = 429
             self.match(Ah3Parser.RPAREN)
         except RecognitionException as re:

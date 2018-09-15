@@ -60,9 +60,14 @@ class Symbol:
         self.value = value
 
     def getSymbolDebug(self):
+        from scriptax.parser.symbols.SymbolScope import SymbolScope
+        value = str(self.value)
+        if isinstance(self.value, SymbolScope):
+            value = {"pointer": {"reference": value, "pointing-to": self.value.getScopeDebug()}}
+
         return {
             'name': self.name,
             'symbol-type': str(self.symbolType),
             'data-type': str(self.dataType),
-            'value': str(self.value)
+            'value': value
         }

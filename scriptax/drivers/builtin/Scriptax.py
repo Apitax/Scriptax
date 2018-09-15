@@ -58,4 +58,6 @@ class Scriptax(Driver):
             return self.handleDriverScript(command)
 
     def getDriverScript(self, path) -> str:
-        return "api addOne(num) { return num + 1; } api getPath () {log('method in script with path: ' + path);} api resetPath () {path='RESET';} api setPath(path1){path=path1;} api test () {log('testing method');} log('Received filepath: " + path + "'); path='" + path + "';"
+        if path == 'bob/bob.ah':
+            return "from scriptax import tester.bobytest as Slurp; extends(Slurp); api doBob() {log('THIS IS THE BOBBY');log(addOne(somenum=6));} api addOne(somenum) {return addOneRecursive(num=somenum);} api addOneRecursive(num) { num += 1; if(num < 10) num = addOneRecursive(num=num); return num;}"
+        return "api addOne(num) { if(num > 5) return num + 1; else return num; } api getPath () {log('method in script with path: ' + parent.path);} api resetPath () {parent.path='RESET';} api setPath(path){parent.path=path;} api test () {log('testing method');} log('Received filepath: " + path + "'); path='" + path + "';"
