@@ -18,6 +18,7 @@ from apitaxcore.flow.LoadedDrivers import LoadedDrivers
 import json
 import re
 import threading
+import traceback
 
 
 # TODO: SCOPE GENERATION:
@@ -50,17 +51,17 @@ import threading
 
 class AhVisitor(AhVisitorOriginal):
 
-    def __init__(self, credentials: Credentials = Credentials(), parameters={}, options: Options = Options(), file=None,
+    def __init__(self, credentials: Credentials = None, parameters: dict = None, options: Options = None, file=None,
                  symbol_table=None):
         # Aliases
         self.log = State.log
         self.config = State.config
 
         # Parameters
-        self.appOptions = options
-        # self.appOptions.debug = True
-        self.credentials = credentials
-        self.parameters = parameters
+        self.appOptions = options if options is not None else Options()
+        #self.appOptions.debug = True
+        self.credentials = credentials if credentials is not None else Credentials()
+        self.parameters = parameters if parameters is not None else {}
 
         # Async Threading
         self.threads = []
@@ -226,7 +227,7 @@ class AhVisitor(AhVisitorOriginal):
         self.symbol_table.enterScope()
         self.symbol_table.current.setMeta(name=self.state['file'], scopeType=SCOPE_SCRIPT)
         self.parser = ctx.parser
-        temp = self.visitChildren(ctx)
+        result = self.visit(ctx.script_structure())
 
         if (self.isError()):
             error = self.isError()
@@ -237,11 +238,13 @@ class AhVisitor(AhVisitorOriginal):
                 self.log.log('')
                 self.log.log('')
         self.symbol_table.exitScope()
-        return self
+        return result
 
     # Visit a parse tree produced by Ah3Parser#script_structure.
     def visitScript_structure(self, ctx: AhParser.Script_structureContext):
-        return self.visitChildren(ctx)
+        self.visit(ctx.global_statements())
+        self.visit(ctx.root_level_statements())
+        return self.visit(ctx.statements())
 
     # Visit a parse tree produced by Ah3Parser#global_statements.
     def visitGlobal_statements(self, ctx: AhParser.Global_statementsContext):
@@ -252,16 +255,17 @@ class AhVisitor(AhVisitorOriginal):
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by AhParser#statements.
-    def visitStatements(self, ctx: AhParser.StatementsContext):
+    def visitStatements(self, ctx: AhParser.StatementsContext) -> tuple:
         i = 0
         while ctx.statement(i):
             result: tuple = self.visit(ctx.statement(
                 i))  # First index of tuple is whether it is a return statement (bool), second is the statement result
             if result[0]:
-                return result[1]
+                return result
             if self.isReturn() or self.isError():
-                return
+                return False, None
             i += 1
+        return False, None
 
     # Visit a parse tree produced by AhParser#statement.
     def visitStatement(self, ctx: AhParser.StatementContext) -> tuple:
@@ -286,7 +290,7 @@ class AhVisitor(AhVisitorOriginal):
         if ctx.terminated():
             temp = self.visit(ctx.terminated())
         else:
-            temp = self.visitChildren(ctx)
+            temp = self.visit(ctx.non_terminated())
 
         if (line != "" and self.appOptions.debug):
             self.log.log('')
@@ -310,7 +314,8 @@ class AhVisitor(AhVisitorOriginal):
 
     # Visit a parse tree produced by AhParser#non_terminated.
     def visitNon_terminated(self, ctx: AhParser.Non_terminatedContext) -> tuple:
-        return (False, self.visitChildren(ctx))
+        temp = self.visit(ctx.flow())
+        return temp
 
     # Visit a parse tree produced by AhParser#executers.
     def visitExecute_statement(self, ctx: AhParser.Execute_statementContext):
@@ -331,7 +336,7 @@ class AhVisitor(AhVisitorOriginal):
             return self.visit(ctx.create_instance())
 
         if (ctx.method_call()):
-            return self.visit(ctx.method_call())[0]
+            return self.visit(ctx.method_call())[0][1]
 
         if (ctx.execute()):
             return self.visit(ctx.execute())['result']
@@ -366,29 +371,34 @@ class AhVisitor(AhVisitorOriginal):
         if (ctx.NOT()):
             return not self.visit(ctx.expr(0))
 
-        if (ctx.AND()):
-            return self.visit(ctx.expr(0)) and self.visit(ctx.expr(1))
+        try:
+            if (ctx.AND()):
+                return self.visit(ctx.expr(0)) and self.visit(ctx.expr(1))
 
-        if (ctx.OR()):
-            return self.visit(ctx.expr(0)) or self.visit(ctx.expr(1))
+            if (ctx.OR()):
+                return self.visit(ctx.expr(0)) or self.visit(ctx.expr(1))
 
-        if (ctx.EQ()):
-            return self.visit(ctx.expr(0)) == self.visit(ctx.expr(1))
+            if (ctx.EQ()):
+                return self.visit(ctx.expr(0)) == self.visit(ctx.expr(1))
 
-        if (ctx.NEQ()):
-            return self.visit(ctx.expr(0)) != self.visit(ctx.expr(1))
+            if (ctx.NEQ()):
+                return self.visit(ctx.expr(0)) != self.visit(ctx.expr(1))
 
-        if (ctx.GE()):
-            return self.visit(ctx.expr(0)) >= self.visit(ctx.expr(1))
+            if (ctx.GE()):
+                return self.visit(ctx.expr(0)) >= self.visit(ctx.expr(1))
 
-        if (ctx.LE()):
-            return self.visit(ctx.expr(0)) <= self.visit(ctx.expr(1))
+            if (ctx.LE()):
+                return self.visit(ctx.expr(0)) <= self.visit(ctx.expr(1))
 
-        if (ctx.GT()):
-            return self.visit(ctx.expr(0)) > self.visit(ctx.expr(1))
+            if (ctx.GT()):
+                return self.visit(ctx.expr(0)) > self.visit(ctx.expr(1))
 
-        if (ctx.LT()):
-            return self.visit(ctx.expr(0)) < self.visit(ctx.expr(1))
+            if (ctx.LT()):
+                return self.visit(ctx.expr(0)) < self.visit(ctx.expr(1))
+        except:
+            stacktrace = traceback.format_exc(limit=0)
+            self.error(("While evaluating expression with `" + str(
+                self.visit(ctx.expr(0))) + "` and `" + str(self.visit(ctx.expr(1))) + "`: " + stacktrace).replace('\r', '').replace('\n', ''))
 
         if (ctx.LPAREN()):
             return self.visit(ctx.expr(0))
@@ -471,8 +481,13 @@ class AhVisitor(AhVisitorOriginal):
             self.log.log('')
 
     # Visit a parse tree produced by AhParser#flow.
-    def visitFlow(self, ctx: AhParser.FlowContext):
-        return self.visitChildren(ctx)
+    def visitFlow(self, ctx: AhParser.FlowContext) -> tuple:
+        if ctx.if_statement():
+            return self.visit(ctx.if_statement())
+        if ctx.while_statement():
+            return self.visit(ctx.while_statement())
+        if ctx.for_statement():
+            return self.visit(ctx.for_statement())
 
     # Visit a parse tree produced by Ah3Parser#create_instance.
     def visitCreate_instance(self, ctx: AhParser.Create_instanceContext):
@@ -559,29 +574,31 @@ class AhVisitor(AhVisitorOriginal):
         return result
 
     # Visit a parse tree produced by AhParser#if_statement.
-    def visitIf_statement(self, ctx: AhParser.If_statementContext):
-
+    def visitIf_statement(self, ctx: AhParser.If_statementContext) -> tuple:
         i = 0
-
-        while (True):
+        while True:
             if (ctx.condition(i) is None):
                 if (ctx.ELSE()):
                     return self.visit(ctx.block(i))
                 else:
-                    return None
+                    return False, None
             condition = self.visit(ctx.condition(i))
-            if (condition):
+            if condition:
                 return self.visit(ctx.block(i))
             else:
                 i += 1
 
     # Visit a parse tree produced by AhParser#while_statement.
-    def visitWhile_statement(self, ctx: AhParser.While_statementContext):
+    def visitWhile_statement(self, ctx: AhParser.While_statementContext) -> tuple:
         while (self.visit(ctx.condition())):
-            self.visit(ctx.block())
+            result = self.visit(ctx.block())
+            if result[0]:
+                return result
+        return False, None
 
     # Visit a parse tree produced by AhParser#for_statement.
-    def visitFor_statement(self, ctx: AhParser.For_statementContext):
+    # TODO: Implement code to stop looping on return and return the tuples
+    def visitFor_statement(self, ctx: AhParser.For_statementContext) -> tuple:
         clause = self.visit(ctx.expr())
         label = self.visit(ctx.labels())
 
@@ -651,16 +668,14 @@ class AhVisitor(AhVisitorOriginal):
         return condition
 
     # Visit a parse tree produced by AhParser#block.
-    def visitBlock(self, ctx: AhParser.BlockContext):
+    def visitBlock(self, ctx: AhParser.BlockContext) -> tuple:
         self.symbol_table.enterScope()
         self.symbol_table.current.setMeta(scopeType=SCOPE_BLOCK)
-        result = None
+        result = False, None
         if ctx.statements():
             result = self.visit(ctx.statements())
         else:
             result = self.visit(ctx.statement())
-            if result[0]:
-                result = result[1]
         self.symbol_table.exitScope()
         return result
 

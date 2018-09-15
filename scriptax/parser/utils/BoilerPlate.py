@@ -18,7 +18,8 @@ def standardParser(scriptax: str) -> tuple:
     result = visitor.visit(tree)
     return result, visitor
 
-def customizableParser(scriptax: str, symbol_table=None, file=None) -> tuple:
+
+def customizableParser(scriptax: str, symbol_table=None, file=None, parameters=None, options=None) -> tuple:
     input = InputStream(scriptax)
     # input = FileStream(filepath)
     lexer = Ah3Lexer(input)
@@ -27,17 +28,18 @@ def customizableParser(scriptax: str, symbol_table=None, file=None) -> tuple:
     tree = parser.prog()
     # printer = AhListener()
 
-    visitor = AhVisitor(symbol_table=symbol_table, file=file)
+    visitor = AhVisitor(symbol_table=symbol_table, file=file, parameters=parameters, options=options)
     result = visitor.visit(tree)
     return result, visitor
+
 
 def standardContextParser(context) -> tuple:
     visitor = AhVisitor()
     result = visitor.visit(context)
     return result, visitor
 
-def customizableContextParser(context, symbol_table=None, file=None) -> tuple:
-    visitor = AhVisitor(symbol_table=symbol_table, file=file)
+
+def customizableContextParser(context, symbol_table=None, file=None, parameters=None, options=None) -> tuple:
+    visitor = AhVisitor(symbol_table=symbol_table, file=file, parameters=parameters, options=options)
     result = visitor.visit(context)
     return result, visitor
-

@@ -1,14 +1,10 @@
 # System import
 
 # Application import
-from scriptax.grammar.build.Ah3Lexer import Ah3Lexer
-from scriptax.grammar.build.Ah3Parser import Ah3Parser
-from scriptax.parser.Visitor import AhVisitor
+from scriptax.parser.utils.BoilerPlate import standardParser, customizableParser
 from apitaxcore.utilities.Files import getPath
 from apitaxcore.flow.LoadedDrivers import LoadedDrivers
 from apitaxcore.models.State import State
-
-from antlr4 import *
 
 
 # Script is used to automate the execution of many commands
@@ -28,16 +24,18 @@ class Scriptax():
         if (not self.options.driver):
             self.options.driver = LoadedDrivers.getDefaultDriver()
 
-        input = InputStream(self.options.driver.getDriverScript(filepath))
+        scriptax = self.options.driver.getDriverScript(filepath)
 
-        # input = FileStream(filepath)
-        lexer = Ah3Lexer(input)
-        stream = CommonTokenStream(lexer)
-        parser = Ah3Parser(stream)
-        tree = parser.prog()
-        #printer = AhListener()
+        result = customizableParser(scriptax, file=getPath(filepath))
 
-        visitor = AhVisitor(parameters=self.parameters, options=self.options)
-        visitor.setState(file=getPath(filepath))
+        #      input = FileStream(filepath)
+        # lexer = Ah3Lexer(input)
+        # stream = CommonTokenStream(lexer)
+        # parser = Ah3Parser(stream)
+        # tree = parser.prog()
+        #      printer = AhListener()
 
-        return visitor.visit(tree)
+        # visitor = AhVisitor(parameters=self.parameters, options=self.options)
+        # visitor.setState(file=getPath(filepath))
+
+        return result

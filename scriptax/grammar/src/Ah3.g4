@@ -208,6 +208,10 @@ atom_none : NONE ;
 LEXER RULES
 **********/
 
+/** KEYWORD COMBINATORS **/
+AND : A N D | SAND ;
+OR : O R | SOR ;
+
 
 /** CONDITIONAL EXPRESSIONS **/
 GT :   '>'  ;
@@ -272,10 +276,6 @@ TERMINATOR : ';' ;
 HASH : '#' ;
 ARROW : '->' ;
 AT : '@' ;
-
-/** KEYWORD COMBINATORS **/
-AND : A N D | SAND ;
-OR : O R | SOR ;
 
 /** FLOW **/
 RETURNS : R E T U R N ;
