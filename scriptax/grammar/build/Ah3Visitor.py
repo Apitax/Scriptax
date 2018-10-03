@@ -244,11 +244,6 @@ class Ah3Visitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by Ah3Parser#url.
-    def visitUrl(self, ctx:Ah3Parser.UrlContext):
-        return self.visitChildren(ctx)
-
-
     # Visit a parse tree produced by Ah3Parser#log.
     def visitLog(self, ctx:Ah3Parser.LogContext):
         return self.visitChildren(ctx)

@@ -431,15 +431,6 @@ class Ah3Listener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by Ah3Parser#url.
-    def enterUrl(self, ctx:Ah3Parser.UrlContext):
-        pass
-
-    # Exit a parse tree produced by Ah3Parser#url.
-    def exitUrl(self, ctx:Ah3Parser.UrlContext):
-        pass
-
-
     # Enter a parse tree produced by Ah3Parser#log.
     def enterLog(self, ctx:Ah3Parser.LogContext):
         pass

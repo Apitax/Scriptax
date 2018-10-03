@@ -43,12 +43,19 @@ import traceback
 #
 #   Scope ordering: imports, program path
 #
-# TODO: Variable access in DOT notation (dict, list, symbol, straight up data)
-# TODO: Variable setting in DOT notation (dict, list, symbol, straight up data)
-# TODO: Implement class signatures using `sig`
-# TODO: Implement reflection according to GitHub issue
+# vTODO: Variable access in DOT notation (dict, list, symbol, straight up data)
+# vTODO: Variable setting in DOT notation (dict, list, symbol, straight up data)
+# vTODO: Implement class signatures using `sig`
+# vTODO: Implement reflection according to GitHub issue
 # TODO: Pull code out of newInstance and extends to another method
-# TODO: Support sig polymorphism for extends
+# vTODO: Support sig polymorphism for extends
+# TODO: DeleteVar
+# TODO: url statement
+# TODO: login statement
+# TODO: Async, Await
+# TODO: Callbacks
+# TODO for, foreach
+# TODO: Commandtax
 
 
 class AhVisitor(AhVisitorOriginal):
@@ -61,7 +68,7 @@ class AhVisitor(AhVisitorOriginal):
 
         # Parameters
         self.appOptions: Options = options if options is not None else Options()
-        #self.appOptions.debug = True
+        # self.appOptions.debug = True
         self.credentials: Credentials = credentials if credentials is not None else Credentials()
         self.parameters: dict = parameters if parameters is not None else {}
 
@@ -87,9 +94,9 @@ class AhVisitor(AhVisitorOriginal):
         # Used for mustache syntax dynamic replacement
         self.regexVar = '{{[ ]{0,}[A-z0-9_$.\-]{1,}[ ]{0,}}}'
 
-    def parseScript(self, scriptax: str) -> tuple:
-        from scriptax.parser.utils.BoilerPlate import standardParser
-        result = standardParser(scriptax)
+    def parseScript(self, scriptax: str, parameters: dict = None) -> tuple:
+        from scriptax.parser.utils.BoilerPlate import customizableParser
+        result = customizableParser(scriptax, parameters=parameters)
         if result[1].isError():
             self.error(message=result[1].message)
             return None, None
@@ -193,7 +200,7 @@ class AhVisitor(AhVisitorOriginal):
                 elif symbol.dataType == DATA_PYTHONIC:
                     return False
                 else:
-                    #print(symbol.dataType)
+                    # print(symbol.dataType)
                     self.error(message="Symbol `" + label + "` is corrupt and not settable.")
                     return False
                 i += 1
@@ -226,50 +233,50 @@ class AhVisitor(AhVisitorOriginal):
 
         table = createTableFromScope(node)
 
-        symbol, i = table.getSymbolWithLength(components[0], symbolType=SYMBOL_VARIABLE)
-
         if len(components) == 1:
+            symbol, i = table.getSymbolWithLength(components[0], symbolType=symbolType)
             return symbol
+
+        symbol, i = table.getSymbolWithLength(components[0], symbolType=SYMBOL_VARIABLE)
+        if not symbol:
+            symbol, i = table.getSymbolWithLength(components[0], symbolType=SYMBOL_SCRIPT)
 
         if symbol:
             i += 1
 
         try:
             while len(components) > i:
+                if len(components) > i + 1:
+                    type = SYMBOL_VARIABLE
+                else:
+                    type = symbolType
                 if symbol.dataType == DATA_INSTANCE:
                     table = createTableFromScope(symbol.value)
-                    symbol, j = table.getSymbolWithLength(name=components[i], symbolType=SYMBOL_VARIABLE)
+                    symbol, j = table.getSymbolWithLength(name=components[i], symbolType=type)
                 elif symbol.dataType == DATA_DICT:
                     symbol = symbol.value[str(components[i])]
                     if not isinstance(symbol, Symbol):
-                        symbol = Symbol(symbolType=SYMBOL_VARIABLE, value=symbol)
+                        symbol = Symbol(symbolType=type, value=symbol)
                 elif symbol.dataType == DATA_LIST:
                     symbol = symbol.value[int(components[i])]
                     if not isinstance(symbol, Symbol):
-                        symbol = Symbol(symbolType=SYMBOL_VARIABLE, value=symbol)
+                        symbol = Symbol(symbolType=type, value=symbol)
                 elif symbol.dataType == DATA_THREAD:
                     return None
                 elif symbol.dataType == DATA_PYTHONIC:
                     return None
-                else:
-                    if len(components) != i:
-                        self.error(message="Symbol `" + label + "` not found in scope.")
-                        return None
-                    else:
-                        return symbol
                 i += 1
 
             return symbol
 
         except:
-            print("Exception during variable setting")
+            print("Exception during variable fetching")
             traceback.print_exc()
             self.error(message="Symbol `" + label + "` not found in scope.")
             return None
 
-
     def getVariable(self, label=None, convert=True):
-        #return self.getSymbol(label=label, convert=convert).value
+        # return self.getSymbol(label=label, convert=convert).value
         if convert:
             label = self.visit(label)
         try:
@@ -277,54 +284,6 @@ class AhVisitor(AhVisitorOriginal):
         except:
             self.error(message="Symbol `" + label + "` not found in scope `" + self.symbol_table.current.name + "`")
             return None
-
-        #if symbol.dataType == DATA_DICT or symbol.dataType == DATA_LIST:
-#
-#           node, name = self.symbol_table.traverseToParent(name=label)
-#          name = name[1:]
-#
-#           for component in components:
-#                if (component not in navigation):
-#                    if (isinstance(navigation, list)):
-#                        if (not (isNumber(component) and len(navigation) > int(component))):
-#                            navigation[int(component)] = {}
-#                    else:
-#                        navigation[component] = {}
-#                if (isinstance(navigation, list)):
-#                    navigation = navigation[int(component)]
-#                else:
-#                    navigation = navigation[str(component)]
-#
-#            # if (finalIndex not in navigation):
-#            #    navigation[finalIndex] = {}
-#
-#            if (self.isJson(data)):
-#                data = json.loads(data)
-#
-#            if (isinstance(navigation, list)):
-#                finalIndex = int(finalIndex)
-#                if (len(navigation) <= finalIndex):
-#                    navigation.insert(finalIndex, data)
-#                else:
-#                    navigation[finalIndex] = data
-#            else:
-#                navigation[finalIndex] = data
-
-#        return symbol.value
-
-    # TODO: WTF?
-    def useOptions(self):
-        if (self.options['params']):
-
-            if (len(self.options['params']) != len(self.data.getVar('params.passed'))):
-                self.error(
-                    'Insufficient parameters. Expected: ' + str(self.options['params']) + ' but received: ' + str(
-                        self.data.getVar('params.passed')))
-            else:
-                i = 0
-                for param in self.options['params']:
-                    self.data.storeVar('params.' + param, self.data.getVar('params.passed.' + param))
-                    i += 1
 
     # Dynamic mustache syntax injection
     def inject(self, line):
@@ -552,7 +511,9 @@ class AhVisitor(AhVisitorOriginal):
         except:
             stacktrace = traceback.format_exc(limit=0)
             self.error(("While evaluating expression with `" + str(
-                self.visit(ctx.expr(0))) + "` and `" + str(self.visit(ctx.expr(1))) + "`: " + stacktrace).replace('\r', '').replace('\n', ''))
+                self.visit(ctx.expr(0))) + "` and `" + str(self.visit(ctx.expr(1))) + "`: " + stacktrace).replace('\r',
+                                                                                                                  '').replace(
+                '\n', ''))
 
         if (ctx.LPAREN()):
             return self.visit(ctx.expr(0))
@@ -618,23 +579,23 @@ class AhVisitor(AhVisitorOriginal):
             tval = value
             value = var
             # TODO: Double check that this still works
-            #self.symbol_table.putSymbol(symbol=Symbol(name=label, symbolType=SYMBOL_VARIABLE, value=value))
+            # self.symbol_table.putSymbol(symbol=Symbol(name=label, symbolType=SYMBOL_VARIABLE, value=value))
             self.setVariable(label=label, value=value, convert=False)
             if (isinstance(tval, threading.Thread)):
                 tval.label = label + "." + str(len(value) - 1)
                 tval.start()
         else:
-            #self.symbol_table.putSymbol(symbol=Symbol(name=label, symbolType=SYMBOL_VARIABLE, value=value))
+            # self.symbol_table.putSymbol(symbol=Symbol(name=label, symbolType=SYMBOL_VARIABLE, value=value))
             self.setVariable(label=label, value=value, convert=False)
             if (isinstance(value, threading.Thread)):
                 value.label = label
                 value.start()
 
         if (self.appOptions.debug):
-            #print('here')
-            #symbol = self.getSymbol(label=label, convert=False) # TODO: Does not work well for DATA_INSTANCE types
+            # print('here')
+            # symbol = self.getSymbol(label=label, convert=False) # TODO: Does not work well for DATA_INSTANCE types
             self.log.log('> Assigning Variable: ' + label + ' = ' + str(
-            value))
+                value))
             self.log.log('')
 
     # Visit a parse tree produced by AhParser#flow.
@@ -651,7 +612,8 @@ class AhVisitor(AhVisitorOriginal):
         label = self.visit(ctx.label())
         symbol: ScriptSymbol = self.symbol_table.getSymbol(name=label, symbolType=SYMBOL_SCRIPT)
         scriptax = symbol.driver.getDriverScript(symbol.path)
-        parser = self.parseScript(scriptax)[1]
+        parameters = self.visit(ctx.optional_parameters_block())
+        parser = self.parseScript(scriptax, parameters=parameters)[1]
         instanceTable: SymbolTable = parser.symbol_table
         instanceTable.resetTable()
         instanceTable.enterScope()  # SymbolTable()
@@ -675,6 +637,8 @@ class AhVisitor(AhVisitorOriginal):
 
         context: AhParser.Method_statementContext = None  # ANTLR context of the method
         scope: SymbolScope = None  # Scope to execute the block within
+
+        # print(self.getSymbol(label=label, symbolType=SYMBOL_METHOD, convert=False).getSymbolDebug())
 
         # Gathering the correct context and scope
         if len(labels) == 1:
@@ -704,16 +668,20 @@ class AhVisitor(AhVisitorOriginal):
         expectedParameters = self.visit(context.sig_parameter_block())
         parameters = self.visit(ctx.optional_parameters_block())
 
+        invertedExpectedParameters = []
+
         # Checking to ensure parameters are correct and filling in optional parameters where necessary
-        for key, value in expectedParameters.items():
+        for expected in expectedParameters:
+            key = expected['label']
+            invertedExpectedParameters.append(key)
             required = False
-            if 'value' not in value:
+            if 'value' not in expected:
                 required = True
             if key not in parameters and required:
                 self.error(message="Required parameter not found in parameter list: " + key)
                 return None, None
             if key not in parameters:
-                parameters[key] = value['value']
+                parameters[key] = expected['value']
 
         # Creating the symbol table to execute the context within
         table: SymbolTable = createTableFromScope(scope)
@@ -724,7 +692,7 @@ class AhVisitor(AhVisitorOriginal):
 
         # Adding parameters as symbols
         for key, value in parameters.items():
-            if key not in expectedParameters:
+            if key not in invertedExpectedParameters:
                 self.error(message="Unexpected parameter passed to method: " + key)
                 return None, None
             else:
@@ -854,7 +822,7 @@ class AhVisitor(AhVisitorOriginal):
         return temp
 
     # Visit a parse tree produced by AhParser#optional_parameters_block.
-    def visitOptional_parameters_block(self, ctx: AhParser.Optional_parameters_blockContext):
+    def visitOptional_parameters_block(self, ctx: AhParser.Optional_parameters_blockContext) -> dict:
         i = 0
         parameters = {}
         while (ctx.optional_parameter(i)):
@@ -864,15 +832,15 @@ class AhVisitor(AhVisitorOriginal):
         return parameters
 
     # Visit a parse tree produced by Ah3Parser#sig_parameter_block.
-    def visitSig_parameter_block(self, ctx: AhParser.Sig_parameter_blockContext):
+    def visitSig_parameter_block(self, ctx: AhParser.Sig_parameter_blockContext) -> list:
         i = 0
-        parameters = {}
+        parameters = []
         while (ctx.sig_parameter(i)):
             opParam = self.visit(ctx.sig_parameter(i))
-            value = {}
+            param = {"label": opParam['label']}
             if 'value' in opParam:
-                value = {"value": opParam['value']}
-            parameters[opParam['label']] = value
+                param['value'] = opParam['value']
+            parameters.append(param)
             i += 1
         return parameters
 
@@ -900,9 +868,8 @@ class AhVisitor(AhVisitorOriginal):
         command = ""
         strict = True
         credentials = None
-        driver = None
 
-        if (not ctx.SCRIPT() and not ctx.COMMANDTAX()):
+        if (not ctx.COMMANDTAX()):
             command += "api"
             if (ctx.GET()):
                 command += " --get"
@@ -916,14 +883,11 @@ class AhVisitor(AhVisitorOriginal):
                 command += " --delete"
             command += " --url " + self.data.getUrl("current") + firstArg
 
-        elif (ctx.SCRIPT()):
-            command += "scriptax " + firstArg + " --apitax-script"
-
         elif (ctx.COMMANDTAX()):
             command = firstArg
 
-        if (ctx.obj_dict()):
-            dataArg = self.visit(ctx.obj_dict())
+        if (ctx.atom_obj_dict()):
+            dataArg = self.visit(ctx.atom_obj_dict())
             if ('post' in dataArg):
                 command += " --data-post '" + json.dumps(dataArg['post']) + "'"
             if ('query' in dataArg):
@@ -940,15 +904,11 @@ class AhVisitor(AhVisitorOriginal):
             if ('auth' in dataArg):
                 credentials = dataArg['auth']
 
-        i = 0
         parameters = {}
-        while (ctx.optional_parameter(i)):
-            opParam = self.visit(ctx.optional_parameter(i))
-            parameters[opParam['label']] = opParam['value']
-            i += 1
+        if ctx.optional_parameters_block():
+            parameters = self.visit(ctx.optional_parameters_block())
 
-        return {'command': command, 'parameters': parameters, 'strict': strict, 'credentials': credentials,
-                'driver': driver}
+        return {'command': command, 'parameters': parameters, 'strict': strict, 'credentials': credentials}
 
     # Visit a parse tree produced by AhParser#execute.
     def visitExecute(self, ctx):
@@ -1014,7 +974,10 @@ class AhVisitor(AhVisitorOriginal):
         label = self.visit(ctx.label())
         symbol: ScriptSymbol = self.symbol_table.getSymbol(name=label, symbolType=SYMBOL_SCRIPT)
         scriptax = symbol.driver.getDriverScript(symbol.path)
-        parser = self.parseScript(scriptax)[1]
+        parameters = {'import': None}
+        if ctx.optional_parameters_block():
+            parameters = self.visit(ctx.optional_parameters_block())
+        parser = self.parseScript(scriptax, parameters=parameters)[1]
 
         extendsTable: SymbolTable = parser.symbol_table
         extendsTable.resetTable()
@@ -1022,35 +985,57 @@ class AhVisitor(AhVisitorOriginal):
         extendsScope: SymbolScope = extendsTable.current
         extendsScope.setMeta(name=label, scopeType=SCOPE_SCRIPT)
 
-        #print(extendsTable.printTable())
+        # print(extendsTable.printTable())
 
+        # for sym in extendsScope.symbols:
 
         current = self.symbol_table.current
         self.symbol_table.exitScopeAndDelete()
         self.symbol_table.insertScope(scope=extendsScope)
         self.symbol_table.insertScope(scope=current)
-        #print(self.symbol_table.printTable())
+        # print(self.symbol_table.printTable())
 
     # Visit a parse tree produced by AhParser#params_statement.
     def visitSig_statement(self, ctx: AhParser.Sig_statementContext):
-        i = 0
-        while (ctx.sig_parameter(i)):
-            sigItem = self.visit(ctx.sig_parameter(i))
+        specialOp = False  # Helps with import and extends
+        if self.parameters and len(self.parameters) == 1 and 'import' in self.parameters and self.parameters[
+            'import'] is None:
+            specialOp = True
 
-            if (self.data.isVarExist('params.passed.' + sigItem['label'])):
-                self.data.storeVar('params.' + sigItem['label'], self.data.getVar('params.passed.' + sigItem['label']))
-            elif ('value' in sigItem):
-                self.data.storeVar('params.' + sigItem['label'], sigItem['value'])
+        parameters = self.visit(ctx.sig_parameter_block())
+        for param in parameters:
+            label = param['label']
+
+            if specialOp:
+                if 'value' in param:
+                    value = param['value']
+                else:
+                    value = None
             else:
-                self.error(
-                    'Insufficient parameters. Expected Parameter: \'' + str(sigItem['label']) + '\'')
+                if label in self.parameters:
+                    value = self.parameters[label]
+                elif 'value' in param:
+                    value = param['value']
+                else:
+                    self.error(
+                        'Insufficient parameters. Expected Parameter: \'' + str(label) + '\'')
+                    return None
 
-            i += 1
+            self.setVariable(label=label, value=value, convert=False)
 
     # Visit a parse tree produced by AhParser#options_statement.
     def visitOptions_statement(self, ctx: AhParser.Options_statementContext):
-        self.options = self.visit(ctx.expr())
-        self.useOptions()
+        # name -> str
+        # help -> str
+        # summary -> str
+        # description -> str
+        # author -> str
+        # version -> str
+        # link -> str
+        # available -> bool
+        # enabled -> bool
+        # access -> list['apitax', 'roles']
+        self.options = self.visit(ctx.optional_parameters_block())
 
     # Visit a parse tree produced by AhParser#delete_statement.
     def visitDelete_statement(self, ctx: AhParser.Delete_statementContext):
@@ -1151,7 +1136,12 @@ class AhVisitor(AhVisitorOriginal):
         path = path.replace('.', '/') + '.ah'
 
         scriptax = driver.getDriverScript(path)
-        parser = self.parseScript(scriptax)[1]
+
+        parameters = {'import': None}
+        if ctx.optional_parameters_block():
+            parameters = self.visit(ctx.optional_parameters_block())
+        parser = self.parseScript(scriptax, parameters=parameters)[1]
+
         importTable: SymbolTable = parser.symbol_table
         importTable.resetTable()
         importTable.enterScope()  # SymbolTable()
@@ -1234,15 +1224,6 @@ class AhVisitor(AhVisitorOriginal):
             self.log.log("> Setting active auth credentials to user: " + credentials.username)
             self.log.log("")
 
-    # Visit a parse tree produced by AhParser#url.
-    def visitUrl(self, ctx: AhParser.UrlContext):
-        url = self.visit(ctx.expr())
-        self.data.storeUrl("current", url)
-
-        if (self.appOptions.debug):
-            self.log.log('> Setting URL: ' + url)
-            self.log.log('')
-
     # Visit a parse tree produced by AhParser#log.
     def visitLog(self, ctx: AhParser.LogContext):
         if ctx.expr():
@@ -1255,7 +1236,8 @@ class AhVisitor(AhVisitorOriginal):
 
     # Visit a parse tree produced by Ah3Parser#reflection.
     def visitReflection(self, ctx: AhParser.ReflectionContext):
-        return self.visitChildren(ctx)
+        symbol = self.getSymbol(label=ctx.labels())
+        return symbol.getSymbolDebug()
 
     # Visit a parse tree produced by AhParser#inject.
     def visitInject(self, ctx: AhParser.InjectContext):

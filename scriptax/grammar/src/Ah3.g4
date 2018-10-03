@@ -37,7 +37,6 @@ terminated :
         | assignment
         | log
         | auth
-        | url
       ) TERMINATOR ;
 
 non_terminated : 
@@ -124,7 +123,7 @@ commandtax :
         | PATCH 
         | DELETE 
         | COMMANDTAX 
-      ) LPAREN expr (COMMA atom_obj_dict)? (COMMA optional_parameter)* RPAREN ;
+      ) LPAREN expr (COMMA atom_obj_dict)? (COMMA optional_parameters_block)? RPAREN ;
 
 execute : commandtax callback? ;
 
@@ -140,7 +139,7 @@ label : LABEL ;
 
 attribute : API | SCRIPT ; 
 
-extends_statement : EXTENDS LPAREN label RPAREN ;
+extends_statement : EXTENDS LPAREN label (COMMA optional_parameters_block)? RPAREN ;
 
 sig_statement : SIG LPAREN sig_parameter_block RPAREN ;
 
@@ -156,7 +155,7 @@ login_statement : LOGIN LPAREN optional_parameters_block RPAREN ;
 
 endpoint_statement : ENDPOINT LPAREN expr RPAREN ; 
 
-import_statement : (FROM label)? IMPORT labels (AS label)? ;
+import_statement : (FROM label)? IMPORT labels (LPAREN optional_parameters_block RPAREN)? (AS label)? ;
 
 casting : 
       (
@@ -169,8 +168,6 @@ casting :
       ) LPAREN expr RPAREN ;
 
 auth : AUTH LPAREN expr RPAREN;
-
-url : URL LPAREN expr RPAREN;
 
 log : LOG LPAREN expr RPAREN ;
 

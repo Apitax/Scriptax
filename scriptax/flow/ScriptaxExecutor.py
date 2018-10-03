@@ -26,7 +26,7 @@ class Scriptax():
 
         scriptax = self.options.driver.getDriverScript(filepath)
 
-        result = customizableParser(scriptax, file=getPath(filepath))
+        result = customizableParser(scriptax, parameters=self.parameters, options=self.options, file=getPath(filepath))
 
         #      input = FileStream(filepath)
         # lexer = Ah3Lexer(input)
