@@ -219,8 +219,8 @@ class Ah3Visitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by Ah3Parser#login_statement.
-    def visitLogin_statement(self, ctx:Ah3Parser.Login_statementContext):
+    # Visit a parse tree produced by Ah3Parser#auth_statement.
+    def visitAuth_statement(self, ctx:Ah3Parser.Auth_statementContext):
         return self.visitChildren(ctx)
 
 
@@ -236,11 +236,6 @@ class Ah3Visitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by Ah3Parser#casting.
     def visitCasting(self, ctx:Ah3Parser.CastingContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by Ah3Parser#auth.
-    def visitAuth(self, ctx:Ah3Parser.AuthContext):
         return self.visitChildren(ctx)
 
 

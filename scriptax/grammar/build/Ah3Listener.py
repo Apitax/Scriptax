@@ -386,12 +386,12 @@ class Ah3Listener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by Ah3Parser#login_statement.
-    def enterLogin_statement(self, ctx:Ah3Parser.Login_statementContext):
+    # Enter a parse tree produced by Ah3Parser#auth_statement.
+    def enterAuth_statement(self, ctx:Ah3Parser.Auth_statementContext):
         pass
 
-    # Exit a parse tree produced by Ah3Parser#login_statement.
-    def exitLogin_statement(self, ctx:Ah3Parser.Login_statementContext):
+    # Exit a parse tree produced by Ah3Parser#auth_statement.
+    def exitAuth_statement(self, ctx:Ah3Parser.Auth_statementContext):
         pass
 
 
@@ -419,15 +419,6 @@ class Ah3Listener(ParseTreeListener):
 
     # Exit a parse tree produced by Ah3Parser#casting.
     def exitCasting(self, ctx:Ah3Parser.CastingContext):
-        pass
-
-
-    # Enter a parse tree produced by Ah3Parser#auth.
-    def enterAuth(self, ctx:Ah3Parser.AuthContext):
-        pass
-
-    # Exit a parse tree produced by Ah3Parser#auth.
-    def exitAuth(self, ctx:Ah3Parser.AuthContext):
         pass
 
 

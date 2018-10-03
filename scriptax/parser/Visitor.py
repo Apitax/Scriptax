@@ -14,6 +14,7 @@ from apitaxcore.models.Options import Options
 from apitaxcore.utilities.Async import GenericExecution
 from apitaxcore.utilities.Json import isJson
 from apitaxcore.flow.LoadedDrivers import LoadedDrivers
+from apitaxcore.flow.responses.ApitaxResponse import ApitaxResponse
 
 import json
 import re
@@ -49,14 +50,7 @@ import traceback
 # vTODO: Implement reflection according to GitHub issue
 # TODO: Pull code out of newInstance and extends to another method
 # vTODO: Support sig polymorphism for extends
-# TODO: DeleteVar
-# TODO: url statement
-# TODO: login statement
 # TODO: Async, Await
-# TODO: Callbacks
-# TODO for, foreach
-# TODO: Commandtax
-
 
 class AhVisitor(AhVisitorOriginal):
 
@@ -111,50 +105,44 @@ class AhVisitor(AhVisitorOriginal):
         return result
 
     def setState(self, file='', line=-1, char=-1):
-        if (file != ''):
+        if file != '':
             self.state['file'] = file
-        if (line != -1):
+        if line != -1:
             self.state['line'] = line
-        if (char != -1):
+        if char != -1:
             self.state['char'] = char
 
-    # TODO: Redo, this is garbage
-    def executeCommand(self, command: Command):
-        from apitaxcore.flow.Connector import Connector
-        if (self.appOptions.debug):
-            self.log.log('> Executing Commandtax: \'' + resolvedCommand['command'] + '\' ' + 'with parameters: ' + str(
-                resolvedCommand['parameters']), logPrefix)
+    def executeCommand(self, command: Command) -> ApitaxResponse:
+        from commandtax.flow.Connector import Connector
+        if self.appOptions.debug:
+            self.log.log('> Executing Commandtax: \'' + " ".join(command.command) + '\' ' + 'with parameters: ' + str(
+                command.parameters))
             self.log.log('')
 
-        credentials = None
-        if (resolvedCommand['auth']):
-            credentials = Credentials(username=resolvedCommand['auth'].username, password=resolvedCommand.password,
-                                      token=resolvedCommand.token)
-        else:
-            credentials = self.credentials
+        if not command.credentials:
+            command.credentials = self.credentials
 
-        connector = Connector(options=Options(debug=self.appOptions.debug, sensitive=self.appOptions.sensitive,
-                                              driver=resolvedCommand['driver']),
-                              credentials=credentials,
-                              command=resolvedCommand['command'], parameters=resolvedCommand['parameters'])
-        commandHandler = connector.execute()
+        if not command.options:
+            command.options = self.options
 
-        if (hasattr(commandHandler.getRequest(), 'parser')):
-            if (commandHandler.getRequest().parser.isError()):
-                self.error('Subscript contains error: ' + commandHandler.getRequest().parser.isError()['message'],
-                           logPrefix)
+        connector = Connector(options=command.options, credentials=command.credentials,
+                              command=" ".join(command.command), parameters=command.parameters, request=command.request)
+        return connector.execute()
 
-        if (resolvedCommand['strict'] and commandHandler.getRequest().getResponseStatusCode() >= 300):
-            self.error('Request returned non-success status code while in strict mode. Request returned: Status ' +
-                       str(
-                           commandHandler.getRequest().getResponseStatusCode()) + ' ' + commandHandler.getRequest().getResponseBody(),
-                       logPrefix)
+    def executeCallback(self, callback=None, response: ApitaxResponse = None, result=None):
+        from scriptax.parser.utils.BoilerPlate import customizableContextParser
+        table = SymbolTable()
+        if not result:
+            result = response.getResponseBody()
+        elif response:
+            result = {'result': result, 'response': response}
 
-        returnResult = commandHandler.getReturnedData()
-        if ('callback' in resolvedCommand):
-            returnResult = self.executeIsolatedCallback(resolvedCommand['callback'], returnResult, logPrefix)
-
-        return dict({"command": resolvedCommand['command'], "commandHandler": commandHandler, "result": returnResult})
+        table.putSymbol(Symbol(name='result', symbolType=SYMBOL_VARIABLE, value=result))
+        for key, value in callback['params'].items():
+            table.putSymbol(Symbol(name=key, symbolType=SYMBOL_VARIABLE, value=value))
+        # Returns the value found in any return statement within the callback.
+        # If no return statement is in the callback this will be None
+        return customizableContextParser(context=callback['block'], symbol_table=table, options=self.appOptions)[0][1]
 
     def setVariable(self, label, value=None, convert=True):
         return self.setSymbol(label, value=value, convert=convert)
@@ -180,7 +168,8 @@ class AhVisitor(AhVisitorOriginal):
 
         # components will be at least 2
         # use cases:
-        # 1. instance navigation via composition:    parent.someInstance.someInstanceOnThatOne.path=  (len=3), someInstance.path=  (len=2)
+        # 1. instance navigation via composition:
+        #   parent.someInstance.someInstanceOnThatOne.path=  (len=3), someInstance.path=  (len=2)
         # 2. instance setting:  someInstance = new Instance();
         try:
             while len(components) > i + 1:
@@ -221,6 +210,16 @@ class AhVisitor(AhVisitorOriginal):
             traceback.print_exc()
             self.error(message="Symbol `" + label + "` is corrupt and not settable.")
             return False
+
+    def getVariable(self, label=None, convert=True):
+        # return self.getSymbol(label=label, convert=convert).value
+        if convert:
+            label = self.visit(label)
+        try:
+            return self.getSymbol(label, False).value
+        except:
+            self.error(message="Symbol `" + label + "` not found in scope `" + self.symbol_table.current.name + "`")
+            return None
 
     # TODO: Repurpose to utilize symbol table
     def getSymbol(self, label, convert=True, symbolType=SYMBOL_VARIABLE):
@@ -275,15 +274,72 @@ class AhVisitor(AhVisitorOriginal):
             self.error(message="Symbol `" + label + "` not found in scope.")
             return None
 
-    def getVariable(self, label=None, convert=True):
-        # return self.getSymbol(label=label, convert=convert).value
+    def deleteVariable(self, label, convert=True):
+        return self.deleteSymbol(label, convert=convert)
+
+    def deleteSymbol(self, label, convert=True, symbolType=SYMBOL_VARIABLE):
         if convert:
             label = self.visit(label)
+        label = label.replace('$', '')
+        node, name, i = self.symbol_table.traverseToParent(label)
+        components = label.split('.')[i:]
+
+        table = createTableFromScope(node)
+
+        # Direct referencing - ie. parent.path=, parent.parent.path=, path=
+        if len(components) == 1:
+            table.deleteSymbol(name=components[0], symbolType=SYMBOL_VARIABLE)
+            return True
+
+        symbol, i = table.getSymbolWithLength(components[0], symbolType=SYMBOL_VARIABLE)
+
+        if symbol:
+            i += 1
+
+        # components will be at least 2
+        # use cases:
+        # 1. instance navigation via composition:
+        #   parent.someInstance.someInstanceOnThatOne.path=  (len=3), someInstance.path=  (len=2)
+        # 2. instance setting:  someInstance = new Instance();
         try:
-            return self.getSymbol(label, False).value
+            while len(components) > i + 1:
+                if symbol.dataType == DATA_INSTANCE:
+                    table = createTableFromScope(symbol.value)
+                    symbol, j = table.getSymbolWithLength(name=components[i], symbolType=SYMBOL_VARIABLE)
+                elif symbol.dataType == DATA_DICT:
+                    symbol = symbol.value[str(components[i])]
+                    if not isinstance(symbol, Symbol):
+                        symbol = Symbol(symbolType=SYMBOL_VARIABLE, value=symbol)
+                elif symbol.dataType == DATA_LIST:
+                    symbol = symbol.value[int(components[i])]
+                    if not isinstance(symbol, Symbol):
+                        symbol = Symbol(symbolType=SYMBOL_VARIABLE, value=symbol)
+                elif symbol.dataType == DATA_THREAD:
+                    return False
+                elif symbol.dataType == DATA_PYTHONIC:
+                    return False
+                else:
+                    # print(symbol.dataType)
+                    self.error(message="Symbol `" + label + "` is corrupt and not settable.")
+                    return False
+                i += 1
+
+            final = components.pop()
+            if symbol.dataType == DATA_INSTANCE:
+                table = createTableFromScope(symbol.value)
+                table.deleteSymbol(name=final, symbolType=SYMBOL_VARIABLE)
+            elif symbol.dataType == DATA_DICT:
+                symbol.value.pop(str(final))
+            elif symbol.dataType == DATA_LIST:
+                del symbol.value[int(final)]
+            else:
+                table.deleteSymbol(name=final, symbolType=SYMBOL_VARIABLE)
+            return True
         except:
-            self.error(message="Symbol `" + label + "` not found in scope `" + self.symbol_table.current.name + "`")
-            return None
+            print("Exception during variable setting")
+            traceback.print_exc()
+            self.error(message="Symbol `" + label + "` is corrupt and not settable.")
+            return False
 
     # Dynamic mustache syntax injection
     def inject(self, line):
@@ -293,19 +349,6 @@ class AhVisitor(AhVisitorOriginal):
             replacer = self.getVariable(label, convert=False)
             line = line.replace(match, replacer)
         return line
-
-    # TODO: Repurpose to use symbol table
-    # TODO: Repurpose to execute a block context generically
-    def executeCallback(self, callback, resultScope, logPrefix=''):
-        visitor = AhVisitor(options=Options(debug=self.appOptions.debug, sensitive=self.appOptions.sensitive))
-        visitor.setState(file=self.state['file'])
-        visitor.log.prefix = logPrefix
-        visitor.data.storeVar('result', resultScope)
-        for key, value in callback['params'].items():
-            visitor.data.storeVar(key, value)
-        block = callback['block']
-        callbackResult = visitor.visit(block)
-        return visitor.data.getVar('result')
 
     # TODO: Find a way to incorporate this into a parser status field
     # Sets the program into error mode
@@ -342,12 +385,11 @@ class AhVisitor(AhVisitorOriginal):
         self.parser = ctx.parser
         result = self.visit(ctx.script_structure())
 
-        if (self.isError()):
-            error = self.isError()
+        if self.isError():
             self.log.error(
                 self.message + ' in ' + str(self.state['file']) + ' @' + str(self.state['line']) + ':' + str(
                     self.state['char']))
-            if (self.appOptions.debug):
+            if self.appOptions.debug:
                 self.log.log('')
                 self.log.log('')
         self.symbol_table.exitScope()
@@ -386,8 +428,8 @@ class AhVisitor(AhVisitorOriginal):
         sensitiveTemp = self.appOptions.sensitive
 
         line = ctx.getText().strip()
-        if (line != "" and self.appOptions.debug):
-            if (ctx.NOT()):
+        if line != "" and self.appOptions.debug:
+            if ctx.NOT():
                 self.log.log(
                     '> Now processing: (This lines contents has been hidden via the \'!\' operator. This is usually done to hide sensitive information)')
                 self.log.log('')
@@ -405,12 +447,12 @@ class AhVisitor(AhVisitorOriginal):
         else:
             temp = self.visit(ctx.non_terminated())
 
-        if (line != "" and self.appOptions.debug):
+        if line != "" and self.appOptions.debug:
             self.log.log('')
 
         self.setState(line=ctx.start.line)  # TODO: Try to add character here as well
 
-        if (ctx.NOT() and line != "" and debugTemp):
+        if ctx.NOT() and line != "" and debugTemp:
             self.log.log('> Setting debug and sensitive back to their original values')
             self.log.log('')
             self.log.log('')
@@ -422,8 +464,8 @@ class AhVisitor(AhVisitorOriginal):
     # Visit a parse tree produced by AhParser#terminated.
     def visitTerminated(self, ctx: AhParser.TerminatedContext) -> tuple:
         if ctx.return_statement():
-            return (True, self.visit(ctx.return_statement()))
-        return (False, self.visitChildren(ctx))
+            return True, self.visit(ctx.return_statement())
+        return False, self.visitChildren(ctx)
 
     # Visit a parse tree produced by AhParser#non_terminated.
     def visitNon_terminated(self, ctx: AhParser.Non_terminatedContext) -> tuple:
@@ -432,9 +474,9 @@ class AhVisitor(AhVisitorOriginal):
 
     # Visit a parse tree produced by AhParser#executers.
     def visitExecute_statement(self, ctx: AhParser.Execute_statementContext):
-        if (ctx.execute()):
+        if ctx.execute():
             return self.visit(ctx.execute())
-        if (ctx.async_execute()):
+        if ctx.async_execute():
             thread = self.visit(ctx.async_execute())
             thread.start()
             return thread
@@ -442,71 +484,71 @@ class AhVisitor(AhVisitorOriginal):
     # Visit a parse tree produced by AhParser#expr.
     def visitExpr(self, ctx):
 
-        if (ctx.reflection()):
+        if ctx.reflection():
             return self.visit(ctx.reflection())
 
-        if (ctx.create_instance()):
+        if ctx.create_instance():
             return self.visit(ctx.create_instance())
 
-        if (ctx.method_call()):
+        if ctx.method_call():
             return self.visit(ctx.method_call())[0][1]
 
-        if (ctx.execute()):
+        if ctx.execute():
             return self.visit(ctx.execute())['result']
 
-        if (ctx.async_execute()):
+        if ctx.async_execute():
             return self.visit(ctx.async_execute())
 
-        if (ctx.atom()):
+        if ctx.atom():
             return self.visit(ctx.atom())
 
-        if (ctx.casting()):
+        if ctx.casting():
             return self.visit(ctx.casting())
 
-        if (ctx.login_statement()):
-            return self.visit(ctx.login_statement())
+        if ctx.auth_statement():
+            return self.visit(ctx.auth_statement())
 
-        if (ctx.endpoint_statement()):
+        if ctx.endpoint_statement():
             return self.visit(ctx.endpoint_statement())
 
-        if (ctx.count()):
+        if ctx.count():
             return self.visit(ctx.count())
 
-        if (ctx.labels()):
+        if ctx.labels():
             return self.getVariable(ctx.labels())
 
-        if (ctx.inject()):
+        if ctx.inject():
             return self.visit(ctx.inject())
 
-        if (ctx.MINUS() and not ctx.expr(1)):
+        if ctx.MINUS() and not ctx.expr(1):
             return self.visit(ctx.expr(0)) * -1
 
-        if (ctx.NOT()):
+        if ctx.NOT():
             return not self.visit(ctx.expr(0))
 
         try:
-            if (ctx.AND()):
+            if ctx.AND():
                 return self.visit(ctx.expr(0)) and self.visit(ctx.expr(1))
 
-            if (ctx.OR()):
+            if ctx.OR():
                 return self.visit(ctx.expr(0)) or self.visit(ctx.expr(1))
 
-            if (ctx.EQ()):
+            if ctx.EQ():
                 return self.visit(ctx.expr(0)) == self.visit(ctx.expr(1))
 
-            if (ctx.NEQ()):
+            if ctx.NEQ():
                 return self.visit(ctx.expr(0)) != self.visit(ctx.expr(1))
 
-            if (ctx.GE()):
+            if ctx.GE():
                 return self.visit(ctx.expr(0)) >= self.visit(ctx.expr(1))
 
-            if (ctx.LE()):
+            if ctx.LE():
                 return self.visit(ctx.expr(0)) <= self.visit(ctx.expr(1))
 
-            if (ctx.GT()):
+            if ctx.GT():
                 return self.visit(ctx.expr(0)) > self.visit(ctx.expr(1))
 
-            if (ctx.LT()):
+            if ctx.LT():
                 return self.visit(ctx.expr(0)) < self.visit(ctx.expr(1))
         except:
             stacktrace = traceback.format_exc(limit=0)
@@ -515,31 +557,31 @@ class AhVisitor(AhVisitorOriginal):
                                                                                                                   '').replace(
                 '\n', ''))
 
-        if (ctx.LPAREN()):
+        if ctx.LPAREN():
             return self.visit(ctx.expr(0))
 
-        if (ctx.POW()):
+        if ctx.POW():
             return self.visit(ctx.expr(0)) ** self.visit(ctx.expr(1))
 
-        if (ctx.PLUS()):
+        if ctx.PLUS():
             left = self.visit(ctx.expr(0))
             right = self.visit(ctx.expr(1))
-            if ((isinstance(left, str) and not isinstance(right, str)) or (
-                    isinstance(right, str) and not isinstance(left, str))):
+            if (isinstance(left, str) and not isinstance(right, str)) or (
+                    isinstance(right, str) and not isinstance(left, str)):
                 left = str(left)
                 right = str(right)
-                if (self.appOptions.debug):
+                if self.appOptions.debug:
                     self.log.log('> Implicit cast to string: \'' + left + '\' + \'' + right + '\'')
                     self.log.log('')
             return left + right
 
-        if (ctx.MINUS()):
+        if ctx.MINUS():
             return self.visit(ctx.expr(0)) - self.visit(ctx.expr(1))
 
-        if (ctx.MUL()):
+        if ctx.MUL():
             return self.visit(ctx.expr(0)) * self.visit(ctx.expr(1))
 
-        if (ctx.DIV()):
+        if ctx.DIV():
             return self.visit(ctx.expr(0)) / self.visit(ctx.expr(1))
 
         return self.visitChildren(ctx)
@@ -549,51 +591,44 @@ class AhVisitor(AhVisitorOriginal):
         label = self.visit(ctx.labels())
         value = None
 
-        if (ctx.expr()):
+        if ctx.expr():
             value = self.visit(ctx.expr())
 
-        if (not ctx.EQUAL()):
-            # TODO: Double check that this still works
+        if not ctx.EQUAL():
             var = self.getVariable(label=label, convert=False)
-            # var = self.data.getVar(label)
-            if (ctx.D_PLUS()):
+            if ctx.D_PLUS():
                 value = var + 1
-            elif (ctx.D_MINUS()):
+            elif ctx.D_MINUS():
                 value = var - 1
             else:
-                if (ctx.PE()):
+                if ctx.PE():
                     value = var + value
-                elif (ctx.ME()):
+                elif ctx.ME():
                     value = var - value
-                elif (ctx.MUE()):
+                elif ctx.MUE():
                     value = var * value
-                elif (ctx.DE()):
+                elif ctx.DE():
                     value = var / value
 
-        if (ctx.SOPEN()):
+        if ctx.SOPEN():
             var = self.getVariable(label=label, convert=False)
-            if (not isinstance(var, list)):
+            if not isinstance(var, list):
                 self.error("Appending to a list requires the variable being a list")
                 return
             var.append(value)
             tval = value
             value = var
-            # TODO: Double check that this still works
-            # self.symbol_table.putSymbol(symbol=Symbol(name=label, symbolType=SYMBOL_VARIABLE, value=value))
             self.setVariable(label=label, value=value, convert=False)
-            if (isinstance(tval, threading.Thread)):
+            if isinstance(tval, threading.Thread):
                 tval.label = label + "." + str(len(value) - 1)
                 tval.start()
         else:
-            # self.symbol_table.putSymbol(symbol=Symbol(name=label, symbolType=SYMBOL_VARIABLE, value=value))
             self.setVariable(label=label, value=value, convert=False)
-            if (isinstance(value, threading.Thread)):
+            if isinstance(value, threading.Thread):
                 value.label = label
                 value.start()
 
-        if (self.appOptions.debug):
-            # print('here')
-            # symbol = self.getSymbol(label=label, convert=False) # TODO: Does not work well for DATA_INSTANCE types
+        if self.appOptions.debug:
             self.log.log('> Assigning Variable: ' + label + ' = ' + str(
                 value))
             self.log.log('')
@@ -707,8 +742,8 @@ class AhVisitor(AhVisitorOriginal):
     def visitIf_statement(self, ctx: AhParser.If_statementContext) -> tuple:
         i = 0
         while True:
-            if (ctx.condition(i) is None):
-                if (ctx.ELSE()):
+            if ctx.condition(i) is None:
+                if ctx.ELSE():
                     return self.visit(ctx.block(i))
                 else:
                     return False, None
@@ -720,51 +755,55 @@ class AhVisitor(AhVisitorOriginal):
 
     # Visit a parse tree produced by AhParser#while_statement.
     def visitWhile_statement(self, ctx: AhParser.While_statementContext) -> tuple:
-        while (self.visit(ctx.condition())):
+        while self.visit(ctx.condition()):
             result = self.visit(ctx.block())
             if result[0]:
                 return result
         return False, None
 
     # Visit a parse tree produced by AhParser#for_statement.
-    # TODO: Implement code to stop looping on return and return the tuples
     def visitFor_statement(self, ctx: AhParser.For_statementContext) -> tuple:
         clause = self.visit(ctx.expr())
         label = self.visit(ctx.labels())
 
-        if (isinstance(clause, str) and isJson(clause)):
+        if isinstance(clause, str) and isJson(clause):
             clause = json.loads(clause)
 
-        if (isinstance(clause, list)):
-            if (self.appOptions.debug):
+        if isinstance(clause, list):
+            if self.appOptions.debug:
                 self.log.log('> Looping through list with var ' + label)
                 self.log.log('')
             for item in clause:
-                if (self.appOptions.debug):
+                if self.appOptions.debug:
                     self.log.log('>> Assigning ' + label + ' = ' + str(item))
                     self.log.log('')
                     self.log.log('')
-                self.data.storeVar(label, item)
-                self.visit(ctx.block())
-            self.data.deleteVar(label)
+                self.setVariable(label=label, value=item, convert=False)
+                result = self.visit(ctx.block())
+                if result[0]:
+                    return result
+            self.deleteVariable(label=label, convert=False)
 
-        elif (isinstance(clause, float) or isinstance(clause, int)):
-            if (self.appOptions.debug):
+        elif isinstance(clause, float) or isinstance(clause, int):
+            if self.appOptions.debug:
                 self.log.log('> Looping through range with var ' + label)
                 self.log.log('')
             for i in range(0, int(clause)):
-                if (self.appOptions.debug):
+                if self.appOptions.debug:
                     self.log.log('>> Assigning ' + label + ' = ' + str(i))
                     self.log.log('')
                     self.log.log('')
-                self.data.storeVar(label, i)
-                self.visit(ctx.block())
-            self.data.deleteVar(label)
+                self.setVariable(label=label, value=i, convert=False)
+                result = self.visit(ctx.block())
+                if result[0]:
+                    return result
+            self.deleteVariable(label=label, convert=False)
 
         else:
-            if (self.appOptions.debug):
+            if self.appOptions.debug:
                 self.error('Invalid Loop Type: ' + str(type(clause)))
                 self.log.log('')
+        return False, None
 
     # Visit a parse tree produced by AhParser#each_statement.
     def visitEach_statement(self, ctx: AhParser.Each_statementContext):
@@ -774,16 +813,16 @@ class AhVisitor(AhVisitorOriginal):
             clause = json.loads(clause)
 
         if (isinstance(clause, list)):
-            if (self.appOptions.debug):
+            if self.appOptions.debug:
                 self.log.log('> Looping through result')
                 self.log.log('')
             callback = self.visit(ctx.callback())
             for item in clause:
-                if (self.appOptions.debug):
+                if self.appOptions.debug:
                     self.log.log('>> Assigning result = ' + str(item))
                     self.log.log('')
                     self.log.log('')
-                self.executeIsolatedCallback(callback, item)
+                self.executeCallback(callback=callback, result=item)
         else:
             self.error("An each loop must be passed a list")
 
@@ -791,7 +830,7 @@ class AhVisitor(AhVisitorOriginal):
     def visitCondition(self, ctx: AhParser.ConditionContext):
         condition = self.visit(ctx.expr())
 
-        if (self.appOptions.debug):
+        if self.appOptions.debug:
             self.log.log('>> Evaluated Flow Condition as: ' + str(condition))
             self.log.log('')
 
@@ -812,20 +851,19 @@ class AhVisitor(AhVisitorOriginal):
     # Visit a parse tree produced by AhParser#callback.
     def visitCallback(self, ctx: AhParser.CallbackContext):
         parameters = {}
-        if (ctx.optional_parameters_block()):
+        if ctx.optional_parameters_block():
             parameters = self.visit(ctx.optional_parameters_block())
         return {"params": parameters, "block": ctx.callback_block()}
 
     # Visit a parse tree produced by AhParser#callback_block.
     def visitCallback_block(self, ctx: AhParser.Callback_blockContext):
-        temp = self.visitChildren(ctx)
-        return temp
+        return self.visit(ctx.statements())
 
     # Visit a parse tree produced by AhParser#optional_parameters_block.
     def visitOptional_parameters_block(self, ctx: AhParser.Optional_parameters_blockContext) -> dict:
         i = 0
         parameters = {}
-        while (ctx.optional_parameter(i)):
+        while ctx.optional_parameter(i):
             opParam = self.visit(ctx.optional_parameter(i))
             parameters[opParam['label']] = opParam['value']
             i += 1
@@ -835,7 +873,7 @@ class AhVisitor(AhVisitorOriginal):
     def visitSig_parameter_block(self, ctx: AhParser.Sig_parameter_blockContext) -> list:
         i = 0
         parameters = []
-        while (ctx.sig_parameter(i)):
+        while ctx.sig_parameter(i):
             opParam = self.visit(ctx.sig_parameter(i))
             param = {"label": opParam['label']}
             if 'value' in opParam:
@@ -846,14 +884,14 @@ class AhVisitor(AhVisitorOriginal):
 
     # Visit a parse tree produced by AhParser#sig_parameter.
     def visitSig_parameter(self, ctx: AhParser.Sig_parameterContext):
-        if (ctx.labels()):
+        if ctx.labels():
             return {"label": self.visit(ctx.labels())}
         else:
             return self.visit(ctx.optional_parameter())
 
     # Visit a parse tree produced by AhParser#call_parameter.
     def visitCall_parameter(self, ctx: AhParser.Call_parameterContext):
-        if (ctx.expr()):
+        if ctx.expr():
             return {"value": self.visit(ctx.expr())}
         else:
             return self.visit(ctx.optional_parameter())
@@ -869,39 +907,38 @@ class AhVisitor(AhVisitorOriginal):
         strict = True
         credentials = None
 
-        if (not ctx.COMMANDTAX()):
+        if not ctx.COMMANDTAX():
             command += "api"
-            if (ctx.GET()):
+            if ctx.GET():
                 command += " --get"
-            if (ctx.POST()):
+            if ctx.POST():
                 command += " --post"
-            if (ctx.PUT()):
+            if ctx.PUT():
                 command += " --put"
-            if (ctx.PATCH()):
+            if ctx.PATCH():
                 command += " --patch"
-            if (ctx.DELETE()):
+            if ctx.DELETE():
                 command += " --delete"
-            command += " --url " + self.data.getUrl("current") + firstArg
+            command += " --url " + firstArg
 
-        elif (ctx.COMMANDTAX()):
+        elif ctx.COMMANDTAX():
             command = firstArg
 
-        if (ctx.atom_obj_dict()):
+        if ctx.atom_obj_dict():
             dataArg = self.visit(ctx.atom_obj_dict())
-            if ('post' in dataArg):
+            if 'post' in dataArg:
                 command += " --data-post '" + json.dumps(dataArg['post']) + "'"
-            if ('query' in dataArg):
+            if 'query' in dataArg:
                 command += " --data-query '" + json.dumps(dataArg['query']) + "'"
-            if ('path' in dataArg):
+            if 'path' in dataArg:
                 command += " --data-path '" + json.dumps(dataArg['path']) + "'"
-            if ('header' in dataArg):
+            if 'header' in dataArg:
                 command += " --data-header '" + json.dumps(dataArg['header']) + "'"
-            if ('driver' in dataArg):
+            if 'driver' in dataArg:
                 command += " --apitax-driver " + dataArg['driver']
-                driver = dataArg['driver']
-            if ('strict' in dataArg):
+            if 'strict' in dataArg:
                 strict = bool(dataArg['strict'])
-            if ('auth' in dataArg):
+            if 'auth' in dataArg:
                 credentials = dataArg['auth']
 
         parameters = {}
@@ -913,14 +950,31 @@ class AhVisitor(AhVisitorOriginal):
     # Visit a parse tree produced by AhParser#execute.
     def visitExecute(self, ctx):
         resolvedCommand = self.visit(ctx.commandtax())
-        if (ctx.callback()):
-            resolvedCommand['callback'] = self.visit(ctx.callback())
-        return self.executeCommand(resolvedCommand)
+        strict = resolvedCommand['strict']
+
+        command = Command(command=resolvedCommand['command'], parameters=resolvedCommand['parameters'],
+                          credentials=resolvedCommand['credentials'])
+
+        response: ApitaxResponse = self.executeCommand(command)
+
+        if strict and not response.isStatusSuccess():
+            self.error('Request returned non-success status code while in strict mode. Request returned: Status ' +
+                       str(
+                           response.getResponseStatusCode()) + ' ' + str(response.getResponseBody()))
+            return None
+
+        result = response.getResponseBody()
+
+        if ctx.callback():
+            callback = self.visit(ctx.callback())
+            result = self.executeCallback(callback=callback, response=response)
+
+        return dict({"command": command, "commandHandler": response, "result": result})
 
     # Visit a parse tree produced by AhParser#async_execute.
     def visitAsync_execute(self, ctx: AhParser.Async_executeContext):
         resolvedCommand = self.visit(ctx.commandtax())
-        if (ctx.callback()):
+        if ctx.callback():
             resolvedCommand['callback'] = self.visit(ctx.callback())
         thread = GenericExecution(self, "Async execution and callback", resolvedCommand, log=self.log,
                                   debug=self.appOptions.debug, sensitive=self.appOptions.sensitive)
@@ -929,16 +983,16 @@ class AhVisitor(AhVisitorOriginal):
 
     # Visit a parse tree produced by AhParser#await.
     def await_statement(self):
-        if (not ctx.labels()):
+        if not ctx.labels():
             for thread in self.threads:
                 thread.join()
             return
         threads = self.getVariable(ctx.labels())
-        if (isinstance(threads, list)):
+        if isinstance(threads, list):
             for thread in threads:
-                if (isinstance(thread, threading.Thread)):
+                if isinstance(thread, threading.Thread):
                     thread.join()
-        elif (isinstance(threads, threading.Thread)):
+        elif isinstance(threads, threading.Thread):
             threads.join()
 
     # Visit a parse tree produced by AhParser#labels.
@@ -946,7 +1000,7 @@ class AhVisitor(AhVisitorOriginal):
 
         label = [self.visit(ctx.label_comp(0))]
         i = 0
-        while (ctx.DOT(i)):
+        while ctx.DOT(i):
             label.append(str(self.visit(ctx.label_comp(i + 1))))
             i += 1
 
@@ -956,7 +1010,7 @@ class AhVisitor(AhVisitorOriginal):
 
     # Visit a parse tree produced by AhParser#label_comp.
     def visitLabel_comp(self, ctx: AhParser.Label_compContext):
-        if (ctx.label()):
+        if ctx.label():
             return self.visit(ctx.label())
         else:
             return self.visit(ctx.inject())
@@ -1040,25 +1094,25 @@ class AhVisitor(AhVisitorOriginal):
     # Visit a parse tree produced by AhParser#delete_statement.
     def visitDelete_statement(self, ctx: AhParser.Delete_statementContext):
         label = self.visit(ctx.labels())
-        self.data.deleteVar(label)
-        if (self.appOptions.debug):
+        self.deleteVariable(label=label, convert=False)
+        if self.appOptions.debug:
             self.log.log('> Deleteing variable: ' + label)
             self.log.log('')
 
     # Visit a parse tree produced by AhParser#error_statement.
     def visitError_statement(self, ctx: AhParser.Error_statementContext):
         message = "No error message was specified"
-        if (ctx.expr()):
+        if ctx.expr():
             message = self.visit(ctx.expr())
         self.error(message)
 
     # Visit a parse tree produced by AhParser#return_statement.
     def visitReturn_statement(self, ctx: AhParser.Return_statementContext):
         exportation = None
-        if (ctx.expr()):
+        if ctx.expr():
             exportation = self.visit(ctx.expr())
 
-        if (self.appOptions.debug):
+        if self.appOptions.debug:
             if exportation:
                 self.log.log('> Returning with value: ' + str(exportation))
             else:
@@ -1067,34 +1121,30 @@ class AhVisitor(AhVisitorOriginal):
 
         return exportation
 
-    # Visit a parse tree produced by AhParser#login_statement.
-    def visitLogin_statement(self, ctx: AhParser.Login_statementContext):
-        from apitaxcore.flow.Connector import Connector
-
+    # Visit a parse tree produced by Ah3Parser#auth_statement.
+    def visitAuth_statement(self, ctx: Ah3Parser.Auth_statementContext):
         parameters = self.visit(ctx.optional_parameters_block())
 
-        driver = self.appOptions.driver
         extra = {}
+        username = None
+        password = None
+        token = None
 
-        if ('driver' in parameters):
-            driver = parameters['driver']
-
-        if ('extra' in parameters):
+        if 'extra' in parameters:
             extra = parameters['extra']
 
-        if ('username' in parameters and 'password' in parameters):
-            if (self.appOptions.debug):
-                self.log.log("> Logging into API with username and password.")
-                self.log.log("")
-            connector = Connector(options=Options(debug=self.appOptions.debug, sensitive=True, driver=driver),
-                                  credentials=Credentials(username=parameters['username'],
-                                                          password=parameters['password'], extra=extra))
-            return connector.credentials
-        elif ('token' in parameters):
-            return Credentials(token=parameters['token'])
-        else:
-            self.error('Must pass a `username` and `password` or a `token` for authentication')
-            return None
+        if 'username' in parameters:
+            username = parameters['username']
+
+        if 'password' in parameters:
+            password = parameters['password']
+
+        if 'token' in parameters:
+            token = parameters['token']
+
+        credentials = Credentials(username=username, password=password, token=token, extra=extra)
+
+        return credentials
 
     # Visit a parse tree produced by AhParser#endpoint_statement.
     def visitEndpoint_statement(self, ctx: AhParser.Endpoint_statementContext):
@@ -1105,12 +1155,12 @@ class AhVisitor(AhVisitorOriginal):
             driver = LoadedDrivers.getDriver(name[1])
             name = name[0]
         except:
-            if (self.appOptions.driver):
+            if self.appOptions.driver:
                 driver = LoadedDrivers.getDriver(self.appOptions.driver)
             else:
                 driver = LoadedDrivers.getDefaultDriver()
         endpoints = driver.getEndpointCatalog()['endpoints']
-        if (name in endpoints):
+        if name in endpoints:
             return endpoints[name]['value']
         else:
             self.error("The endpoint requested does not exist")
@@ -1160,69 +1210,61 @@ class AhVisitor(AhVisitorOriginal):
     def visitCasting(self, ctx: AhParser.CastingContext):
         value = self.visit(ctx.expr())
         returner = None
-        if (ctx.TYPE_INT()):
+        if ctx.TYPE_INT():
             returner = int(value)
-            if (self.appOptions.debug):
+            if self.appOptions.debug:
                 self.log.log('> Explicitly Casting \'' + str(value) + '\' to int: ' + json.dumps(returner))
                 self.log.log('')
             return returner
 
-        if (ctx.TYPE_DEC()):
+        if ctx.TYPE_DEC():
             returner = float(value)
-            if (self.appOptions.debug):
+            if self.appOptions.debug:
                 self.log.log('> Explicitly Casting \'' + str(value) + '\' to number: ' + json.dumps(returner))
                 self.log.log('')
             return returner
 
-        if (ctx.TYPE_BOOL()):
+        if ctx.TYPE_BOOL():
             returner = bool(value)
-            if (self.appOptions.debug):
+            if self.appOptions.debug:
                 self.log.log('> Explicitly Casting \'' + str(value) + '\' to boolean: ' + json.dumps(returner))
                 self.log.log('')
             return returner
 
-        if (ctx.TYPE_STR()):
+        if ctx.TYPE_STR():
             returner = str(value)
-            if (self.appOptions.debug):
+            if self.appOptions.debug:
                 self.log.log('> Explicitly Casting \'' + str(value) + '\' to string: ' + json.dumps(returner))
                 self.log.log('')
             return returner
 
-        if (ctx.TYPE_LIST()):
+        if ctx.TYPE_LIST():
             returner = list(str(value).split(","))
-            if (self.appOptions.debug):
+            if self.appOptions.debug:
                 self.log.log('> Explicitly Casting \'' + str(value) + '\' to list: ' + json.dumps(returner))
                 self.log.log('')
             return returner
 
-        if (ctx.TYPE_DICT()):
-            if (isinstance(value, dict)):
+        if ctx.TYPE_DICT():
+            if isinstance(value, dict):
                 returner = value
-            elif (isinstance(value, list)):
+            elif isinstance(value, list):
                 count = 0
                 newdict = {}
                 for i in value:
                     newdict.update({str(count): i})
                     count += 1
                 returner = dict(newdict)
-            elif (isinstance(value, str) and isJson(value)):
+            elif isinstance(value, str) and isJson(value):
                 returner = dict(json.loads(str(value)))
             else:
                 returner = dict({"default": value})
 
-            if (self.appOptions.debug):
+            if self.appOptions.debug:
                 self.log.log('> Explicitly Casting \'' + str(value) + '\' to dictionary: ' + json.dumps(returner))
                 self.log.log('')
 
         return returner
-
-    # Visit a parse tree produced by AhParser#auth.
-    def visitAuth(self, ctx: AhParser.AuthContext):
-        credentials = self.visit(ctx.expr())
-        self.credentials = credentials
-        if (self.appOptions.debug):
-            self.log.log("> Setting active auth credentials to user: " + credentials.username)
-            self.log.log("")
 
     # Visit a parse tree produced by AhParser#log.
     def visitLog(self, ctx: AhParser.LogContext):
@@ -1242,7 +1284,7 @@ class AhVisitor(AhVisitorOriginal):
     # Visit a parse tree produced by AhParser#inject.
     def visitInject(self, ctx: AhParser.InjectContext):
         returner = self.visit(ctx.expr())
-        if (self.appOptions.debug):
+        if self.appOptions.debug:
             self.log.log('> Injecting into: ' + ctx.getText() + ' with the value ' + str(returner))
             self.log.log('')
         return returner
@@ -1250,34 +1292,34 @@ class AhVisitor(AhVisitorOriginal):
     # Visit a parse tree produced by AhParser#atom.
     def visitAtom(self, ctx: AhParser.AtomContext):
 
-        if (ctx.atom_obj_dict()):
+        if ctx.atom_obj_dict():
             return self.visit(ctx.atom_obj_dict())
 
-        if (ctx.atom_obj_list()):
+        if ctx.atom_obj_list():
             return self.visit(ctx.atom_obj_list())
 
-        if (ctx.atom_string()):
+        if ctx.atom_string():
             return self.visit(ctx.atom_string())
 
-        if (ctx.atom_number()):
+        if ctx.atom_number():
             return self.visit(ctx.atom_number())
 
-        if (ctx.atom_boolean()):
+        if ctx.atom_boolean():
             return self.visit(ctx.atom_boolean())
 
-        if (ctx.atom_hex()):
+        if ctx.atom_hex():
             return self.visit(ctx.atom_hex())
 
-        if (ctx.atom_none()):
+        if ctx.atom_none():
             return self.visit(ctx.atom_none())
 
     # Visit a parse tree produced by AhParser#obj_dict.
     def visitAtom_obj_dict(self, ctx: AhParser.Atom_obj_dictContext):
         dictionary = {}
         i = 0
-        if (ctx.COLON(0)):
+        if ctx.COLON(0):
             dictionary[self.visit(ctx.expr(0))] = self.visit(ctx.expr(1))
-        while (ctx.COMMA(i) and ctx.expr((i + 1) * 2)):
+        while ctx.COMMA(i) and ctx.expr((i + 1) * 2):
             base = (i + 1) * 2
             dictionary[self.visit(ctx.expr(base))] = self.visit(ctx.expr(base + 1))
             i += 1
@@ -1287,9 +1329,9 @@ class AhVisitor(AhVisitorOriginal):
     def visitAtom_obj_list(self, ctx: AhParser.Atom_obj_listContext):
         parameters = []
         i = 0
-        if (ctx.expr(0)):
+        if ctx.expr(0):
             parameters.append(self.visit(ctx.expr(0)))
-        while (ctx.COMMA(i) and ctx.expr(i + 1)):
+        while ctx.COMMA(i) and ctx.expr(i + 1):
             parameters.append(self.visit(ctx.expr(i + 1)))
             i += 1
         return parameters
@@ -1305,23 +1347,23 @@ class AhVisitor(AhVisitorOriginal):
             label = label.replace('$', '')
             replacer = str(self.getVariable(label, convert=False))
             line = line.replace(match, replacer)
-            if (self.appOptions.debug):
+            if self.appOptions.debug:
                 self.log.log('> Injecting Variable into String \'' + label + '\': ' + line)
                 self.log.log('')
         return line
 
     # Visit a parse tree produced by AhParser#number.
     def visitAtom_number(self, ctx: AhParser.Atom_numberContext):
-        if (ctx.INT()):
+        if ctx.INT():
             return int(ctx.INT().getText())
         else:
             return float(ctx.FLOAT().getText())
 
     # Visit a parse tree produced by AhParser#boolean.
     def visitAtom_boolean(self, ctx: AhParser.Atom_booleanContext):
-        if (ctx.TRUE()):
+        if ctx.TRUE():
             return True
-        if (ctx.FALSE()):
+        if ctx.FALSE():
             return False
 
     # Visit a parse tree produced by Ah3Parser#atom_hex.

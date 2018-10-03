@@ -36,7 +36,6 @@ terminated :
         | await_statement
         | assignment
         | log
-        | auth
       ) TERMINATOR ;
 
 non_terminated : 
@@ -62,7 +61,7 @@ expr :
       | method_call
       | async_execute
       | execute
-      | login_statement
+      | auth_statement
       | endpoint_statement
       | casting
       | count
@@ -151,7 +150,7 @@ error_statement : ERROR LPAREN expr? RPAREN;
 
 return_statement : RETURNS expr? ;
 
-login_statement : LOGIN LPAREN optional_parameters_block RPAREN ;
+auth_statement : AUTH LPAREN optional_parameters_block RPAREN ;
 
 endpoint_statement : ENDPOINT LPAREN expr RPAREN ; 
 
@@ -166,8 +165,6 @@ casting :
         | TYPE_LIST
         | TYPE_DICT
       ) LPAREN expr RPAREN ;
-
-auth : AUTH LPAREN expr RPAREN;
 
 log : LOG LPAREN expr RPAREN ;
 
@@ -291,7 +288,6 @@ TYPE_LIST : L I S T ;
 TYPE_DEC : D E C ;
 TYPE_STR : S T R ;
 TYPE_BOOL : B O O L ;
-LOGIN : L O G I N ;
 LOG : L O G ;
 ENDPOINT : E N D P O I N T ;
 
