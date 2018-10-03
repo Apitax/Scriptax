@@ -88,6 +88,34 @@ class AhVisitor(AhVisitorOriginal):
         # Used for mustache syntax dynamic replacement
         self.regexVar = '{{[ ]{0,}[A-z0-9_$.\-]{1,}[ ]{0,}}}'
 
+    # TODO: Find a way to incorporate this into a parser status field
+    # Sets the program into error mode
+    def error(self, message):
+        self.message = message
+        self.status = 'error'
+
+    def setStatusReturn(self):
+        self.status = 'return'
+
+    def setStatusExit(self):
+        self.status = 'exit'
+
+    def setStatusOk(self):
+        self.status = 'ok'
+
+    def isOk(self):
+        return self.status == 'ok'
+
+    def isError(self):
+        return self.status == 'error'
+
+    def isExit(self):
+        return self.status == 'exit'
+
+    def isReturn(self):
+        return self.status == 'return'
+
+    # Helper method which executes a given scriptax string
     def parseScript(self, scriptax: str, parameters: dict = None) -> tuple:
         from scriptax.parser.utils.BoilerPlate import customizableParser
         result = customizableParser(scriptax, parameters=parameters)
@@ -96,6 +124,7 @@ class AhVisitor(AhVisitorOriginal):
             return None, None
         return result
 
+    # Helper method which executes on a given context with a given set of symbols
     def parseScriptCustom(self, context, symbol_table: SymbolTable = None) -> tuple:
         from scriptax.parser.utils.BoilerPlate import customizableContextParser
         result = customizableContextParser(context, symbol_table=symbol_table)
@@ -104,6 +133,7 @@ class AhVisitor(AhVisitorOriginal):
             return None, None
         return result
 
+    # Sets the current state of the parser
     def setState(self, file='', line=-1, char=-1):
         if file != '':
             self.state['file'] = file
@@ -112,6 +142,7 @@ class AhVisitor(AhVisitorOriginal):
         if char != -1:
             self.state['char'] = char
 
+    # Helper method which executes commandtax
     def executeCommand(self, command: Command) -> ApitaxResponse:
         from commandtax.flow.Connector import Connector
         if self.appOptions.debug:
@@ -129,6 +160,7 @@ class AhVisitor(AhVisitorOriginal):
                               command=" ".join(command.command), parameters=command.parameters, request=command.request)
         return connector.execute()
 
+    # Helper method which executes a callback
     def executeCallback(self, callback=None, response: ApitaxResponse = None, result=None):
         from scriptax.parser.utils.BoilerPlate import customizableContextParser
         table = SymbolTable()
@@ -221,7 +253,6 @@ class AhVisitor(AhVisitorOriginal):
             self.error(message="Symbol `" + label + "` not found in scope `" + self.symbol_table.current.name + "`")
             return None
 
-    # TODO: Repurpose to utilize symbol table
     def getSymbol(self, label, convert=True, symbolType=SYMBOL_VARIABLE):
 
         if convert:
@@ -349,33 +380,6 @@ class AhVisitor(AhVisitorOriginal):
             replacer = self.getVariable(label, convert=False)
             line = line.replace(match, replacer)
         return line
-
-    # TODO: Find a way to incorporate this into a parser status field
-    # Sets the program into error mode
-    def error(self, message):
-        self.message = message
-        self.status = 'error'
-
-    def setStatusReturn(self):
-        self.status = 'return'
-
-    def setStatusExit(self):
-        self.status = 'exit'
-
-    def setStatusOk(self):
-        self.status = 'ok'
-
-    def isOk(self):
-        return self.status == 'ok'
-
-    def isError(self):
-        return self.status == 'error'
-
-    def isExit(self):
-        return self.status == 'exit'
-
-    def isReturn(self):
-        return self.status == 'return'
 
     # Visit a parse tree produced by AhParser#prog.
     # TODO: Improve error message format
@@ -809,10 +813,10 @@ class AhVisitor(AhVisitorOriginal):
     def visitEach_statement(self, ctx: AhParser.Each_statementContext):
         clause = self.visit(ctx.expr())
 
-        if (isinstance(clause, str) and isJson(clause)):
+        if isinstance(clause, str) and isJson(clause):
             clause = json.loads(clause)
 
-        if (isinstance(clause, list)):
+        if isinstance(clause, list):
             if self.appOptions.debug:
                 self.log.log('> Looping through result')
                 self.log.log('')

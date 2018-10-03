@@ -32,7 +32,7 @@ class Scriptax(Driver):
 
         scriptax = ScriptaxExecutor(command.parameters, command.options)
 
-        parser = scriptax.execute(command.command[0])
+        result = scriptax.execute(command.command[0])
 
         executionTime = round2str(time() - t0)
 
@@ -41,12 +41,12 @@ class Scriptax(Driver):
             State.log.log('')
 
         response = ApitaxResponse()
-        response.body.add({'result': parser.data.getStore()})
+        response.body.add({'result': result[0][1]})
         response.body.add({'commandtax': command.command[0]})
         response.body.add({'execution-time': executionTime})
 
-        if (parser.isError()):
-            response.body.add({'error': parser.data.getError()})
+        if (result[1].isError()):
+            response.body.add({'error': result[1].message})
             response.status = 500
         else:
             response.status = 200

@@ -1,5 +1,5 @@
 # Application import
-from scriptax.parser.utils.BoilerPlate import standardParser, customizableParser
+from scriptax.parser.utils.BoilerPlate import customizableParser
 from scriptax.drivers.builtin.Scriptax import Scriptax
 
 from apitaxcore.logs.Log import Log
