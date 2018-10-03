@@ -2,6 +2,7 @@ from scriptax.parser.symbols.Symbol import *
 from typing import List
 from typing import TypeVar
 import string
+import json
 import random
 
 # Required to facilitate type hinting inside of the SymbolScope class
@@ -54,7 +55,7 @@ class SymbolScope:
         return debug
 
     def printScopeDebug(self):
-        pass
+        print(json.dumps(self.getScopeDebug(), indent=2))
 
     # When generating and using the symbol table occur in independent stages, this method is used to create new child
     # scopes or use existing ones where possible.

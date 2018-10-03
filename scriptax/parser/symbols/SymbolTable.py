@@ -37,26 +37,42 @@ class SymbolTable:
     def printDebugScopeTree(self):
         self.root.printScopeDebug()
 
-    def getSymbol(self, name, symbolType=None):
-        node: SymbolScope = self.current
-
+    def traverseToParent(self, name=None, start: SymbolScope=None) -> tuple:
+        if start:
+            node: SymbolScope = start
+        else:
+            node: SymbolScope = self.current
+        i = 0
         comps = name.split('.')
-        while comps[0] == 'parent' and len(comps) > 1:
+        while len(comps) > 0 and comps[0] == 'parent':
             while node.type != SCOPE_SCRIPT:
                 node = node.parent
                 if not node:
-                    return None
+                    return None, None
+            i += 1
             del comps[0]
-        name = ".".join(comps)
+        # Ignore the rest of comps because we only want to retrieve the
+        #   symbol and leave the rest of the dots for the logic
+        if len(comps) > 0:
+            name = comps[0]
+        else:
+            name = None
+        return node, name, i
 
+    def getSymbol(self, name, symbolType=None):
+        return self.getSymbolWithLength(name, symbolType)[0]
+
+    # Returns the symbol and the number of components used out of the name label
+    def getSymbolWithLength(self, name, symbolType=None) -> tuple:
+        node, name, i = self.traverseToParent(name=name)
         while node is not None:
             symbol = node.getSymbol(name, symbolType)
             if symbol:
-                return symbol
+                return symbol, i
             if symbolType == SYMBOL_VARIABLE and node.variableScanBlocked:
-                return None
+                return None, None
             node = node.parent
-        return None
+        return None, None
 
     def isSymbolExists(self, name, symbolType=None):
         symbol = self.getSymbol(name, symbolType)
@@ -72,8 +88,22 @@ class SymbolTable:
         else:
             self.current.addSymbol(symbol=symbol)
 
+    def getAt(self, name, symbolType=None) -> tuple:
+        node, name, i = self.traverseToParent(name=name)
+        if not name:
+            return node, i
+        while node is not None:
+            symbol = node.getSymbol(name, symbolType)
+            if symbol:
+                return symbol, i
+            if symbolType == SYMBOL_VARIABLE and node.variableScanBlocked:
+                return None, None
+            node = node.parent
+        return None, None
+
     def deleteSymbol(self, name, symbolType=SYMBOL_VARIABLE):
-        node: SymbolScope = self.current
+        node, name = self.traverseToParent(name=name)
+        # node: SymbolScope = self.current
         while node is not None:
             symbol = node.removeSymbol(name, symbolType)
             if symbol:

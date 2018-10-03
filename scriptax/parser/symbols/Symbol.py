@@ -59,6 +59,13 @@ class Symbol:
             self.dataType = dataType
         self.value = value
 
+    def setValue(self, dataType=None, value=None):
+        if not dataType:
+            self.dataType = valueToType(value)
+        else:
+            self.dataType = dataType
+        self.value = value
+
     def getSymbolDebug(self):
         from scriptax.parser.symbols.SymbolScope import SymbolScope
         value = str(self.value)

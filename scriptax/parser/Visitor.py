@@ -49,8 +49,7 @@ import traceback
 # TODO: Implement reflection according to GitHub issue
 # TODO: Pull code out of newInstance and extends to another method
 # TODO: Support sig polymorphism for extends
-# TODO: Method recursion does not protect variable scopes
-#    TODO: Calling a method from inside of a method inherits the scope of the calling method. THIS IS BAD
+
 
 class AhVisitor(AhVisitorOriginal):
 
@@ -61,10 +60,10 @@ class AhVisitor(AhVisitorOriginal):
         self.config = State.config
 
         # Parameters
-        self.appOptions = options if options is not None else Options()
+        self.appOptions: Options = options if options is not None else Options()
         #self.appOptions.debug = True
-        self.credentials = credentials if credentials is not None else Credentials()
-        self.parameters = parameters if parameters is not None else {}
+        self.credentials: Credentials = credentials if credentials is not None else Credentials()
+        self.parameters: dict = parameters if parameters is not None else {}
 
         # Async Threading
         self.threads = []
@@ -81,9 +80,9 @@ class AhVisitor(AhVisitorOriginal):
 
         # Symbol Table
         if not symbol_table:
-            self.symbol_table = SymbolTable()
+            self.symbol_table: SymbolTable = SymbolTable()
         else:
-            self.symbol_table = symbol_table
+            self.symbol_table: SymbolTable = symbol_table
 
         # Used for mustache syntax dynamic replacement
         self.regexVar = '{{[ ]{0,}[A-z0-9_$.\-]{1,}[ ]{0,}}}'
@@ -150,24 +149,168 @@ class AhVisitor(AhVisitorOriginal):
 
         return dict({"command": resolvedCommand['command'], "commandHandler": commandHandler, "result": returnResult})
 
-    def getVariable(self, label, convert=True):
+    def setVariable(self, label, value=None, convert=True):
+        return self.setSymbol(label, value=value, convert=convert)
+
+    def setSymbol(self, label, value=None, convert=True):
+        if convert:
+            label = self.visit(label)
+        label = label.replace('$', '')
+        node, name, i = self.symbol_table.traverseToParent(label)
+        components = label.split('.')[i:]
+
+        table = createTableFromScope(node)
+
+        # Direct referencing - ie. parent.path=, parent.parent.path=, path=
+        if len(components) == 1:
+            table.putSymbol(Symbol(name=components[0], symbolType=SYMBOL_VARIABLE, value=value))
+            return True
+
+        symbol, i = table.getSymbolWithLength(components[0], symbolType=SYMBOL_VARIABLE)
+
+        if symbol:
+            i += 1
+
+        # components will be at least 2
+        # use cases:
+        # 1. instance navigation via composition:    parent.someInstance.someInstanceOnThatOne.path=  (len=3), someInstance.path=  (len=2)
+        # 2. instance setting:  someInstance = new Instance();
+        try:
+            while len(components) > i + 1:
+                if symbol.dataType == DATA_INSTANCE:
+                    table = createTableFromScope(symbol.value)
+                    symbol, j = table.getSymbolWithLength(name=components[i], symbolType=SYMBOL_VARIABLE)
+                elif symbol.dataType == DATA_DICT:
+                    symbol = symbol.value[str(components[i])]
+                    if not isinstance(symbol, Symbol):
+                        symbol = Symbol(symbolType=SYMBOL_VARIABLE, value=symbol)
+                elif symbol.dataType == DATA_LIST:
+                    symbol = symbol.value[int(components[i])]
+                    if not isinstance(symbol, Symbol):
+                        symbol = Symbol(symbolType=SYMBOL_VARIABLE, value=symbol)
+                elif symbol.dataType == DATA_THREAD:
+                    return False
+                elif symbol.dataType == DATA_PYTHONIC:
+                    return False
+                else:
+                    #print(symbol.dataType)
+                    self.error(message="Symbol `" + label + "` is corrupt and not settable.")
+                    return False
+                i += 1
+
+            final = components.pop()
+            if symbol.dataType == DATA_INSTANCE:
+                table = createTableFromScope(symbol.value)
+                table.putSymbol(Symbol(name=final, symbolType=SYMBOL_VARIABLE, value=value))
+            elif symbol.dataType == DATA_DICT:
+                symbol.value[str(final)] = value
+            elif symbol.dataType == DATA_LIST:
+                symbol.value[int(final)] = value
+            else:
+                table.putSymbol(Symbol(name=final, symbolType=SYMBOL_VARIABLE, value=value))
+            return True
+        except:
+            print("Exception during variable setting")
+            traceback.print_exc()
+            self.error(message="Symbol `" + label + "` is corrupt and not settable.")
+            return False
+
+    # TODO: Repurpose to utilize symbol table
+    def getSymbol(self, label, convert=True, symbolType=SYMBOL_VARIABLE):
+
+        if convert:
+            label = self.visit(label)
+        label = label.replace('$', '')
+        node, name, i = self.symbol_table.traverseToParent(label)
+        components = label.split('.')[i:]
+
+        table = createTableFromScope(node)
+
+        symbol, i = table.getSymbolWithLength(components[0], symbolType=SYMBOL_VARIABLE)
+
+        if len(components) == 1:
+            return symbol
+
+        if symbol:
+            i += 1
+
+        try:
+            while len(components) > i:
+                if symbol.dataType == DATA_INSTANCE:
+                    table = createTableFromScope(symbol.value)
+                    symbol, j = table.getSymbolWithLength(name=components[i], symbolType=SYMBOL_VARIABLE)
+                elif symbol.dataType == DATA_DICT:
+                    symbol = symbol.value[str(components[i])]
+                    if not isinstance(symbol, Symbol):
+                        symbol = Symbol(symbolType=SYMBOL_VARIABLE, value=symbol)
+                elif symbol.dataType == DATA_LIST:
+                    symbol = symbol.value[int(components[i])]
+                    if not isinstance(symbol, Symbol):
+                        symbol = Symbol(symbolType=SYMBOL_VARIABLE, value=symbol)
+                elif symbol.dataType == DATA_THREAD:
+                    return None
+                elif symbol.dataType == DATA_PYTHONIC:
+                    return None
+                else:
+                    if len(components) != i:
+                        self.error(message="Symbol `" + label + "` not found in scope.")
+                        return None
+                    else:
+                        return symbol
+                i += 1
+
+            return symbol
+
+        except:
+            print("Exception during variable setting")
+            traceback.print_exc()
+            self.error(message="Symbol `" + label + "` not found in scope.")
+            return None
+
+
+    def getVariable(self, label=None, convert=True):
+        #return self.getSymbol(label=label, convert=convert).value
         if convert:
             label = self.visit(label)
         try:
-            return self.getSymbol(label, convert=False).value
+            return self.getSymbol(label, False).value
         except:
             self.error(message="Symbol `" + label + "` not found in scope `" + self.symbol_table.current.name + "`")
             return None
 
-    # TODO: Repurpose to utilize symbol table
-    def getSymbol(self, label, convert=True, symbolType=SYMBOL_VARIABLE):
-        if convert:
-            label = self.visit(label)
-        try:
-            return self.symbol_table.getSymbol(name=label, symbolType=SYMBOL_VARIABLE)
-        except:
-            self.error(message="Symbol `" + label + "` not found in scope `" + self.symbol_table.current.name + "`")
-            return None
+        #if symbol.dataType == DATA_DICT or symbol.dataType == DATA_LIST:
+#
+#           node, name = self.symbol_table.traverseToParent(name=label)
+#          name = name[1:]
+#
+#           for component in components:
+#                if (component not in navigation):
+#                    if (isinstance(navigation, list)):
+#                        if (not (isNumber(component) and len(navigation) > int(component))):
+#                            navigation[int(component)] = {}
+#                    else:
+#                        navigation[component] = {}
+#                if (isinstance(navigation, list)):
+#                    navigation = navigation[int(component)]
+#                else:
+#                    navigation = navigation[str(component)]
+#
+#            # if (finalIndex not in navigation):
+#            #    navigation[finalIndex] = {}
+#
+#            if (self.isJson(data)):
+#                data = json.loads(data)
+#
+#            if (isinstance(navigation, list)):
+#                finalIndex = int(finalIndex)
+#                if (len(navigation) <= finalIndex):
+#                    navigation.insert(finalIndex, data)
+#                else:
+#                    navigation[finalIndex] = data
+#            else:
+#                navigation[finalIndex] = data
+
+#        return symbol.value
 
     # TODO: WTF?
     def useOptions(self):
@@ -475,20 +618,23 @@ class AhVisitor(AhVisitorOriginal):
             tval = value
             value = var
             # TODO: Double check that this still works
-            self.symbol_table.putSymbol(symbol=Symbol(name=label, symbolType=SYMBOL_VARIABLE, value=value))
-            # self.data.storeVar(label, value)
+            #self.symbol_table.putSymbol(symbol=Symbol(name=label, symbolType=SYMBOL_VARIABLE, value=value))
+            self.setVariable(label=label, value=value, convert=False)
             if (isinstance(tval, threading.Thread)):
                 tval.label = label + "." + str(len(value) - 1)
                 tval.start()
         else:
-            self.symbol_table.putSymbol(symbol=Symbol(name=label, symbolType=SYMBOL_VARIABLE, value=value))
+            #self.symbol_table.putSymbol(symbol=Symbol(name=label, symbolType=SYMBOL_VARIABLE, value=value))
+            self.setVariable(label=label, value=value, convert=False)
             if (isinstance(value, threading.Thread)):
                 value.label = label
                 value.start()
 
         if (self.appOptions.debug):
+            #print('here')
+            #symbol = self.getSymbol(label=label, convert=False) # TODO: Does not work well for DATA_INSTANCE types
             self.log.log('> Assigning Variable: ' + label + ' = ' + str(
-                self.symbol_table.getSymbol(name=label, symbolType=SYMBOL_VARIABLE)))
+            value))
             self.log.log('')
 
     # Visit a parse tree produced by AhParser#flow.
