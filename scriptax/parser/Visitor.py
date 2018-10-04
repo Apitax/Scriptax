@@ -146,7 +146,7 @@ class AhVisitor(AhVisitorOriginal):
     def executeCommand(self, command: Command) -> ApitaxResponse:
         from commandtax.flow.Connector import Connector
         if self.appOptions.debug:
-            self.log.log('> Executing Commandtax: \'' + " ".join(command.command) + '\' ' + 'with parameters: ' + str(
+            self.log.log('> Executing Commandtax: \'' + command.command + '\' ' + 'with parameters: ' + str(
                 command.parameters))
             self.log.log('')
 
@@ -157,7 +157,7 @@ class AhVisitor(AhVisitorOriginal):
             command.options = self.options
 
         connector = Connector(options=command.options, credentials=command.credentials,
-                              command=" ".join(command.command), parameters=command.parameters, request=command.request)
+                              command=command.command, parameters=command.parameters, request=command.request)
         return connector.execute()
 
     # Helper method which executes a callback
