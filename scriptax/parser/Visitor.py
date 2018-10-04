@@ -156,6 +156,9 @@ class AhVisitor(AhVisitorOriginal):
         if not command.options:
             command.options = self.options
 
+        if not command.options:
+            command.options = Options()
+
         connector = Connector(options=command.options, credentials=command.credentials,
                               command=command.command, parameters=command.parameters, request=command.request)
         return connector.execute()
