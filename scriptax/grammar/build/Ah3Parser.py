@@ -1,4 +1,4 @@
-# Generated from D:/Programming/Projects/Apitax/Scriptax/scriptax/grammar/src\Ah3.g4 by ANTLR 4.7
+# Generated from C:/Users/Shawn/PycharmProjects/Scriptax/scriptax/grammar/src\Ah3.g4 by ANTLR 4.7
 # encoding: utf-8
 from antlr4 import *
 from io import StringIO
