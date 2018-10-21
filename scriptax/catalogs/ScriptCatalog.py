@@ -7,5 +7,5 @@ class ScriptCatalog(Catalog):
         super().__init__("scripts")
 
     def add(self, label, path, summary='', help='', driver='', examples=[]):
-        item = {'label':label, 'path': path, 'summary': summary, 'help': help, 'driver': driver, 'examples': examples}
+        item = {'label': label, 'path': path, 'summary': summary, 'help': help, 'driver': driver, 'examples': examples}
         super().add(item)
