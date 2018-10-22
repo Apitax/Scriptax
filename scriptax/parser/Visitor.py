@@ -154,7 +154,7 @@ class AhVisitor(AhVisitorOriginal):
             command.credentials = self.credentials
 
         if not command.options:
-            command.options = self.options
+            command.options = self.appOptions
 
         if not command.options:
             command.options = Options()
