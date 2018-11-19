@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 setup(
     name='scriptax',
     packages=find_packages(),
-    version='0.0.5',
+    version='0.0.6',
     description='Scriptax is a powerful driver for the Apitax framework which exposes an automation first language used to quickly script together automation.',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -21,7 +21,7 @@ setup(
     ),
     install_requires=[
         'antlr4-python3-runtime',
-        'apitaxcore==3.0.6',
+        'apitaxcore==3.0.9',
         'commandtax==0.0.8',
     ],
 )

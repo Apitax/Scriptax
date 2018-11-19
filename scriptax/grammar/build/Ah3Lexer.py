@@ -1,4 +1,4 @@
-# Generated from C:/Users/Shawn/PycharmProjects/Scriptax/scriptax/grammar/src\Ah3.g4 by ANTLR 4.7
+# Generated from D:/Programming/Projects/Apitax/Scriptax/scriptax/grammar/src\Ah3.g4 by ANTLR 4.7
 from antlr4 import *
 from io import StringIO
 from typing.io import TextIO
@@ -317,10 +317,10 @@ def serializedATN():
         buf.write("\u02a3\3\2\2\2\u02a2\u02a0\3\2\2\2\u02a3\u02a4\b\\\2\2")
         buf.write("\u02a4\u00b8\3\2\2\2\u02a5\u02a7\7\17\2\2\u02a6\u02a5")
         buf.write("\3\2\2\2\u02a6\u02a7\3\2\2\2\u02a7\u02a8\3\2\2\2\u02a8")
-        buf.write("\u02a9\7\f\2\2\u02a9\u02aa\3\2\2\2\u02aa\u02ab\b]\3\2")
+        buf.write("\u02a9\7\f\2\2\u02a9\u02aa\3\2\2\2\u02aa\u02ab\b]\2\2")
         buf.write("\u02ab\u00ba\3\2\2\2\u02ac\u02ae\t\5\2\2\u02ad\u02ac\3")
         buf.write("\2\2\2\u02ae\u02af\3\2\2\2\u02af\u02ad\3\2\2\2\u02af\u02b0")
-        buf.write("\3\2\2\2\u02b0\u02b1\3\2\2\2\u02b1\u02b2\b^\3\2\u02b2")
+        buf.write("\3\2\2\2\u02b0\u02b1\3\2\2\2\u02b1\u02b2\b^\2\2\u02b2")
         buf.write("\u00bc\3\2\2\2\u02b3\u02b4\7^\2\2\u02b4\u02ba\7$\2\2\u02b5")
         buf.write("\u02b6\7^\2\2\u02b6\u02ba\7)\2\2\u02b7\u02b8\7^\2\2\u02b8")
         buf.write("\u02ba\7^\2\2\u02b9\u02b3\3\2\2\2\u02b9\u02b5\3\2\2\2")
@@ -371,7 +371,7 @@ def serializedATN():
         buf.write("\2\2\2\u0313\u0314\7)\2\2\u0314\u00fe\3\2\2\2\34\2\u0104")
         buf.write("\u010a\u014d\u0152\u0155\u015a\u0161\u0171\u0173\u017b")
         buf.write("\u017d\u0182\u0188\u0191\u0193\u019f\u0283\u028a\u028c")
-        buf.write("\u0293\u02a0\u02a6\u02af\u02b9\u02d5\4\2\3\2\b\2\2")
+        buf.write("\u0293\u02a0\u02a6\u02af\u02b9\u02d5\3\b\2\2")
         return buf.getvalue()
 
 

@@ -325,8 +325,8 @@ NEW : N E W ;
 LABEL : VARIABLE_ID? (LETTER | ULINE | DIGIT | INT | FLOAT)+ ;
 
 /** COMMENTS **/
-BLOCK_COMMENT : DIV MUL .*? MUL DIV -> channel(HIDDEN) ;
-LINE_COMMENT : DIV DIV ~[\r\n]* -> channel(HIDDEN) ;
+BLOCK_COMMENT : DIV MUL .*? MUL DIV -> skip ;
+LINE_COMMENT : DIV DIV ~[\r\n]* -> skip ;
 
 /** NEWLINES AND WHITESPACE **/
 NEWLINE : '\r'? '\n' -> skip;

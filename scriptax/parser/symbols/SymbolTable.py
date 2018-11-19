@@ -48,7 +48,7 @@ class SymbolTable:
             while node.type != SCOPE_SCRIPT:
                 node = node.parent
                 if not node:
-                    return None, None
+                    return None, None, None
             i += 1
             del comps[0]
         # Ignore the rest of comps because we only want to retrieve the
@@ -102,7 +102,7 @@ class SymbolTable:
         return None, None
 
     def deleteSymbol(self, name, symbolType=SYMBOL_VARIABLE):
-        node, name = self.traverseToParent(name=name)
+        node, name, i = self.traverseToParent(name=name)
         # node: SymbolScope = self.current
         while node is not None:
             symbol = node.removeSymbol(name, symbolType)
