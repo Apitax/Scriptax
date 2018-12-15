@@ -41,9 +41,9 @@ table.scope().remove_symbol(name="myval")
 
 
 # End of program
-table.exit_scope()
-table.exit_scope()
-table.exit_scope()
+#table.exit_scope()
+#table.exit_scope()
+#table.exit_scope()
 
 table.print_debug_table()
 print()
