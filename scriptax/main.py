@@ -1,5 +1,5 @@
-from scriptax.parser.symbols.SymbolTable import SymbolTable
-from scriptax.parser.symbols.Symbol import *
+from scriptax.parser.symbols.migrate.SymbolTable import SymbolTable
+from scriptax.parser.symbols.migrate.Symbol import *
 
 symbol_table = SymbolTable()
 

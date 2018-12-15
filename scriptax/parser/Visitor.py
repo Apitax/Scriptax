@@ -1,9 +1,9 @@
 from scriptax.grammar.build.Ah3Parser import Ah3Parser as AhParser, Ah3Parser
 from scriptax.grammar.build.Ah3Visitor import Ah3Visitor as AhVisitorOriginal
-from scriptax.parser.symbols.SymbolTable import SymbolTable, createTableFromScope
-from scriptax.parser.symbols.Symbol import *
-from scriptax.parser.symbols.ScriptSymbol import ScriptSymbol
-from scriptax.parser.symbols.SymbolScope import SymbolScope, SCOPE_BLOCK, SCOPE_CALLBACK, SCOPE_METHOD, SCOPE_SCRIPT
+from scriptax.parser.symbols.migrate.SymbolTable import SymbolTable, createTableFromScope
+from scriptax.parser.symbols.migrate.Symbol import *
+from scriptax.parser.symbols.migrate.ScriptSymbol import ScriptSymbol
+from scriptax.parser.symbols.migrate.SymbolScope import SymbolScope, SCOPE_BLOCK, SCOPE_METHOD, SCOPE_SCRIPT
 from scriptax.drivers.Driver import Driver
 
 from commandtax.models.Command import Command

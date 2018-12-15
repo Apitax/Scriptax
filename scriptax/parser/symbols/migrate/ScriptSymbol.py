@@ -1,4 +1,4 @@
-from scriptax.parser.symbols.Symbol import Symbol
+from scriptax.parser.symbols.migrate.Symbol import Symbol
 
 
 class ScriptSymbol(Symbol):
