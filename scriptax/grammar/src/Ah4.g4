@@ -112,7 +112,7 @@ import_statement : (FROM label)? IMPORT labels (LPAREN optional_parameters_block
 
 commandtax : COMMANDTAX LPAREN expr (COMMA atom_obj_dict)? (COMMA optional_parameters_block)? RPAREN ;
 
-extends_statement : EXTENDS LPAREN label (COMMA optional_parameters_block)? RPAREN ;
+extends_statement : EXTENDS LPAREN label RPAREN ;
 
 create_instance : NEW label LPAREN optional_parameters_block RPAREN ;
 

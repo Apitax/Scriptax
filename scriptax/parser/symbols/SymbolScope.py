@@ -76,12 +76,13 @@ class SymbolScope:
 
     # Inserts a Symbol into this SymbolScope
     # If a Symbol already exists with the same name, throws exception
-    def insert_symbol(self, symbol: Symbol):
+    def insert_symbol(self, symbol: Symbol) -> Symbol:
         symbol.name = SymbolScope.conform_name(symbol.name)
         if self.has_symbol(symbol.name, symbol.symbol_type):
             raise Exception(
                 'SymbolScope already contains symbol `' + symbol.name + '` and cannot insert a new one. Scriptax.SymbolScope@insert_symbol')
         self.symbols.append(symbol)
+        return symbol
 
     # Remove a Symbol from this SymbolScope
     # If a Symbol cannot be removed, throws exception
@@ -172,6 +173,23 @@ class SymbolScope:
         parent_scope = self.complete_call()
         self.disown_scope()
         return parent_scope
+
+    # Injects a static scope between this scope and its parent
+    # Handles all of the static linking
+    # So if the static linking looks like: A->B->C and we want to call extends on C with a scope called D
+    #   it would become: A->B->D->C
+    # This does not touch dynamic links
+    def extends(self, scope):
+        # May not necessarily have a parent if we are extending the top level scope
+        if self.scope_parent:
+            # Unlinks the parent scope from this scope
+            self.scope_parent.remove_child_scope(self)
+            # Links the parent scope to the new scope
+            self.scope_parent.add_child_scope(scope)
+        # Links the new scope to this scope
+        scope.add_child_scope(self)
+        # Links this scope to the new scope
+        self.scope_parent = scope
 
     def get_scope_debug(self):
         debug = {
