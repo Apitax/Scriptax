@@ -3,7 +3,7 @@ import json
 
 
 # Wrapper for managing SymbolScope Activation Record Instances (ARI)
-class SymbolTable:
+class ARISymbolTable:
     def __init__(self, name=None, type=SCOPE_MODULE):
         # This is the root of the linked list of scopes
         self.root: SymbolScope = SymbolScope(scope_parent=None, type=type)
@@ -94,8 +94,8 @@ class SymbolTable:
         print("Symbol Table Call Stack Depth: " + str(self.depth))
 
 
-def create_table(scope: SymbolScope) -> SymbolTable:
-    table = SymbolTable()
+def create_table(scope: SymbolScope) -> ARISymbolTable:
+    table = ARISymbolTable()
     table.root = scope
     table.current = scope
     return table

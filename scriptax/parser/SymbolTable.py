@@ -1,7 +1,7 @@
 from typing import List
 from scriptax.models.Parameter import Parameter
-from scriptax.parser.symbols.SymbolTable import SymbolTable as GenericTable
-from scriptax.parser.symbols.SymbolTable import create_table as create_generic_table
+from scriptax.parser.symbols.ARISymbolTable import ARISymbolTable as GenericTable
+from scriptax.parser.symbols.ARISymbolTable import create_table as create_generic_table
 from scriptax.parser.symbols.SymbolScope import SymbolScope, SCOPE_MODULE, SCOPE_BLOCK
 from scriptax.parser.symbols.Symbol import Symbol, DATA_DICT, DATA_LIST, DATA_INSTANCE, DATA_PYTHONIC, DATA_THREAD, \
     DATA_METHOD, SYMBOL_VAR, SYMBOL_MODULE

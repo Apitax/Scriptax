@@ -72,6 +72,9 @@ instance.scope().insert_symbol(Symbol(name="get_value2", data_type=DATA_METHOD, 
 instance.scope().insert_symbol(Symbol(name="get_value", data_type=DATA_METHOD, value="OVERRIDEN this is a local instance method from the child class"))
 
 
+# table.complete_execution()
+# table.complete_execution()
+
 table.print_debug_table()
 print()
 table.print_call_stack()

@@ -907,53 +907,6 @@ class AhVisitor(AhVisitorOriginal):
     def visitOptional_parameter(self, ctx: AhParser.Optional_parameterContext):
         return {"label": self.visit(ctx.labels()), "value": self.visit(ctx.expr())}
 
-    # Visit a parse tree produced by AhParser#commandtax.
-    def visitCommandtax(self, ctx: AhParser.CommandtaxContext):
-        firstArg = self.visit(ctx.expr())
-        command = ""
-        strict = True
-        credentials = None
-
-        if not ctx.COMMANDTAX():
-            command += "api"
-            if ctx.GET():
-                command += " --get"
-            if ctx.POST():
-                command += " --post"
-            if ctx.PUT():
-                command += " --put"
-            if ctx.PATCH():
-                command += " --patch"
-            if ctx.DELETE():
-                command += " --delete"
-            command += " --url " + firstArg
-
-        elif ctx.COMMANDTAX():
-            command = firstArg
-
-        if ctx.atom_obj_dict():
-            dataArg = self.visit(ctx.atom_obj_dict())
-            if 'post' in dataArg:
-                command += " --data-post '" + json.dumps(dataArg['post']) + "'"
-            if 'query' in dataArg:
-                command += " --data-query '" + json.dumps(dataArg['query']) + "'"
-            if 'path' in dataArg:
-                command += " --data-path '" + json.dumps(dataArg['path']) + "'"
-            if 'header' in dataArg:
-                command += " --data-header '" + json.dumps(dataArg['header']) + "'"
-            if 'driver' in dataArg:
-                command += " --apitax-driver " + dataArg['driver']
-            if 'strict' in dataArg:
-                strict = bool(dataArg['strict'])
-            if 'auth' in dataArg:
-                credentials = dataArg['auth']
-
-        parameters = {}
-        if ctx.optional_parameters_block():
-            parameters = self.visit(ctx.optional_parameters_block())
-
-        return {'command': command, 'parameters': parameters, 'strict': strict, 'credentials': credentials}
-
     # Visit a parse tree produced by AhParser#execute.
     def visitExecute(self, ctx):
         resolvedCommand = self.visit(ctx.commandtax())
@@ -1127,51 +1080,6 @@ class AhVisitor(AhVisitorOriginal):
             self.log.log('')
 
         return exportation
-
-    # Visit a parse tree produced by Ah3Parser#auth_statement.
-    def visitAuth_statement(self, ctx: Ah3Parser.Auth_statementContext):
-        parameters = self.visit(ctx.optional_parameters_block())
-
-        extra = {}
-        username = None
-        password = None
-        token = None
-
-        if 'extra' in parameters:
-            extra = parameters['extra']
-
-        if 'username' in parameters:
-            username = parameters['username']
-
-        if 'password' in parameters:
-            password = parameters['password']
-
-        if 'token' in parameters:
-            token = parameters['token']
-
-        credentials = Credentials(username=username, password=password, token=token, extra=extra)
-
-        return credentials
-
-    # Visit a parse tree produced by AhParser#endpoint_statement.
-    def visitEndpoint_statement(self, ctx: AhParser.Endpoint_statementContext):
-        name = self.visit(ctx.expr())
-        try:
-            name.find('@')
-            name = name.split('@')
-            driver = LoadedDrivers.getDriver(name[1])
-            name = name[0]
-        except:
-            if self.appOptions.driver:
-                driver = LoadedDrivers.getDriver(self.appOptions.driver)
-            else:
-                driver = LoadedDrivers.getDefaultDriver()
-        endpoints = driver.getEndpointCatalog()['endpoints']
-        if name in endpoints:
-            return endpoints[name]['value']
-        else:
-            self.error("The endpoint requested does not exist")
-            return None
 
     # Visit a parse tree produced by Ah3Parser#import_statement.
     def visitImport_statement(self, ctx: AhParser.Import_statementContext):
