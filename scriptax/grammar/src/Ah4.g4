@@ -10,9 +10,8 @@ script_structure : global_statements root_level_statements statements ;
 
 global_statements :
       (import_statement TERMINATOR)*
-      (sig_statement TERMINATOR)?
       (extends_statement TERMINATOR)?
-      (options_statement TERMINATOR)?
+      (ahoptions_statement TERMINATOR)?
       ;
 
 root_level_statements : method_def_atom* ;
@@ -39,7 +38,7 @@ expr :
       | expr AND expr
       | expr OR expr
       | create_instance
-      | method_call
+      | runnable_statements
       | execute
       | casting
       | count
@@ -49,6 +48,7 @@ expr :
 atom:
       atom_obj_dict
       | atom_obj_list
+      | atom_obj_enum
       | atom_string
       | atom_number
       | atom_boolean
@@ -59,17 +59,27 @@ atom:
 
 terminated :
       (
-        each_statement
+        log_statement
+        | each_statement
         | return_statement
         | error_statement
         | delete_statement
         | execute_statement
-        | method_call
         | await_statement
-        | assignment
+        | assignment_statement
+        | runnable_statements
       ) TERMINATOR ;
 
-method_call : AWAIT? labels LPAREN optional_parameters_block RPAREN atom_callback? ;
+runnable_statements : 
+      method_call_statement
+      | os_statement
+      | commandtax_statement ;
+
+commandtax_statement : COMMANDTAX LPAREN expr RPAREN ;
+
+os_statement : OS LPAREN expr RPAREN ;
+
+method_call_statement : AWAIT? labels LPAREN optional_parameters_block RPAREN atom_callback? ;
 
 execute_statement : execute ;
 
@@ -83,7 +93,7 @@ callback_block : EXECUTEOPEN statements EXECUTECLOSE ;
 
 // seperataition between callback blocks and regular blocks
 
-method_def_atom : attribute+ ASYNC? label LPAREN flexible_parameter_block RPAREN block ;
+method_def_atom : attribute+ label LPAREN flexible_parameter_block RPAREN block ;
 
 non_terminated : flow ;
 
@@ -98,11 +108,22 @@ for_statement : FOR labels IN expr block ;
 
 while_statement : WHILE condition block ;
 
-block : BLOCKOPEN statements BLOCKCLOSE | statement ;
+switch_statement : SWITCH LPAREN labels RPAREN case_statement* default_statement ;
+
+case_statement : CASE LPAREN (
+        (GE | LE | GT | LT) expr
+        | (EQ | NEQ) expr
+        | AND expr
+        | OR expr
+      ) RPAREN block ;
+
+default_statement : DEFAULT block ;
+
+block : BLOCKOPEN (statements | DONE | CONTINUE)* BLOCKCLOSE | (statement | DONE | CONTINUE) ;
 
 // statements
 
-sig_statement : SIG LPAREN flexible_parameter_block RPAREN ;
+log_statement : LOG LPAREN expr RPAREN ;
 
 flexible_parameter_block : flexible_parameter? (COMMA flexible_parameter)* ; // used to be sig
 
@@ -110,17 +131,22 @@ flexible_parameter : required_parameter | optional_parameter ;
 
 import_statement : (FROM label)? IMPORT labels (LPAREN optional_parameters_block RPAREN)? (AS label)? ;
 
-commandtax : COMMANDTAX LPAREN expr (COMMA atom_obj_dict)? (COMMA optional_parameters_block)? RPAREN ;
-
-extends_statement : EXTENDS LPAREN label RPAREN ;
+extends_statement : EXTEND 
+      (
+        label (WITH label (COMMA label)*) 
+        | label 
+        | (WITH label (COMMA label)*)
+      ) ;
 
 create_instance : NEW label LPAREN optional_parameters_block RPAREN ;
 
-options_statement : OPTIONS LPAREN optional_parameters_block RPAREN;
+ahoptions_statement : AHOPTIONS LPAREN atom_obj_dict RPAREN;
 
-optional_parameters_block : optional_parameter? (COMMA optional_parameter)* ;
+optional_parameters_block : (dict_signal | optional_parameter)? (COMMA (dict_signal | optional_parameter))* ;
 
 optional_parameter : labels EQUAL expr ;
+
+dict_signal : SIGNAL (atom_obj_dict | label) ;
 
 casting :
       (
@@ -134,7 +160,7 @@ casting :
 
 atom_obj_dict : BLOCKOPEN (expr COLON expr)? (COMMA (expr COLON expr)?)* BLOCKCLOSE ;
 
-assignment :
+assignment_statement :
       labels ((
         (SOPEN SCLOSE)? EQUAL
         | PE
@@ -144,6 +170,8 @@ assignment :
       ) expr | D_PLUS | D_MINUS);
 
 atom_obj_list : SOPEN expr? (COMMA expr?)* SCLOSE ;
+
+atom_obj_enum : LPAREN label (ARROW expr)? (COMMA label (ARROW expr)?)* RPAREN ;
 
 error_statement : ERROR LPAREN expr? RPAREN;
 
@@ -167,11 +195,11 @@ required_parameter : labels ;
 
 labels : label_comp (DOT label_comp)* ;
 
-label_comp : label | inject ;
+label_comp : label (SOPEN (expr COLON | COLON expr | expr COLON expr) SCLOSE)? | inject ;
 
 label : LABEL ;
 
-attribute : SCRIPT ;
+attribute : SCRIPT | STATIC | ASYNC ;
 
 atom_string : STRING ;
 
@@ -257,6 +285,7 @@ TERMINATOR : ';' ;
 HASH : '#' ;
 ARROW : '->' ;
 AT : '@' ;
+SIGNAL : '...' ;
 
 
 /** BLOCK FLOW **/
@@ -266,12 +295,15 @@ FOR : F O R ;
 EACH : E A C H;
 WHILE : W H I L E ;
 UNTIL : U N T I L ;
+SWITCH : S W I T C H ;
+CASE : C A S E ;
 
 
 /** STATEMENT FLOW **/
 RETURNS : R E T U R N ;
 CONTINUE : C O N T I N U E ;
 DONE : D O N E ;
+DEFAULT : D E F A U L T ;
 
 
 /** CASTING **/
@@ -284,17 +316,20 @@ TYPE_BOOL : B O O L ;
 
 
 /** METHODS **/
-SIG : S I G ;
-OPTIONS : O P T I O N S ;
+AHOPTIONS : A H O P T I O N S ;
 IMPORT : I M P O R T ;
+EXTEND : E X T E N D ;
 DEL : D E L ;
-EXTENDS : E X T E N D S ;
+OS : O S ;
 COMMANDTAX : C T ;
+LOG : L O G ;
 ERROR : E R R O R ;
 
 
 /** Attributes **/
 SCRIPT : S C R I P T ;
+STATIC : S T A T I C ;
+ASYNC : A S Y N C ;
 
 
 /** MODIFIERS **/
@@ -302,7 +337,6 @@ IN : I N ;
 AS : A S ;
 FROM : F R O M ;
 WITH: W I T H ;
-ASYNC : A S Y N C ;
 AWAIT : A W A I T ;
 NEW : N E W ;
 

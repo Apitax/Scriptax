@@ -24,32 +24,32 @@ import traceback
 
 # TODO: SCOPE GENERATION:
 #   basic symbol creators:
-#     v assignment
+#     assignment
 #     sig_statement
 #
 #   symbol value adjusters:
-#     v assignment
+#     assignment
 #
 #   symbol type adjusters/verifiers:
-#     v assignment
+#     assignment
 #
 #   scope creators:
-#     v method_statement (ADD SYMBOL TO GLOBAL SCOPE & ADD AS CHILD SCOPE OF TYPE METHOD)
-#     v block            (ADD AS CHILD SCOPE OF TYPE BLOCK)
-#     v callback_block   (ADD AS CHILD SCOPE OF TYPE CALLBACK)
+#     method_statement (ADD SYMBOL TO GLOBAL SCOPE & ADD AS CHILD SCOPE OF TYPE METHOD)
+#     block            (ADD AS CHILD SCOPE OF TYPE BLOCK)
+#     callback_block   (ADD AS CHILD SCOPE OF TYPE CALLBACK)
 #
 #     run recursively when encountering and merge into global scope:
 #       extends_statement  (MERGE SCOPES & SYMBOLS INTO GLOBAL OF SUB SCRIPT PRIOR TO CURRENT SCRIPT)
-#       v import_statement   (ADD AS SCRIPT SYMBOL TYPE INTO GLOBAL SCOPE)
+#       import_statement   (ADD AS SCRIPT SYMBOL TYPE INTO GLOBAL SCOPE)
 #
 #   Scope ordering: imports, program path
 #
-# vTODO: Variable access in DOT notation (dict, list, symbol, straight up data)
-# vTODO: Variable setting in DOT notation (dict, list, symbol, straight up data)
+# TODO: Variable access in DOT notation (dict, list, symbol, straight up data)
+# TODO: Variable setting in DOT notation (dict, list, symbol, straight up data)
 # vTODO: Implement class signatures using `sig`
-# vTODO: Implement reflection according to GitHub issue
+# TODO: Implement reflection according to GitHub issue
 # TODO: Pull code out of newInstance and extends to another method
-# vTODO: Support sig polymorphism for extends
+# TODO: Support sig polymorphism for extends
 # TODO: Async, Await
 
 class AhVisitor(AhVisitorOriginal):
@@ -876,26 +876,6 @@ class AhVisitor(AhVisitorOriginal):
             i += 1
         return parameters
 
-    # Visit a parse tree produced by Ah3Parser#sig_parameter_block.
-    def visitSig_parameter_block(self, ctx: AhParser.Sig_parameter_blockContext) -> list:
-        i = 0
-        parameters = []
-        while ctx.sig_parameter(i):
-            opParam = self.visit(ctx.sig_parameter(i))
-            param = {"label": opParam['label']}
-            if 'value' in opParam:
-                param['value'] = opParam['value']
-            parameters.append(param)
-            i += 1
-        return parameters
-
-    # Visit a parse tree produced by AhParser#sig_parameter.
-    def visitSig_parameter(self, ctx: AhParser.Sig_parameterContext):
-        if ctx.labels():
-            return {"label": self.visit(ctx.labels())}
-        else:
-            return self.visit(ctx.optional_parameter())
-
     # Visit a parse tree produced by AhParser#call_parameter.
     def visitCall_parameter(self, ctx: AhParser.Call_parameterContext):
         if ctx.expr():
@@ -930,30 +910,6 @@ class AhVisitor(AhVisitorOriginal):
             result = self.executeCallback(callback=callback, response=response)
 
         return dict({"command": command, "commandHandler": response, "result": result})
-
-    # Visit a parse tree produced by AhParser#async_execute.
-    def visitAsync_execute(self, ctx: AhParser.Async_executeContext):
-        resolvedCommand = self.visit(ctx.commandtax())
-        if ctx.callback():
-            resolvedCommand['callback'] = self.visit(ctx.callback())
-        thread = GenericExecution(self, "Async execution and callback", resolvedCommand, log=self.log,
-                                  debug=self.appOptions.debug, sensitive=self.appOptions.sensitive)
-        self.threads.append(thread)
-        return thread
-
-    # Visit a parse tree produced by AhParser#await.
-    def await_statement(self):
-        if not ctx.labels():
-            for thread in self.threads:
-                thread.join()
-            return
-        threads = self.getVariable(ctx.labels())
-        if isinstance(threads, list):
-            for thread in threads:
-                if isinstance(thread, threading.Thread):
-                    thread.join()
-        elif isinstance(threads, threading.Thread):
-            threads.join()
 
     # Visit a parse tree produced by AhParser#labels.
     def visitLabels(self, ctx: AhParser.LabelsContext):
@@ -1008,35 +964,7 @@ class AhVisitor(AhVisitorOriginal):
         self.symbol_table.insertScope(scope=extendsScope)
         self.symbol_table.insertScope(scope=current)
         # print(self.symbol_table.printTable())
-
-    # Visit a parse tree produced by AhParser#params_statement.
-    def visitSig_statement(self, ctx: AhParser.Sig_statementContext):
-        specialOp = False  # Helps with import and extends
-        if self.parameters and len(self.parameters) == 1 and 'import' in self.parameters and self.parameters[
-            'import'] is None:
-            specialOp = True
-
-        parameters = self.visit(ctx.sig_parameter_block())
-        for param in parameters:
-            label = param['label']
-
-            if specialOp:
-                if 'value' in param:
-                    value = param['value']
-                else:
-                    value = None
-            else:
-                if label in self.parameters:
-                    value = self.parameters[label]
-                elif 'value' in param:
-                    value = param['value']
-                else:
-                    self.error(
-                        'Insufficient parameters. Expected Parameter: \'' + str(label) + '\'')
-                    return None
-
-            self.setVariable(label=label, value=value, convert=False)
-
+        
     # Visit a parse tree produced by AhParser#options_statement.
     def visitOptions_statement(self, ctx: AhParser.Options_statementContext):
         # name -> str
