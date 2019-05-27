@@ -20,6 +20,8 @@ import re
 import threading
 import traceback
 
+from typing import Tuple, Any
+
 
 # TODO: SCOPE GENERATION:
 #   basic symbol creators:
@@ -50,10 +52,62 @@ import traceback
 # TODO: Pull code out of newInstance and extends to another method
 # TODO: Support sig polymorphism for extends
 # TODO: Async, Await
+#
+# TODO: Combine class attributes: parser `state`, `status`, and `message` into a single dict
+# TODO: Parameters must be injected into the symbol scope
+#
+#
+#
+#
+#
 
 class AhVisitor(AhVisitorOriginal):
+    """
+    Parses and executes Scriptax code
 
+    ...
+
+    Attributes
+    ----------
+    log : Logger
+        Logging class used to log messages
+    config : Config
+        Config class for retrieving configuration values
+    appOptions : Options
+        Application options such as debug mode
+    parameters : dict
+        Parameters sent to the parser. Typically method or constructor arguments
+    threads : List[Thread]
+        Holds the threads that this execution spawns
+    state : dict
+        Holds the state of execution. This includes the current file name, line, and character number of execution
+    parser : Antlr4 Ctx Parser, deprecated
+        The parser object created by Antlr4
+    options : dict, deprecated
+        Holds the options defined by the 'options' code in Scriptax
+    status : str
+        The current status of parsing. ok -> running properly, error -> the parsing has error'd, return -> the parser has completed and returned, exit -> unused
+    message : str
+        A message associated with the status. This allows the parser to provide an error message etc.
+    symbol_table : SymbolTable
+        The symbol table used for parsing
+    regexVar : str
+        The regex used for detecting mustache syntax
+    """
     def __init__(self, parameters: dict = None, options: Options = None, file=None, symbol_table: SymbolTable=None):
+        """
+        Parameters
+        ----------
+        parameters : dict
+            Parameters sent to the parser. Typically method or constructor arguments
+        options : Options
+            Application options such as debug mode
+        file : str
+            The file path + name
+        symbol_table : SymbolTable
+            If we would like to parse off of an existing symbol table
+        """
+
         # Aliases
         self.log = State.log
         self.config = State.config
@@ -112,8 +166,22 @@ class AhVisitor(AhVisitorOriginal):
     def isReturn(self):
         return self.status == 'return'
 
-    # Helper method which executes a given scriptax string
-    def parseScript(self, scriptax: str, parameters: dict = None) -> tuple:
+    def parseScript(self, scriptax: str, parameters: dict = None) -> Tuple[Any, AhVisitor]:
+        """
+        Helper method which executes a given scriptax string
+
+        Parameters
+        ----------
+        scriptax : str
+            The scriptax code to execute
+        parameters : dict
+            The parameters we wish to execute with
+
+        Returns
+        -------
+        Tuple[Any, AhVisitor]
+            The first index is the returned result, the second is the parsing class
+        """
         from scriptax.parser.utils.BoilerPlate import customizableParser
         result = customizableParser(scriptax, parameters=parameters)
         if result[1].isError():
@@ -121,8 +189,22 @@ class AhVisitor(AhVisitorOriginal):
             return None, None
         return result
 
-    # Helper method which executes on a given context with a given set of symbols
-    def parseScriptCustom(self, context, symbol_table: SymbolTable = None) -> tuple:
+    def parseScriptCustom(self, context, symbol_table: SymbolTable = None) -> Tuple[Any, AhVisitor]:
+        """
+        Helper method which executes on a given context with a given set of symbols
+
+        Parameters
+        ----------
+        context : antlr 4 context
+            The antlr 4 context variable
+        symbol_table : SymbolTable
+            The symbol table we wish to execute with
+
+        Returns
+        -------
+        Tuple[Any, AhVisitor]
+            The first index is the returned result, the second is the parsing class
+        """
         from scriptax.parser.utils.BoilerPlate import customizableContextParser
         result = customizableContextParser(context, symbol_table=symbol_table)
         if result[1].isError():
@@ -130,25 +212,26 @@ class AhVisitor(AhVisitorOriginal):
             return None, None
         return result
 
-    # Sets the current state of the parser
-    def setState(self, file='', line=-1, char=-1):
-        if file != '':
+    def setState(self, file: str=None, line: int=None, char: int=None):
+        """
+        Sets the current state of the parser
+        """
+        if file:
             self.state['file'] = file
-        if line != -1:
+        if line:
             self.state['line'] = line
-        if char != -1:
+        if char:
             self.state['char'] = char
 
-    # Helper method which executes commandtax
     def executeCommand(self, command: Command) -> ApitaxResponse:
+        """
+        Helper method which executes commandtax
+        """
         from commandtax.flow.Connector import Connector
         if self.appOptions.debug:
             self.log.log('> Executing Commandtax: \'' + command.command + '\' ' + 'with parameters: ' + str(
                 command.parameters))
             self.log.log('')
-
-        if not command.credentials:
-            command.credentials = self.credentials
 
         if not command.options:
             command.options = self.appOptions
@@ -160,8 +243,10 @@ class AhVisitor(AhVisitorOriginal):
                               command=command.command, parameters=command.parameters, request=command.request)
         return connector.execute()
 
-    # Helper method which executes a callback
     def executeCallback(self, callback=None, response: ApitaxResponse = None, result=None):
+        """
+        Helper method which executes a callback
+        """
         from scriptax.parser.utils.BoilerPlate import customizableContextParser
         table = SymbolTable()
         if not result:
@@ -177,74 +262,15 @@ class AhVisitor(AhVisitorOriginal):
         return customizableContextParser(context=callback['block'], symbol_table=table, options=self.appOptions)[0][1]
 
     def setVariable(self, label, value=None, convert=True):
+        """
+
+        """
         return self.setSymbol(label, value=value, convert=convert)
 
-    def setSymbol(self, label, value=None, convert=True):
-        if convert:
-            label = self.visit(label)
-        label = label.replace('$', '')
-        node, name, i = self.symbol_table.traverseToParent(label)
-        components = label.split('.')[i:]
-
-        table = createTableFromScope(node)
-
-        # Direct referencing - ie. parent.path=, parent.parent.path=, path=
-        if len(components) == 1:
-            table.putSymbol(Symbol(name=components[0], symbolType=SYMBOL_VARIABLE, value=value))
-            return True
-
-        symbol, i = table.getSymbolWithLength(components[0], symbolType=SYMBOL_VARIABLE)
-
-        if symbol:
-            i += 1
-
-        # components will be at least 2
-        # use cases:
-        # 1. instance navigation via composition:
-        #   parent.someInstance.someInstanceOnThatOne.path=  (len=3), someInstance.path=  (len=2)
-        # 2. instance setting:  someInstance = new Instance();
-        try:
-            while len(components) > i + 1:
-                if symbol.dataType == DATA_INSTANCE:
-                    table = createTableFromScope(symbol.value)
-                    symbol, j = table.getSymbolWithLength(name=components[i], symbolType=SYMBOL_VARIABLE)
-                elif symbol.dataType == DATA_DICT:
-                    symbol = symbol.value[str(components[i])]
-                    if not isinstance(symbol, Symbol):
-                        symbol = Symbol(symbolType=SYMBOL_VARIABLE, value=symbol)
-                elif symbol.dataType == DATA_LIST:
-                    symbol = symbol.value[int(components[i])]
-                    if not isinstance(symbol, Symbol):
-                        symbol = Symbol(symbolType=SYMBOL_VARIABLE, value=symbol)
-                elif symbol.dataType == DATA_THREAD:
-                    return False
-                elif symbol.dataType == DATA_PYTHONIC:
-                    return False
-                else:
-                    # print(symbol.dataType)
-                    self.error(message="Symbol `" + label + "` is corrupt and not settable.")
-                    return False
-                i += 1
-
-            final = components.pop()
-            if symbol.dataType == DATA_INSTANCE:
-                table = createTableFromScope(symbol.value)
-                table.putSymbol(Symbol(name=final, symbolType=SYMBOL_VARIABLE, value=value))
-            elif symbol.dataType == DATA_DICT:
-                symbol.value[str(final)] = value
-            elif symbol.dataType == DATA_LIST:
-                symbol.value[int(final)] = value
-            else:
-                table.putSymbol(Symbol(name=final, symbolType=SYMBOL_VARIABLE, value=value))
-            return True
-        except:
-            print("Exception during variable setting")
-            traceback.print_exc()
-            self.error(message="Symbol `" + label + "` is corrupt and not settable.")
-            return False
-
     def getVariable(self, label=None, convert=True):
-        # return self.getSymbol(label=label, convert=convert).value
+        """
+
+        """
         if convert:
             label = self.visit(label)
         try:
@@ -253,127 +279,17 @@ class AhVisitor(AhVisitorOriginal):
             self.error(message="Symbol `" + label + "` not found in scope `" + self.symbol_table.current.name + "`")
             return None
 
-    def getSymbol(self, label, convert=True, symbolType=SYMBOL_VARIABLE):
-
-        if convert:
-            label = self.visit(label)
-        label = label.replace('$', '')
-        node, name, i = self.symbol_table.traverseToParent(label)
-        components = label.split('.')[i:]
-
-        table = createTableFromScope(node)
-
-        if len(components) == 1:
-            symbol, i = table.getSymbolWithLength(components[0], symbolType=symbolType)
-            return symbol
-
-        symbol, i = table.getSymbolWithLength(components[0], symbolType=SYMBOL_VARIABLE)
-        if not symbol:
-            symbol, i = table.getSymbolWithLength(components[0], symbolType=SYMBOL_SCRIPT)
-
-        if symbol:
-            i += 1
-
-        try:
-            while len(components) > i:
-                if len(components) > i + 1:
-                    type = SYMBOL_VARIABLE
-                else:
-                    type = symbolType
-                if symbol.dataType == DATA_INSTANCE:
-                    table = createTableFromScope(symbol.value)
-                    symbol, j = table.getSymbolWithLength(name=components[i], symbolType=type)
-                elif symbol.dataType == DATA_DICT:
-                    symbol = symbol.value[str(components[i])]
-                    if not isinstance(symbol, Symbol):
-                        symbol = Symbol(symbolType=type, value=symbol)
-                elif symbol.dataType == DATA_LIST:
-                    symbol = symbol.value[int(components[i])]
-                    if not isinstance(symbol, Symbol):
-                        symbol = Symbol(symbolType=type, value=symbol)
-                elif symbol.dataType == DATA_THREAD:
-                    return None
-                elif symbol.dataType == DATA_PYTHONIC:
-                    return None
-                i += 1
-
-            return symbol
-
-        except:
-            print("Exception during variable fetching")
-            traceback.print_exc()
-            self.error(message="Symbol `" + label + "` not found in scope.")
-            return None
-
     def deleteVariable(self, label, convert=True):
+        """
+
+        """
         return self.deleteSymbol(label, convert=convert)
 
-    def deleteSymbol(self, label, convert=True, symbolType=SYMBOL_VARIABLE):
-        if convert:
-            label = self.visit(label)
-        label = label.replace('$', '')
-        node, name, i = self.symbol_table.traverseToParent(label)
-        components = label.split('.')[i:]
 
-        table = createTableFromScope(node)
-
-        # Direct referencing - ie. parent.path=, parent.parent.path=, path=
-        if len(components) == 1:
-            table.deleteSymbol(name=components[0], symbolType=SYMBOL_VARIABLE)
-            return True
-
-        symbol, i = table.getSymbolWithLength(components[0], symbolType=SYMBOL_VARIABLE)
-
-        if symbol:
-            i += 1
-
-        # components will be at least 2
-        # use cases:
-        # 1. instance navigation via composition:
-        #   parent.someInstance.someInstanceOnThatOne.path=  (len=3), someInstance.path=  (len=2)
-        # 2. instance setting:  someInstance = new Instance();
-        try:
-            while len(components) > i + 1:
-                if symbol.dataType == DATA_INSTANCE:
-                    table = createTableFromScope(symbol.value)
-                    symbol, j = table.getSymbolWithLength(name=components[i], symbolType=SYMBOL_VARIABLE)
-                elif symbol.dataType == DATA_DICT:
-                    symbol = symbol.value[str(components[i])]
-                    if not isinstance(symbol, Symbol):
-                        symbol = Symbol(symbolType=SYMBOL_VARIABLE, value=symbol)
-                elif symbol.dataType == DATA_LIST:
-                    symbol = symbol.value[int(components[i])]
-                    if not isinstance(symbol, Symbol):
-                        symbol = Symbol(symbolType=SYMBOL_VARIABLE, value=symbol)
-                elif symbol.dataType == DATA_THREAD:
-                    return False
-                elif symbol.dataType == DATA_PYTHONIC:
-                    return False
-                else:
-                    # print(symbol.dataType)
-                    self.error(message="Symbol `" + label + "` is corrupt and not settable.")
-                    return False
-                i += 1
-
-            final = components.pop()
-            if symbol.dataType == DATA_INSTANCE:
-                table = createTableFromScope(symbol.value)
-                table.deleteSymbol(name=final, symbolType=SYMBOL_VARIABLE)
-            elif symbol.dataType == DATA_DICT:
-                symbol.value.pop(str(final))
-            elif symbol.dataType == DATA_LIST:
-                del symbol.value[int(final)]
-            else:
-                table.deleteSymbol(name=final, symbolType=SYMBOL_VARIABLE)
-            return True
-        except:
-            print("Exception during variable setting")
-            traceback.print_exc()
-            self.error(message="Symbol `" + label + "` is corrupt and not settable.")
-            return False
-
-    # Dynamic mustache syntax injection
     def inject(self, line):
+        """
+        Dynamic mustache syntax injection
+        """
         matches = re.findall(self.regexVar, line)
         for match in matches:
             label = match[2:-2].strip()
@@ -381,9 +297,11 @@ class AhVisitor(AhVisitorOriginal):
             line = line.replace(match, replacer)
         return line
 
-    # Visit a parse tree produced by AhParser#prog.
     # TODO: Improve error message format
     def visitProg(self, ctx: AhParser.ProgContext):
+        """
+        Visit a parse tree produced by AhParser#prog.
+        """
         self.symbol_table.enterScope()
         self.symbol_table.current.setMeta(name=self.state['file'], scopeType=SCOPE_SCRIPT)
         self.parser = ctx.parser

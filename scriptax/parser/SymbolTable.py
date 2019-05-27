@@ -369,7 +369,7 @@ class SymbolTable(GenericTable):
         """
 
         # Checks if a script has been imported with this name
-        if not self.has_symbol(name : str, type : str =SYMBOL_MODULE):
+        if not self.has_symbol(name, type=SYMBOL_MODULE):
             # Perhaps it is in the parent module scope, let's try
             up_name = self.up_words[0] + "." + name
             if not self.has_symbol(up_name, type=SYMBOL_MODULE):
