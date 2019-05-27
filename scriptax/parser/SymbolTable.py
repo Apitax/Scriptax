@@ -360,6 +360,20 @@ class SymbolTable(GenericTable):
         # Returns the import symbol so that we have the path to re-parse as well as the
         #   symbol table to parse with
         return ExtendedImport(sym_import=symbol, table_extended=instance_table)
+    
+    # Implements static method symbols from the imported scope into this scope
+    def implements(self, import_name):
+        # If we imported module exists, then get the symbol for it
+        symbol: Symbol = self._get_import(import_name)
+
+        # Get the symbols inside of the imported module symbol and loop through them
+        for sym in symbol.value.symbols:
+            # Used for getting type hints in IDE
+            sym: Symbol = sym
+
+            # If the symbol is a static method, then we need to add it to our current module scope
+            if sym.data_type == DATA_METHOD and 'static' in sym.attributes and sym.attributes['static'] == True: 
+                self.scope().insert_symbol(sym)
 
 
 # Model used for extending scopes
