@@ -2,8 +2,25 @@ from scriptax.parser.symbols.SymbolScope import SymbolScope, SCOPE_MODULE
 import json
 
 
-# Wrapper for managing SymbolScope Activation Record Instances (ARI)
 class ARISymbolTable:
+    """
+    Wrapper for managing SymbolScope Activation Record Instances (ARI)
+    Essentially simplifies working with the SymbolScope class.
+    Handles pretty printing, depth calculations, calls, and scoping
+
+    This is a generic class which should be overriden to implement language specific features
+
+    ...
+
+    Attributes
+    ----------
+    root : SymbolScope
+        The root of the symbol table tree
+    current : SymbolScope
+        The active entry (sometimes called node or row) of the symbol table
+    depth : int
+        The depth of the call stack
+    """
     def __init__(self, name=None, type=SCOPE_MODULE):
         # This is the root of the linked list of scopes
         self.root: SymbolScope = SymbolScope(scope_parent=None, type=type)
@@ -20,21 +37,30 @@ class ARISymbolTable:
         #   or as the length of the linked list
         self.depth: int = 0
 
-    # Create a Dynamic Link for a call to another scope
-    # Also increases the linked list depth
-    # Can be thought of as adding another known element to the linked list
+
     def call(self, scope: SymbolScope):
+        """
+        Create a Dynamic Link for a call to another scope
+        Also increases the linked list depth
+        Can be thought of as adding another known element to the linked list
+        """
         self.current = self.scope().call(scope)
         self.depth += 1
 
-    # Removed the Dynamic Links for a call to this scope
-    # Removes the tail of the linked list
+
     def complete_call(self):
+        """
+        Removed the Dynamic Links for a call to this scope
+        Removes the tail of the linked list
+        """
         self.current = self.scope().complete_call()
         self.depth -= 1
 
-    # Creates a new anonymous scope but does not call it or enter it
+
     def birth_scope(self, type=None, name=None) -> SymbolScope:
+        """
+        Creates a new anonymous scope but does not call it or enter it
+        """
         scope = self.scope().birth_scope()
         if type:
             scope.type = type
@@ -42,9 +68,12 @@ class ARISymbolTable:
             scope.name = name
         return scope
 
-    # Enter into an anonymous scope
-    # Useful for any block scopes like IF statements, LOOPS, or method bodies.
+
     def enter_scope(self, type=None, name=None) -> SymbolScope:
+        """
+        Enter into an anonymous scope
+        Useful for any block scopes like IF statements, LOOPS, or method bodies.
+        """
         self.current = self.current.enter_scope()
         self.depth += 1
         if type:
@@ -53,48 +82,87 @@ class ARISymbolTable:
             self.current.name = name
         return self.scope()
 
-    # Exit out of an anonymous scope
-    # This removes this scopes and deletes all the data within it including called scopes and all symbols.
+
     def exit_scope(self) -> SymbolScope:
+        """
+        Exit out of an anonymous scope
+        This removes this scopes and deletes all the data within it including called scopes and all symbols.
+        """
         self.current = self.current.exit_scope()
         self.depth -= 1
         return self.scope()
 
-    # Returns the current scope node the table is pointing to.
     def scope(self) -> SymbolScope:
+        """
+        Returns the current scope node the table is pointing to.
+        """
         return self.current
 
-    # Returns the root scope node the table is pointing to
-    # This is the start of the linked list
+
     def root_scope(self) -> SymbolScope:
+        """
+        Returns the root scope node the table is pointing to
+        This is the start of the linked list
+        """
         return self.root
 
     def get_table_debug(self):
+        """
+        Returns information about the symbol table
+        """
         return json.dumps(self.root.get_scope_debug(), indent=2)
 
     def get_call_stack(self):
+        """
+        Returns the call stack of the program
+        """
         return json.dumps(self.root.get_call_stack(), indent=2)
 
     def get_call_stack_summary(self):
+        """
+        Returns the call stack summary of the program
+        """
         return self.root.get_call_stack_summary()
 
     def print_debug_table(self):
+        """
+        Pretty prints the symbol table information
+        """
         print('>> Symbol Table <<')
         print(self.get_table_debug())
         print("Symbol Table Call Stack Depth: " + str(self.depth))
 
     def print_call_stack(self):
+        """
+        Pretty prints the call stack information
+        """
         print('>> Symbol Table Call Stack <<')
         print(self.get_call_stack())
         print("Symbol Table Call Stack Depth: " + str(self.depth))
 
     def print_call_stack_summary(self):
+        """
+        Pretty prints the call stack summary information
+        """
         print('>> Symbol Table Call Stack Summary <<')
         print(self.get_call_stack_summary())
         print("Symbol Table Call Stack Depth: " + str(self.depth))
 
 
 def create_table(scope: SymbolScope) -> ARISymbolTable:
+    """
+    Creates a new symbol table given a SymbolScope
+
+    Parameters
+    ----------
+    scope : SymbolScope
+        The symbol scope we wish to wrap around
+    
+    Returns
+    -------
+    ARISymbolTable
+        The wrapper table for the scope
+    """
     table = ARISymbolTable()
     table.root = scope
     table.current = scope

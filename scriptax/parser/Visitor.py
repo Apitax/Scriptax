@@ -1,15 +1,14 @@
 from scriptax.grammar.build.Ah3Parser import Ah3Parser as AhParser, Ah3Parser
 from scriptax.grammar.build.Ah3Visitor import Ah3Visitor as AhVisitorOriginal
-from scriptax.parser.symbols.migrate.SymbolTable import SymbolTable, createTableFromScope
-from scriptax.parser.symbols.migrate.Symbol import *
-from scriptax.parser.symbols.migrate.ScriptSymbol import ScriptSymbol
-from scriptax.parser.symbols.migrate.SymbolScope import SymbolScope, SCOPE_BLOCK, SCOPE_METHOD, SCOPE_SCRIPT
 from scriptax.drivers.Driver import Driver
 
 from commandtax.models.Command import Command
 
+from scriptax.parser.SymbolTable import SymbolTable, ExtendedImport, create_table
+from scriptax.parser.symbols.SymbolScope import SymbolScope, SCOPE_GLOBAL, SCOPE_MODULE
+from scriptax.parser.symbols.Symbol import Symbol, DATA_NUMBER, DATA_BOOLEAN, DATA_HEX, DATA_NONE, DATA_STRING,DATA_DICT,DATA_LIST,DATA_METHOD,DATA_THREAD,DATA_PYTHONIC,DATA_INSTANCE,SYMBOL_VAR,SYMBOL_MODULE
+
 from apitaxcore.models.State import State
-from apitaxcore.models.Credentials import Credentials
 from apitaxcore.models.Options import Options
 from apitaxcore.utilities.Async import GenericExecution
 from apitaxcore.utilities.Json import isJson
@@ -54,8 +53,7 @@ import traceback
 
 class AhVisitor(AhVisitorOriginal):
 
-    def __init__(self, credentials: Credentials = None, parameters: dict = None, options: Options = None, file=None,
-                 symbol_table=None):
+    def __init__(self, parameters: dict = None, options: Options = None, file=None, symbol_table: SymbolTable=None):
         # Aliases
         self.log = State.log
         self.config = State.config
@@ -63,7 +61,6 @@ class AhVisitor(AhVisitorOriginal):
         # Parameters
         self.appOptions: Options = options if options is not None else Options()
         # self.appOptions.debug = True
-        self.credentials: Credentials = credentials if credentials is not None else Credentials()
         self.parameters: dict = parameters if parameters is not None else {}
 
         # Async Threading
@@ -964,7 +961,7 @@ class AhVisitor(AhVisitorOriginal):
         self.symbol_table.insertScope(scope=extendsScope)
         self.symbol_table.insertScope(scope=current)
         # print(self.symbol_table.printTable())
-        
+
     # Visit a parse tree produced by AhParser#options_statement.
     def visitOptions_statement(self, ctx: AhParser.Options_statementContext):
         # name -> str
