@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from scriptax.grammar.build.Ah3Parser import Ah3Parser as AhParser, Ah3Parser
-from scriptax.grammar.build.Ah3Visitor import Ah3Visitor as AhVisitorOriginal
+from scriptax.grammar.build.Ah4Parser import Ah4Parser as AhParser, Ah4Parser
+from scriptax.grammar.build.Ah4Visitor import Ah4Visitor as AhVisitorOriginal
 from scriptax.drivers.Driver import Driver
 from scriptax.models.Parameter import Parameter
 
@@ -405,17 +405,17 @@ class AhVisitor(AhVisitorOriginal):
         self.symbol_table.exitScope()
         return result
 
-    # Visit a parse tree produced by Ah3Parser#script_structure.
+    # Visit a parse tree produced by Ah4Parser#script_structure.
     def visitScript_structure(self, ctx: AhParser.Script_structureContext):
         self.visit(ctx.global_statements())
         self.visit(ctx.root_level_statements())
         return self.visit(ctx.statements())
 
-    # Visit a parse tree produced by Ah3Parser#global_statements.
+    # Visit a parse tree produced by Ah4Parser#global_statements.
     def visitGlobal_statements(self, ctx: AhParser.Global_statementsContext):
         return self.visitChildren(ctx)
 
-    # Visit a parse tree produced by Ah3Parser#root_level_statements.
+    # Visit a parse tree produced by Ah4Parser#root_level_statements.
     def visitRoot_level_statements(self, ctx: AhParser.Root_level_statementsContext):
         return self.visitChildren(ctx)
 
@@ -652,7 +652,7 @@ class AhVisitor(AhVisitorOriginal):
         if ctx.for_statement():
             return self.visit(ctx.for_statement())
 
-    # Visit a parse tree produced by Ah3Parser#create_instance.
+    # Visit a parse tree produced by Ah4Parser#create_instance.
     def visitCreate_instance(self, ctx: AhParser.Create_instanceContext):
         label = self.visit(ctx.label())
         symbol: ScriptSymbol = self.symbol_table.getSymbol(name=label, symbolType=SYMBOL_SCRIPT)
@@ -666,14 +666,14 @@ class AhVisitor(AhVisitorOriginal):
         instanceScope.setMeta(name=label, scopeType=SCOPE_SCRIPT)
         return instanceScope
 
-    # Visit a parse tree produced by Ah3Parser#method_statement.
+    # Visit a parse tree produced by Ah4Parser#method_statement.
     def visitMethod_statement(self, ctx: AhParser.Method_statementContext):
         self.symbol_table.current.addSymbol(
             symbol=Symbol(name=self.visit(ctx.label()), symbolType=SYMBOL_METHOD, dataType=DATA_CONTEXT,
                           value=ctx))
         # return self.visitChildren(ctx)
 
-    # Visit a parse tree produced by Ah3Parser#method_call.
+    # Visit a parse tree produced by Ah4Parser#method_call.
     def visitMethod_call(self, ctx: AhParser.Method_callContext) -> tuple:
         # TODO: Check to see whether ASYNC should be used here and if so execute in thread
 
@@ -934,15 +934,15 @@ class AhVisitor(AhVisitorOriginal):
         else:
             return self.visit(ctx.inject())
 
-    # Visit a parse tree produced by Ah3Parser#label.
+    # Visit a parse tree produced by Ah4Parser#label.
     def visitLabel(self, ctx: AhParser.LabelContext):
         return ctx.LABEL().getText()
 
-    # Visit a parse tree produced by Ah3Parser#attribute.
+    # Visit a parse tree produced by Ah4Parser#attribute.
     def visitAttribute(self, ctx: AhParser.AttributeContext):
         return self.visitChildren(ctx)
 
-    # Visit a parse tree produced by Ah3Parser#extends_statement.
+    # Visit a parse tree produced by Ah4Parser#extends_statement.
     def visitExtends_statement(self, ctx: AhParser.Extends_statementContext):
         label = self.visit(ctx.label())
         symbol: ScriptSymbol = self.symbol_table.getSymbol(name=label, symbolType=SYMBOL_SCRIPT)
@@ -1012,7 +1012,7 @@ class AhVisitor(AhVisitorOriginal):
 
         return exportation
 
-    # Visit a parse tree produced by Ah3Parser#import_statement.
+    # Visit a parse tree produced by Ah4Parser#import_statement.
     def visitImport_statement(self, ctx: AhParser.Import_statementContext):
         driver: Driver = LoadedDrivers.getPrimaryDriver()
         labelIndex = 0
@@ -1122,7 +1122,7 @@ class AhVisitor(AhVisitorOriginal):
     def visitCount(self, ctx: AhParser.CountContext):
         return len(self.visit(ctx.expr()))
 
-    # Visit a parse tree produced by Ah3Parser#reflection.
+    # Visit a parse tree produced by Ah4Parser#reflection.
     def visitReflection(self, ctx: AhParser.ReflectionContext):
         symbol = self.getSymbol(label=ctx.labels())
         return symbol.getSymbolDebug()
@@ -1212,10 +1212,65 @@ class AhVisitor(AhVisitorOriginal):
         if ctx.FALSE():
             return False
 
-    # Visit a parse tree produced by Ah3Parser#atom_hex.
+    # Visit a parse tree produced by Ah4Parser#atom_hex.
     def visitAtom_hex(self, ctx: AhParser.Atom_hexContext):
         return '0x' + str(ctx.HEX().getText())[2:].upper()
 
-    # Visit a parse tree produced by Ah3Parser#atom_none.
+    # Visit a parse tree produced by Ah4Parser#atom_none.
     def visitAtom_none(self, ctx: AhParser.Atom_noneContext):
         return None
+
+    def visitRunnable_statements(self, ctx: Ah4Parser.Runnable_statementsContext):
+        return super().visitRunnable_statements(ctx)
+
+    def visitMethod_call_statement(self, ctx: Ah4Parser.Method_call_statementContext):
+        return super().visitMethod_call_statement(ctx)
+
+    def visitCommandtax_statement(self, ctx: Ah4Parser.Commandtax_statementContext):
+        return super().visitCommandtax_statement(ctx)
+
+    def visitOs_statement(self, ctx: Ah4Parser.Os_statementContext):
+        return super().visitOs_statement(ctx)
+
+    def visitAtom_callback(self, ctx: Ah4Parser.Atom_callbackContext):
+        return super().visitAtom_callback(ctx)
+
+    def visitMethod_def_atom(self, ctx: Ah4Parser.Method_def_atomContext):
+        return super().visitMethod_def_atom(ctx)
+
+    def visitSwitch_statement(self, ctx: Ah4Parser.Switch_statementContext):
+        return super().visitSwitch_statement(ctx)
+
+    def visitCase_statement(self, ctx: Ah4Parser.Case_statementContext):
+        return super().visitCase_statement(ctx)
+
+    def visitDefault_statement(self, ctx: Ah4Parser.Default_statementContext):
+        return super().visitDefault_statement(ctx)
+
+    def visitLog_statement(self, ctx: Ah4Parser.Log_statementContext):
+        return super().visitLog_statement(ctx)
+
+    def visitFlexible_parameter_block(self, ctx: Ah4Parser.Flexible_parameter_blockContext):
+        return super().visitFlexible_parameter_block(ctx)
+
+    def visitFlexible_parameter(self, ctx: Ah4Parser.Flexible_parameterContext):
+        return super().visitFlexible_parameter(ctx)
+
+    def visitAhoptions_statement(self, ctx: Ah4Parser.Ahoptions_statementContext):
+        return super().visitAhoptions_statement(ctx)
+
+    def visitDict_signal(self, ctx: Ah4Parser.Dict_signalContext):
+        return super().visitDict_signal(ctx)
+
+    def visitAssignment_statement(self, ctx: Ah4Parser.Assignment_statementContext):
+        return super().visitAssignment_statement(ctx)
+
+    def visitAtom_obj_enum(self, ctx: Ah4Parser.Atom_obj_enumContext):
+        return super().visitAtom_obj_enum(ctx)
+
+    def visitAwait_statement(self, ctx: Ah4Parser.Await_statementContext):
+        return super().visitAwait_statement(ctx)
+
+    def visitRequired_parameter(self, ctx: Ah4Parser.Required_parameterContext):
+        return super().visitRequired_parameter(ctx)
+
