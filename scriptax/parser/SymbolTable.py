@@ -11,6 +11,7 @@ class SymbolTable(GenericTable):
     """
     A specialized Symbol Table for Scriptax
     """
+
     def __init__(self, name=None, type=SCOPE_MODULE):
         super().__init__(name, type)
         self.up_words = ['parent', 'self', 'this', 'me']
@@ -21,7 +22,6 @@ class SymbolTable(GenericTable):
         """
         return any(keyword in self.up_words for keyword in name)
 
-
     def is_name_valid(self, name: list):
         """
         Verifies a name to be valid
@@ -30,7 +30,6 @@ class SymbolTable(GenericTable):
         if self.name_has_up(name[1:]):
             return False
         return True
-
 
     def make_and_verify_name(self, name: str):
         """
@@ -41,7 +40,6 @@ class SymbolTable(GenericTable):
         if not self.is_name_valid(comps):
             raise Exception("Invalid symbol access `" + name + "` Scriptax.SymbolTable@make_and_verify_name")
         return comps
-
 
     def traverse_up(self, name: list):
         """
@@ -57,14 +55,12 @@ class SymbolTable(GenericTable):
                     raise Exception("Invalid symbol access. Too many up traversals. Scriptax.SymbolTable@traverse_up")
         return scope
 
-
     def _get_parent_module(self):
         """
         Returns the parent module within this static scope
         """
         name = [self.up_words[0]]
         return self.traverse_up(name)
-
 
     def search_scope_for_symbol(self, scope: SymbolScope, name: str, type=SYMBOL_VAR) -> Symbol:
         """
@@ -88,7 +84,6 @@ class SymbolTable(GenericTable):
             else:
                 raise Exception(
                     "Cannot find symbol `" + name + "` inside of scope `" + scope.name + "`. Scriptax.SymbolTable@search_scope_for_symbol")
-
 
     def search_symbol_for_value(self, symbol: Symbol, name: list, type=SYMBOL_VAR):
         """
@@ -190,7 +185,6 @@ class SymbolTable(GenericTable):
         except:
             raise Exception("Altering existing symbol failed. Scriptax.SymbolTable@set_symbol")
 
-
     def has_symbol(self, name: str, type=SYMBOL_VAR) -> bool:
         """
         Returns whether or not the given symbol exists
@@ -201,7 +195,6 @@ class SymbolTable(GenericTable):
         except:
             return False
         return True
-
 
     def get_symbol(self, name: str, type=SYMBOL_VAR, as_value=True):
         """
@@ -331,7 +324,8 @@ class SymbolTable(GenericTable):
             raise Exception("Method `" + ".".join(name) + "` does not exist. Scriptax.SymbolTable@execute")
 
         if method.data_type != DATA_METHOD:
-            raise Exception("Cannot execute non executable data type `" + method.data_type + "`. Scriptax.SymbolTable@execute")
+            raise Exception(
+                "Cannot execute non executable data type `" + method.data_type + "`. Scriptax.SymbolTable@execute")
 
         # Spawns an anonymous scope if this should be executed in isolation, otherwise use the existing
         #   static scope
@@ -353,15 +347,13 @@ class SymbolTable(GenericTable):
         # Returns the body method such that some parser or compiler can execute its body
         return method.value
 
-
     def complete_execution(self):
         """
         Completes execution
         """
         self.exit_scope()
 
-
-    def new(self, name : str, path : str) -> Symbol:
+    def new(self, name: str, path: str) -> Symbol:
         """
         No parameters on this one as it is handled via the constructor
         After calling this, use the returned scope symbol to parse the file
@@ -370,8 +362,7 @@ class SymbolTable(GenericTable):
         return self.scope().insert_symbol(
             Symbol(name=name, symbol_type=SYMBOL_MODULE, value=import_table.scope(), attributes={"path": path}))
 
-
-    def _get_import(self, name : str) -> Symbol:
+    def _get_import(self, name: str) -> Symbol:
         """
         Finds an import and returns it's symbol
         If it does not exist, it will throw an exception.
@@ -390,8 +381,7 @@ class SymbolTable(GenericTable):
         # If we imported module exists, then return the symbol for it
         return self.get_symbol(name, type=SYMBOL_MODULE, as_value=False)
 
-
-    def copy(self, import_name : str, var_name : str) -> Symbol:
+    def copy(self, import_name: str, var_name: str) -> Symbol:
         """
         Uses the import to generate a fresh object of that type
         After calling this, use the returned scope symbol to parse the file and call the constructor
@@ -407,8 +397,9 @@ class SymbolTable(GenericTable):
         return self.scope().insert_symbol(
             Symbol(name=var_name, value=instance_table.scope(), attributes={"path": symbol.attributes['path']}))
 
+    def new_instance(self, import_name: str) -> :
 
-    def extends(self, import_name : str) -> 'ExtendedImport':
+    def extends(self, import_name: str) -> 'ExtendedImport':
         """
         Extends the current scope by an imported scope.
         Returns the SymbolTable of the extended scope (the copy of the imported scope) in order to parse using it
@@ -426,9 +417,8 @@ class SymbolTable(GenericTable):
         # Returns the import symbol so that we have the path to re-parse as well as the
         #   symbol table to parse with
         return ExtendedImport(sym_import=symbol, table_extended=instance_table)
-    
 
-    def implements(self, import_name : str):
+    def implements(self, import_name: str):
         """
         Implements static method symbols from the imported scope into this scope
         """
@@ -442,7 +432,7 @@ class SymbolTable(GenericTable):
             sym: Symbol = sym
 
             # If the symbol is a static method, then we need to add it to our current module scope
-            if sym.data_type == DATA_METHOD and 'static' in sym.attributes and sym.attributes['static'] == True: 
+            if sym.data_type == DATA_METHOD and 'static' in sym.attributes and sym.attributes['static'] == True:
                 self.scope().insert_symbol(sym)
 
 
@@ -450,6 +440,7 @@ class ExtendedImport:
     """
     A model class used for extending scopes
     """
+
     def __init__(self, sym_import: Symbol, table_extended: SymbolTable):
         self.sym_import: Symbol = sym_import
         self.table: SymbolTable = table_extended

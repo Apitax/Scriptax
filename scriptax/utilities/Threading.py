@@ -1,33 +1,44 @@
 import threading
 import uuid
+from apitaxcore.models.Options import Options
+from scriptax.parser.utils.BoilerPlate import customizableContextParser
+from scriptax.parser.Visitor import AhVisitor
+from scriptax.models.Parameter import Parameter
+from typing import List
 
 
 class GenericExecution(threading.Thread):
-    def __init__(self, context, name, resolvedCommand, log=None, label=None, debug=False, sensitive=False):
+    def __init__(self, name, parent_visitor: AhVisitor, body_context, options: Options,
+                 body_parameters: List[Parameter] = None, callback_context=None,
+                 callback_parameters: List[Parameter] = None,
+                 log=None, result_label: str = None):
         super().__init__()
         self.threadId = uuid.uuid4()
         self.name = name
-        self.resolvedCommand = resolvedCommand
-        self.callback = None
-        if ('callback' in resolvedCommand):
-            self.callback = resolvedCommand['callback']
-        self.result = {}
         self.log = log
-        self.context = context
-        self.label = label
-        self.debug = debug
-        self.sensitive = sensitive
+        self.options: Options = options
+        self.result_label: str = result_label
+        self.body_context = body_context
+        self.body_parameters: List[Parameter] = body_parameters
+        self.callback_context = callback_context
+        self.callback_parameters: List[Parameter] = callback_parameters
+        self.parent_visitor: AhVisitor = parent_visitor
 
     def run(self):
-        if (self.log and self.debug):
+        if self.log and self.options.debug:
             self.log.log(">> Executing Async")
             self.log.log('')
 
         # Execute command
-        self.result = self.context.executeCommand(self.resolvedCommand, '(In Thread: ' + str(self.threadId) + ')')
+        result = customizableContextParser(context=self.body_context, parameters=self.body_parameters,
+                                           options=self.options)
 
-        if (self.label):
-            self.context.data.storeVar(self.label, self.result['result'])
+        if self.callback_context:
+            result = customizableContextParser(context=self.callback_context, parameters=self.callback_parameters + [
+                Parameter(name="result", value=result[0], options=self.options)])
+
+        if self.result_label:
+            self.parent_visitor.set_variable(label=self.result_label, value=result[0])
 
     def serialize(self):
         return str(self.threadId)

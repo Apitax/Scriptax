@@ -8,7 +8,7 @@ from apitaxcore.models.State import State
 
 
 # Script is used to automate the execution of many commands
-class Scriptax():
+class Scriptax:
     def __init__(self, parameters, options):
         self.options = options
         self.parameters = parameters

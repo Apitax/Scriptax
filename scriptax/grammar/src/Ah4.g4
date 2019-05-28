@@ -142,7 +142,7 @@ optional_parameters_block : (dict_signal | optional_parameter)? (COMMA (dict_sig
 
 optional_parameter : labels EQUAL expr ;
 
-dict_signal : SIGNAL (atom_obj_dict | label) ;
+dict_signal : SIGNAL (atom_obj_dict | labels) ;
 
 casting :
       (
@@ -167,7 +167,7 @@ assignment_statement :
 
 atom_obj_list : SOPEN expr? (COMMA expr?)* SCLOSE ;
 
-atom_obj_enum : LPAREN label (ARROW expr)? (COMMA label (ARROW expr)?)* RPAREN ;
+atom_obj_enum : LPAREN (label ARROW expr (COMMA (label ARROW expr)?)*) | (label (COMMA label?)*) RPAREN ;
 
 error_statement : ERROR LPAREN expr? RPAREN;
 

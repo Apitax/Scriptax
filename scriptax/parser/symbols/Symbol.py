@@ -84,7 +84,9 @@ class Symbol:
     get_symbol_debug()
     print_symbol_debug()
     """
-    def __init__(self, name : str, value : Any =None, symbol_type : str =SYMBOL_VAR, data_type : str =None, attributes : dict=None):
+
+    def __init__(self, name: str, value: Any = None, symbol_type: str = SYMBOL_VAR, data_type: str = None,
+                 attributes: dict = None):
         self.name = name
 
         if not data_type:
@@ -100,7 +102,7 @@ class Symbol:
         if not self.attributes:
             self.attributes = {}
 
-    def set_value(self, data_type: str=None, value: Any=None):
+    def set_value(self, data_type: str = None, value: Any = None):
         """
         Sets the value of a symbol
         """
@@ -110,7 +112,7 @@ class Symbol:
             self.data_type = data_type
         self.value = value
 
-    def get_symbol_debug(self):
+    def get_symbol_debug(self) -> dict:
         """
         Retrieve information about the symbol
         """

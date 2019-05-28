@@ -9,7 +9,7 @@ import sys
 def serializedATN():
     with StringIO() as buf:
         buf.write("\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\\")
-        buf.write("\u0269\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7")
+        buf.write("\u0274\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7")
         buf.write("\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t\13\4\f\t\f\4\r\t\r\4\16")
         buf.write("\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22\t\22\4\23\t\23")
         buf.write("\4\24\t\24\4\25\t\25\4\26\t\26\4\27\t\27\4\30\t\30\4\31")
@@ -56,18 +56,19 @@ def serializedATN():
         buf.write("\'\16\'\u01e3\13\'\3\'\3\'\3(\3(\3(\5(\u01ea\n(\3(\3(")
         buf.write("\3(\3(\3(\5(\u01f1\n(\3(\3(\3(\5(\u01f6\n(\3)\3)\5)\u01fa")
         buf.write("\n)\3)\3)\5)\u01fe\n)\7)\u0200\n)\f)\16)\u0203\13)\3)")
-        buf.write("\3)\3*\3*\3*\3*\5*\u020b\n*\3*\3*\3*\3*\5*\u0211\n*\7")
-        buf.write("*\u0213\n*\f*\16*\u0216\13*\3*\3*\3+\3+\3+\5+\u021d\n")
-        buf.write("+\3+\3+\3,\3,\3,\3,\3,\3-\3-\3-\3-\3.\3.\5.\u022c\n.\3")
-        buf.write("/\3/\3/\3\60\3\60\3\60\3\60\3\60\3\61\3\61\5\61\u0238")
-        buf.write("\n\61\3\62\3\62\3\62\3\63\3\63\3\64\3\64\3\64\7\64\u0242")
-        buf.write("\n\64\f\64\16\64\u0245\13\64\3\65\3\65\3\65\3\65\3\65")
-        buf.write("\3\65\3\65\3\65\3\65\3\65\3\65\5\65\u0252\n\65\3\65\3")
-        buf.write("\65\5\65\u0256\n\65\3\65\5\65\u0259\n\65\3\66\3\66\3\67")
+        buf.write("\3)\3*\3*\3*\3*\3*\3*\3*\3*\3*\5*\u0210\n*\7*\u0212\n")
+        buf.write("*\f*\16*\u0215\13*\3*\3*\3*\5*\u021a\n*\7*\u021c\n*\f")
+        buf.write("*\16*\u021f\13*\3*\3*\5*\u0223\n*\3+\3+\3+\5+\u0228\n")
+        buf.write("+\3+\3+\3,\3,\3,\3,\3,\3-\3-\3-\3-\3.\3.\5.\u0237\n.\3")
+        buf.write("/\3/\3/\3\60\3\60\3\60\3\60\3\60\3\61\3\61\5\61\u0243")
+        buf.write("\n\61\3\62\3\62\3\62\3\63\3\63\3\64\3\64\3\64\7\64\u024d")
+        buf.write("\n\64\f\64\16\64\u0250\13\64\3\65\3\65\3\65\3\65\3\65")
+        buf.write("\3\65\3\65\3\65\3\65\3\65\3\65\5\65\u025d\n\65\3\65\3")
+        buf.write("\65\5\65\u0261\n\65\3\65\5\65\u0264\n\65\3\66\3\66\3\67")
         buf.write("\3\67\38\38\39\39\3:\3:\3;\3;\3<\3<\3<\2\3\16=\2\4\6\b")
         buf.write("\n\f\16\20\22\24\26\30\32\34\36 \"$&(*,.\60\62\64\668")
         buf.write(":<>@BDFHJLNPRTVXZ\\^`bdfhjlnprtv\2\n\3\2\26\27\3\2\24")
-        buf.write("\25\3\2\5\b\3\2\t\n\3\2AF\3\2OQ\3\2 !\3\2\"#\2\u0290\2")
+        buf.write("\25\3\2\5\b\3\2\t\n\3\2AF\3\2OQ\3\2 !\3\2\"#\2\u029d\2")
         buf.write("x\3\2\2\2\4{\3\2\2\2\6\u0084\3\2\2\2\b\u0094\3\2\2\2\n")
         buf.write("\u009a\3\2\2\2\f\u009e\3\2\2\2\16\u00b5\3\2\2\2\20\u00db")
         buf.write("\3\2\2\2\22\u00e5\3\2\2\2\24\u00ea\3\2\2\2\26\u00f4\3")
@@ -79,12 +80,12 @@ def serializedATN():
         buf.write("\3\2\2\2:\u0181\3\2\2\2<\u0185\3\2\2\2>\u0193\3\2\2\2")
         buf.write("@\u01aa\3\2\2\2B\u01b0\3\2\2\2D\u01b7\3\2\2\2F\u01c3\3")
         buf.write("\2\2\2H\u01c7\3\2\2\2J\u01cc\3\2\2\2L\u01d1\3\2\2\2N\u01e6")
-        buf.write("\3\2\2\2P\u01f7\3\2\2\2R\u0206\3\2\2\2T\u0219\3\2\2\2")
-        buf.write("V\u0220\3\2\2\2X\u0225\3\2\2\2Z\u0229\3\2\2\2\\\u022d")
-        buf.write("\3\2\2\2^\u0230\3\2\2\2`\u0235\3\2\2\2b\u0239\3\2\2\2")
-        buf.write("d\u023c\3\2\2\2f\u023e\3\2\2\2h\u0258\3\2\2\2j\u025a\3")
-        buf.write("\2\2\2l\u025c\3\2\2\2n\u025e\3\2\2\2p\u0260\3\2\2\2r\u0262")
-        buf.write("\3\2\2\2t\u0264\3\2\2\2v\u0266\3\2\2\2xy\5\4\3\2yz\7\2")
+        buf.write("\3\2\2\2P\u01f7\3\2\2\2R\u0222\3\2\2\2T\u0224\3\2\2\2")
+        buf.write("V\u022b\3\2\2\2X\u0230\3\2\2\2Z\u0234\3\2\2\2\\\u0238")
+        buf.write("\3\2\2\2^\u023b\3\2\2\2`\u0240\3\2\2\2b\u0244\3\2\2\2")
+        buf.write("d\u0247\3\2\2\2f\u0249\3\2\2\2h\u0263\3\2\2\2j\u0265\3")
+        buf.write("\2\2\2l\u0267\3\2\2\2n\u0269\3\2\2\2p\u026b\3\2\2\2r\u026d")
+        buf.write("\3\2\2\2t\u026f\3\2\2\2v\u0271\3\2\2\2xy\5\4\3\2yz\7\2")
         buf.write("\2\3z\3\3\2\2\2{|\5\6\4\2|}\5\b\5\2}~\5\n\6\2~\5\3\2\2")
         buf.write("\2\177\u0080\5<\37\2\u0080\u0081\7\60\2\2\u0081\u0083")
         buf.write("\3\2\2\2\u0082\177\3\2\2\2\u0083\u0086\3\2\2\2\u0084\u0082")
@@ -231,7 +232,7 @@ def serializedATN():
         buf.write("\2\2\2\u01c1E\3\2\2\2\u01c2\u01c0\3\2\2\2\u01c3\u01c4")
         buf.write("\5f\64\2\u01c4\u01c5\7\23\2\2\u01c5\u01c6\5\16\b\2\u01c6")
         buf.write("G\3\2\2\2\u01c7\u01ca\7\64\2\2\u01c8\u01cb\5L\'\2\u01c9")
-        buf.write("\u01cb\5j\66\2\u01ca\u01c8\3\2\2\2\u01ca\u01c9\3\2\2\2")
+        buf.write("\u01cb\5f\64\2\u01ca\u01c8\3\2\2\2\u01ca\u01c9\3\2\2\2")
         buf.write("\u01cbI\3\2\2\2\u01cc\u01cd\t\6\2\2\u01cd\u01ce\7+\2\2")
         buf.write("\u01ce\u01cf\5\16\b\2\u01cf\u01d0\7,\2\2\u01d0K\3\2\2")
         buf.write("\2\u01d1\u01d6\7)\2\2\u01d2\u01d3\5\16\b\2\u01d3\u01d4")
@@ -258,51 +259,56 @@ def serializedATN():
         buf.write("\u0200\3\2\2\2\u01ff\u01fb\3\2\2\2\u0200\u0203\3\2\2\2")
         buf.write("\u0201\u01ff\3\2\2\2\u0201\u0202\3\2\2\2\u0202\u0204\3")
         buf.write("\2\2\2\u0203\u0201\3\2\2\2\u0204\u0205\7.\2\2\u0205Q\3")
-        buf.write("\2\2\2\u0206\u0207\7+\2\2\u0207\u020a\5j\66\2\u0208\u0209")
-        buf.write("\7\62\2\2\u0209\u020b\5\16\b\2\u020a\u0208\3\2\2\2\u020a")
-        buf.write("\u020b\3\2\2\2\u020b\u0214\3\2\2\2\u020c\u020d\7\36\2")
-        buf.write("\2\u020d\u0210\5j\66\2\u020e\u020f\7\62\2\2\u020f\u0211")
-        buf.write("\5\16\b\2\u0210\u020e\3\2\2\2\u0210\u0211\3\2\2\2\u0211")
-        buf.write("\u0213\3\2\2\2\u0212\u020c\3\2\2\2\u0213\u0216\3\2\2\2")
-        buf.write("\u0214\u0212\3\2\2\2\u0214\u0215\3\2\2\2\u0215\u0217\3")
-        buf.write("\2\2\2\u0216\u0214\3\2\2\2\u0217\u0218\7,\2\2\u0218S\3")
-        buf.write("\2\2\2\u0219\u021a\7N\2\2\u021a\u021c\7+\2\2\u021b\u021d")
-        buf.write("\5\16\b\2\u021c\u021b\3\2\2\2\u021c\u021d\3\2\2\2\u021d")
-        buf.write("\u021e\3\2\2\2\u021e\u021f\7,\2\2\u021fU\3\2\2\2\u0220")
-        buf.write("\u0221\7\6\2\2\u0221\u0222\7\37\2\2\u0222\u0223\5\16\b")
-        buf.write("\2\u0223\u0224\7\5\2\2\u0224W\3\2\2\2\u0225\u0226\7+\2")
-        buf.write("\2\u0226\u0227\5\16\b\2\u0227\u0228\7,\2\2\u0228Y\3\2")
-        buf.write("\2\2\u0229\u022b\7=\2\2\u022a\u022c\5\16\b\2\u022b\u022a")
-        buf.write("\3\2\2\2\u022b\u022c\3\2\2\2\u022c[\3\2\2\2\u022d\u022e")
-        buf.write("\7\61\2\2\u022e\u022f\5\16\b\2\u022f]\3\2\2\2\u0230\u0231")
-        buf.write("\7J\2\2\u0231\u0232\7+\2\2\u0232\u0233\5f\64\2\u0233\u0234")
-        buf.write("\7,\2\2\u0234_\3\2\2\2\u0235\u0237\7V\2\2\u0236\u0238")
-        buf.write("\5f\64\2\u0237\u0236\3\2\2\2\u0237\u0238\3\2\2\2\u0238")
-        buf.write("a\3\2\2\2\u0239\u023a\7\63\2\2\u023a\u023b\5f\64\2\u023b")
-        buf.write("c\3\2\2\2\u023c\u023d\5f\64\2\u023de\3\2\2\2\u023e\u0243")
-        buf.write("\5h\65\2\u023f\u0240\7\33\2\2\u0240\u0242\5h\65\2\u0241")
-        buf.write("\u023f\3\2\2\2\u0242\u0245\3\2\2\2\u0243\u0241\3\2\2\2")
-        buf.write("\u0243\u0244\3\2\2\2\u0244g\3\2\2\2\u0245\u0243\3\2\2")
-        buf.write("\2\u0246\u0255\5j\66\2\u0247\u0251\7-\2\2\u0248\u0249")
-        buf.write("\5\16\b\2\u0249\u024a\7\34\2\2\u024a\u0252\3\2\2\2\u024b")
-        buf.write("\u024c\7\34\2\2\u024c\u0252\5\16\b\2\u024d\u024e\5\16")
-        buf.write("\b\2\u024e\u024f\7\34\2\2\u024f\u0250\5\16\b\2\u0250\u0252")
-        buf.write("\3\2\2\2\u0251\u0248\3\2\2\2\u0251\u024b\3\2\2\2\u0251")
-        buf.write("\u024d\3\2\2\2\u0252\u0253\3\2\2\2\u0253\u0254\7.\2\2")
-        buf.write("\u0254\u0256\3\2\2\2\u0255\u0247\3\2\2\2\u0255\u0256\3")
-        buf.write("\2\2\2\u0256\u0259\3\2\2\2\u0257\u0259\5V,\2\u0258\u0246")
-        buf.write("\3\2\2\2\u0258\u0257\3\2\2\2\u0259i\3\2\2\2\u025a\u025b")
-        buf.write("\7X\2\2\u025bk\3\2\2\2\u025c\u025d\t\7\2\2\u025dm\3\2")
-        buf.write("\2\2\u025e\u025f\7$\2\2\u025fo\3\2\2\2\u0260\u0261\t\b")
-        buf.write("\2\2\u0261q\3\2\2\2\u0262\u0263\t\t\2\2\u0263s\3\2\2\2")
-        buf.write("\u0264\u0265\7%\2\2\u0265u\3\2\2\2\u0266\u0267\7&\2\2")
-        buf.write("\u0267w\3\2\2\2<\u0084\u008a\u008f\u0094\u009a\u009e\u00a2")
+        buf.write("\2\2\2\u0206\u0207\7+\2\2\u0207\u0208\5j\66\2\u0208\u0209")
+        buf.write("\7\62\2\2\u0209\u0213\5\16\b\2\u020a\u020f\7\36\2\2\u020b")
+        buf.write("\u020c\5j\66\2\u020c\u020d\7\62\2\2\u020d\u020e\5\16\b")
+        buf.write("\2\u020e\u0210\3\2\2\2\u020f\u020b\3\2\2\2\u020f\u0210")
+        buf.write("\3\2\2\2\u0210\u0212\3\2\2\2\u0211\u020a\3\2\2\2\u0212")
+        buf.write("\u0215\3\2\2\2\u0213\u0211\3\2\2\2\u0213\u0214\3\2\2\2")
+        buf.write("\u0214\u0223\3\2\2\2\u0215\u0213\3\2\2\2\u0216\u021d\5")
+        buf.write("j\66\2\u0217\u0219\7\36\2\2\u0218\u021a\5j\66\2\u0219")
+        buf.write("\u0218\3\2\2\2\u0219\u021a\3\2\2\2\u021a\u021c\3\2\2\2")
+        buf.write("\u021b\u0217\3\2\2\2\u021c\u021f\3\2\2\2\u021d\u021b\3")
+        buf.write("\2\2\2\u021d\u021e\3\2\2\2\u021e\u0220\3\2\2\2\u021f\u021d")
+        buf.write("\3\2\2\2\u0220\u0221\7,\2\2\u0221\u0223\3\2\2\2\u0222")
+        buf.write("\u0206\3\2\2\2\u0222\u0216\3\2\2\2\u0223S\3\2\2\2\u0224")
+        buf.write("\u0225\7N\2\2\u0225\u0227\7+\2\2\u0226\u0228\5\16\b\2")
+        buf.write("\u0227\u0226\3\2\2\2\u0227\u0228\3\2\2\2\u0228\u0229\3")
+        buf.write("\2\2\2\u0229\u022a\7,\2\2\u022aU\3\2\2\2\u022b\u022c\7")
+        buf.write("\6\2\2\u022c\u022d\7\37\2\2\u022d\u022e\5\16\b\2\u022e")
+        buf.write("\u022f\7\5\2\2\u022fW\3\2\2\2\u0230\u0231\7+\2\2\u0231")
+        buf.write("\u0232\5\16\b\2\u0232\u0233\7,\2\2\u0233Y\3\2\2\2\u0234")
+        buf.write("\u0236\7=\2\2\u0235\u0237\5\16\b\2\u0236\u0235\3\2\2\2")
+        buf.write("\u0236\u0237\3\2\2\2\u0237[\3\2\2\2\u0238\u0239\7\61\2")
+        buf.write("\2\u0239\u023a\5\16\b\2\u023a]\3\2\2\2\u023b\u023c\7J")
+        buf.write("\2\2\u023c\u023d\7+\2\2\u023d\u023e\5f\64\2\u023e\u023f")
+        buf.write("\7,\2\2\u023f_\3\2\2\2\u0240\u0242\7V\2\2\u0241\u0243")
+        buf.write("\5f\64\2\u0242\u0241\3\2\2\2\u0242\u0243\3\2\2\2\u0243")
+        buf.write("a\3\2\2\2\u0244\u0245\7\63\2\2\u0245\u0246\5f\64\2\u0246")
+        buf.write("c\3\2\2\2\u0247\u0248\5f\64\2\u0248e\3\2\2\2\u0249\u024e")
+        buf.write("\5h\65\2\u024a\u024b\7\33\2\2\u024b\u024d\5h\65\2\u024c")
+        buf.write("\u024a\3\2\2\2\u024d\u0250\3\2\2\2\u024e\u024c\3\2\2\2")
+        buf.write("\u024e\u024f\3\2\2\2\u024fg\3\2\2\2\u0250\u024e\3\2\2")
+        buf.write("\2\u0251\u0260\5j\66\2\u0252\u025c\7-\2\2\u0253\u0254")
+        buf.write("\5\16\b\2\u0254\u0255\7\34\2\2\u0255\u025d\3\2\2\2\u0256")
+        buf.write("\u0257\7\34\2\2\u0257\u025d\5\16\b\2\u0258\u0259\5\16")
+        buf.write("\b\2\u0259\u025a\7\34\2\2\u025a\u025b\5\16\b\2\u025b\u025d")
+        buf.write("\3\2\2\2\u025c\u0253\3\2\2\2\u025c\u0256\3\2\2\2\u025c")
+        buf.write("\u0258\3\2\2\2\u025d\u025e\3\2\2\2\u025e\u025f\7.\2\2")
+        buf.write("\u025f\u0261\3\2\2\2\u0260\u0252\3\2\2\2\u0260\u0261\3")
+        buf.write("\2\2\2\u0261\u0264\3\2\2\2\u0262\u0264\5V,\2\u0263\u0251")
+        buf.write("\3\2\2\2\u0263\u0262\3\2\2\2\u0264i\3\2\2\2\u0265\u0266")
+        buf.write("\7X\2\2\u0266k\3\2\2\2\u0267\u0268\t\7\2\2\u0268m\3\2")
+        buf.write("\2\2\u0269\u026a\7$\2\2\u026ao\3\2\2\2\u026b\u026c\t\b")
+        buf.write("\2\2\u026cq\3\2\2\2\u026d\u026e\t\t\2\2\u026es\3\2\2\2")
+        buf.write("\u026f\u0270\7%\2\2\u0270u\3\2\2\2\u0271\u0272\7&\2\2")
+        buf.write("\u0272w\3\2\2\2>\u0084\u008a\u008f\u0094\u009a\u009e\u00a2")
         buf.write("\u00b5\u00cc\u00ce\u00db\u00e5\u00ea\u00ef\u00f2\u010c")
         buf.write("\u0117\u0124\u0130\u0135\u0148\u0157\u0163\u0165\u016c")
         buf.write("\u016e\u0176\u017c\u0181\u0185\u018d\u0191\u019b\u01a5")
         buf.write("\u01a8\u01b7\u01bc\u01c0\u01ca\u01d6\u01dd\u01e1\u01e9")
-        buf.write("\u01f0\u01f5\u01f9\u01fd\u0201\u020a\u0210\u0214\u021c")
-        buf.write("\u022b\u0237\u0243\u0251\u0255\u0258")
+        buf.write("\u01f0\u01f5\u01f9\u01fd\u0201\u020f\u0213\u0219\u021d")
+        buf.write("\u0222\u0227\u0236\u0242\u024e\u025c\u0260\u0263")
         return buf.getvalue()
 
 
@@ -3538,8 +3544,8 @@ class Ah4Parser ( Parser ):
             return self.getTypedRuleContext(Ah4Parser.Atom_obj_dictContext,0)
 
 
-        def label(self):
-            return self.getTypedRuleContext(Ah4Parser.LabelContext,0)
+        def labels(self):
+            return self.getTypedRuleContext(Ah4Parser.LabelsContext,0)
 
 
         def getRuleIndex(self):
@@ -3577,9 +3583,9 @@ class Ah4Parser ( Parser ):
                 self.state = 454
                 self.atom_obj_dict()
                 pass
-            elif token in [Ah4Parser.LABEL]:
+            elif token in [Ah4Parser.LT, Ah4Parser.LABEL]:
                 self.state = 455
-                self.label()
+                self.labels()
                 pass
             else:
                 raise NoViableAltException(self)
@@ -4021,9 +4027,6 @@ class Ah4Parser ( Parser ):
                 return self.getTypedRuleContext(Ah4Parser.LabelContext,i)
 
 
-        def RPAREN(self):
-            return self.getToken(Ah4Parser.RPAREN, 0)
-
         def ARROW(self, i:int=None):
             if i is None:
                 return self.getTokens(Ah4Parser.ARROW)
@@ -4042,6 +4045,9 @@ class Ah4Parser ( Parser ):
                 return self.getTokens(Ah4Parser.COMMA)
             else:
                 return self.getToken(Ah4Parser.COMMA, i)
+
+        def RPAREN(self):
+            return self.getToken(Ah4Parser.RPAREN, 0)
 
         def getRuleIndex(self):
             return Ah4Parser.RULE_atom_obj_enum
@@ -4069,45 +4075,72 @@ class Ah4Parser ( Parser ):
         self.enterRule(localctx, 80, self.RULE_atom_obj_enum)
         self._la = 0 # Token type
         try:
-            self.enterOuterAlt(localctx, 1)
-            self.state = 516
-            self.match(Ah4Parser.LPAREN)
-            self.state = 517
-            self.label()
-            self.state = 520
+            self.state = 544
             self._errHandler.sync(self)
-            _la = self._input.LA(1)
-            if _la==Ah4Parser.ARROW:
+            token = self._input.LA(1)
+            if token in [Ah4Parser.LPAREN]:
+                self.enterOuterAlt(localctx, 1)
+                self.state = 516
+                self.match(Ah4Parser.LPAREN)
+
+                self.state = 517
+                self.label()
                 self.state = 518
                 self.match(Ah4Parser.ARROW)
                 self.state = 519
                 self.expr(0)
-
-
-            self.state = 530
-            self._errHandler.sync(self)
-            _la = self._input.LA(1)
-            while _la==Ah4Parser.COMMA:
-                self.state = 522
-                self.match(Ah4Parser.COMMA)
-                self.state = 523
-                self.label()
-                self.state = 526
+                self.state = 529
                 self._errHandler.sync(self)
-                _la = self._input.LA(1)
-                if _la==Ah4Parser.ARROW:
-                    self.state = 524
-                    self.match(Ah4Parser.ARROW)
-                    self.state = 525
-                    self.expr(0)
+                _alt = self._interp.adaptivePredict(self._input,49,self._ctx)
+                while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
+                    if _alt==1:
+                        self.state = 520
+                        self.match(Ah4Parser.COMMA)
+                        self.state = 525
+                        self._errHandler.sync(self)
+                        la_ = self._interp.adaptivePredict(self._input,48,self._ctx)
+                        if la_ == 1:
+                            self.state = 521
+                            self.label()
+                            self.state = 522
+                            self.match(Ah4Parser.ARROW)
+                            self.state = 523
+                            self.expr(0)
 
+                 
+                    self.state = 531
+                    self._errHandler.sync(self)
+                    _alt = self._interp.adaptivePredict(self._input,49,self._ctx)
 
+                pass
+            elif token in [Ah4Parser.LABEL]:
+                self.enterOuterAlt(localctx, 2)
                 self.state = 532
+                self.label()
+                self.state = 539
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
+                while _la==Ah4Parser.COMMA:
+                    self.state = 533
+                    self.match(Ah4Parser.COMMA)
+                    self.state = 535
+                    self._errHandler.sync(self)
+                    _la = self._input.LA(1)
+                    if _la==Ah4Parser.LABEL:
+                        self.state = 534
+                        self.label()
 
-            self.state = 533
-            self.match(Ah4Parser.RPAREN)
+
+                    self.state = 541
+                    self._errHandler.sync(self)
+                    _la = self._input.LA(1)
+
+                self.state = 542
+                self.match(Ah4Parser.RPAREN)
+                pass
+            else:
+                raise NoViableAltException(self)
+
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -4163,19 +4196,19 @@ class Ah4Parser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 535
+            self.state = 546
             self.match(Ah4Parser.ERROR)
-            self.state = 536
+            self.state = 547
             self.match(Ah4Parser.LPAREN)
-            self.state = 538
+            self.state = 549
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << Ah4Parser.LT) | (1 << Ah4Parser.MINUS) | (1 << Ah4Parser.NOT) | (1 << Ah4Parser.INT) | (1 << Ah4Parser.FLOAT) | (1 << Ah4Parser.FALSE) | (1 << Ah4Parser.TRUE) | (1 << Ah4Parser.STRING) | (1 << Ah4Parser.HEX) | (1 << Ah4Parser.NONE) | (1 << Ah4Parser.EXECUTEOPEN) | (1 << Ah4Parser.BLOCKOPEN) | (1 << Ah4Parser.LPAREN) | (1 << Ah4Parser.SOPEN) | (1 << Ah4Parser.HASH) | (1 << Ah4Parser.AT) | (1 << Ah4Parser.TYPE_INT))) != 0) or ((((_la - 64)) & ~0x3f) == 0 and ((1 << (_la - 64)) & ((1 << (Ah4Parser.TYPE_DICT - 64)) | (1 << (Ah4Parser.TYPE_LIST - 64)) | (1 << (Ah4Parser.TYPE_DEC - 64)) | (1 << (Ah4Parser.TYPE_STR - 64)) | (1 << (Ah4Parser.TYPE_BOOL - 64)) | (1 << (Ah4Parser.OS - 64)) | (1 << (Ah4Parser.COMMANDTAX - 64)) | (1 << (Ah4Parser.SCRIPT - 64)) | (1 << (Ah4Parser.STATIC - 64)) | (1 << (Ah4Parser.ASYNC - 64)) | (1 << (Ah4Parser.AWAIT - 64)) | (1 << (Ah4Parser.NEW - 64)) | (1 << (Ah4Parser.LABEL - 64)))) != 0):
-                self.state = 537
+                self.state = 548
                 self.expr(0)
 
 
-            self.state = 540
+            self.state = 551
             self.match(Ah4Parser.RPAREN)
         except RecognitionException as re:
             localctx.exception = re
@@ -4231,13 +4264,13 @@ class Ah4Parser ( Parser ):
         self.enterRule(localctx, 84, self.RULE_inject)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 542
+            self.state = 553
             self.match(Ah4Parser.LT)
-            self.state = 543
+            self.state = 554
             self.match(Ah4Parser.BAR)
-            self.state = 544
+            self.state = 555
             self.expr(0)
-            self.state = 545
+            self.state = 556
             self.match(Ah4Parser.GT)
         except RecognitionException as re:
             localctx.exception = re
@@ -4290,11 +4323,11 @@ class Ah4Parser ( Parser ):
         self.enterRule(localctx, 86, self.RULE_condition)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 547
+            self.state = 558
             self.match(Ah4Parser.LPAREN)
-            self.state = 548
+            self.state = 559
             self.expr(0)
-            self.state = 549
+            self.state = 560
             self.match(Ah4Parser.RPAREN)
         except RecognitionException as re:
             localctx.exception = re
@@ -4345,13 +4378,13 @@ class Ah4Parser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 551
+            self.state = 562
             self.match(Ah4Parser.RETURNS)
-            self.state = 553
+            self.state = 564
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << Ah4Parser.LT) | (1 << Ah4Parser.MINUS) | (1 << Ah4Parser.NOT) | (1 << Ah4Parser.INT) | (1 << Ah4Parser.FLOAT) | (1 << Ah4Parser.FALSE) | (1 << Ah4Parser.TRUE) | (1 << Ah4Parser.STRING) | (1 << Ah4Parser.HEX) | (1 << Ah4Parser.NONE) | (1 << Ah4Parser.EXECUTEOPEN) | (1 << Ah4Parser.BLOCKOPEN) | (1 << Ah4Parser.LPAREN) | (1 << Ah4Parser.SOPEN) | (1 << Ah4Parser.HASH) | (1 << Ah4Parser.AT) | (1 << Ah4Parser.TYPE_INT))) != 0) or ((((_la - 64)) & ~0x3f) == 0 and ((1 << (_la - 64)) & ((1 << (Ah4Parser.TYPE_DICT - 64)) | (1 << (Ah4Parser.TYPE_LIST - 64)) | (1 << (Ah4Parser.TYPE_DEC - 64)) | (1 << (Ah4Parser.TYPE_STR - 64)) | (1 << (Ah4Parser.TYPE_BOOL - 64)) | (1 << (Ah4Parser.OS - 64)) | (1 << (Ah4Parser.COMMANDTAX - 64)) | (1 << (Ah4Parser.SCRIPT - 64)) | (1 << (Ah4Parser.STATIC - 64)) | (1 << (Ah4Parser.ASYNC - 64)) | (1 << (Ah4Parser.AWAIT - 64)) | (1 << (Ah4Parser.NEW - 64)) | (1 << (Ah4Parser.LABEL - 64)))) != 0):
-                self.state = 552
+                self.state = 563
                 self.expr(0)
 
 
@@ -4403,9 +4436,9 @@ class Ah4Parser ( Parser ):
         self.enterRule(localctx, 90, self.RULE_count)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 555
+            self.state = 566
             self.match(Ah4Parser.HASH)
-            self.state = 556
+            self.state = 567
             self.expr(0)
         except RecognitionException as re:
             localctx.exception = re
@@ -4461,13 +4494,13 @@ class Ah4Parser ( Parser ):
         self.enterRule(localctx, 92, self.RULE_delete_statement)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 558
+            self.state = 569
             self.match(Ah4Parser.DEL)
-            self.state = 559
+            self.state = 570
             self.match(Ah4Parser.LPAREN)
-            self.state = 560
+            self.state = 571
             self.labels()
-            self.state = 561
+            self.state = 572
             self.match(Ah4Parser.RPAREN)
         except RecognitionException as re:
             localctx.exception = re
@@ -4518,13 +4551,13 @@ class Ah4Parser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 563
+            self.state = 574
             self.match(Ah4Parser.AWAIT)
-            self.state = 565
+            self.state = 576
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             if _la==Ah4Parser.LT or _la==Ah4Parser.LABEL:
-                self.state = 564
+                self.state = 575
                 self.labels()
 
 
@@ -4576,9 +4609,9 @@ class Ah4Parser ( Parser ):
         self.enterRule(localctx, 96, self.RULE_reflection)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 567
+            self.state = 578
             self.match(Ah4Parser.AT)
-            self.state = 568
+            self.state = 579
             self.labels()
         except RecognitionException as re:
             localctx.exception = re
@@ -4625,7 +4658,7 @@ class Ah4Parser ( Parser ):
         self.enterRule(localctx, 98, self.RULE_required_parameter)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 570
+            self.state = 581
             self.labels()
         except RecognitionException as re:
             localctx.exception = re
@@ -4681,20 +4714,20 @@ class Ah4Parser ( Parser ):
         self.enterRule(localctx, 100, self.RULE_labels)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 572
+            self.state = 583
             self.label_comp()
-            self.state = 577
+            self.state = 588
             self._errHandler.sync(self)
-            _alt = self._interp.adaptivePredict(self._input,54,self._ctx)
+            _alt = self._interp.adaptivePredict(self._input,56,self._ctx)
             while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
                 if _alt==1:
-                    self.state = 573
+                    self.state = 584
                     self.match(Ah4Parser.DOT)
-                    self.state = 574
+                    self.state = 585
                     self.label_comp() 
-                self.state = 579
+                self.state = 590
                 self._errHandler.sync(self)
-                _alt = self._interp.adaptivePredict(self._input,54,self._ctx)
+                _alt = self._interp.adaptivePredict(self._input,56,self._ctx)
 
         except RecognitionException as re:
             localctx.exception = re
@@ -4760,54 +4793,54 @@ class Ah4Parser ( Parser ):
         localctx = Ah4Parser.Label_compContext(self, self._ctx, self.state)
         self.enterRule(localctx, 102, self.RULE_label_comp)
         try:
-            self.state = 598
+            self.state = 609
             self._errHandler.sync(self)
             token = self._input.LA(1)
             if token in [Ah4Parser.LABEL]:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 580
+                self.state = 591
                 self.label()
-                self.state = 595
+                self.state = 606
                 self._errHandler.sync(self)
-                la_ = self._interp.adaptivePredict(self._input,56,self._ctx)
+                la_ = self._interp.adaptivePredict(self._input,58,self._ctx)
                 if la_ == 1:
-                    self.state = 581
+                    self.state = 592
                     self.match(Ah4Parser.SOPEN)
-                    self.state = 591
+                    self.state = 602
                     self._errHandler.sync(self)
-                    la_ = self._interp.adaptivePredict(self._input,55,self._ctx)
+                    la_ = self._interp.adaptivePredict(self._input,57,self._ctx)
                     if la_ == 1:
-                        self.state = 582
+                        self.state = 593
                         self.expr(0)
-                        self.state = 583
+                        self.state = 594
                         self.match(Ah4Parser.COLON)
                         pass
 
                     elif la_ == 2:
-                        self.state = 585
+                        self.state = 596
                         self.match(Ah4Parser.COLON)
-                        self.state = 586
+                        self.state = 597
                         self.expr(0)
                         pass
 
                     elif la_ == 3:
-                        self.state = 587
+                        self.state = 598
                         self.expr(0)
-                        self.state = 588
+                        self.state = 599
                         self.match(Ah4Parser.COLON)
-                        self.state = 589
+                        self.state = 600
                         self.expr(0)
                         pass
 
 
-                    self.state = 593
+                    self.state = 604
                     self.match(Ah4Parser.SCLOSE)
 
 
                 pass
             elif token in [Ah4Parser.LT]:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 597
+                self.state = 608
                 self.inject()
                 pass
             else:
@@ -4857,7 +4890,7 @@ class Ah4Parser ( Parser ):
         self.enterRule(localctx, 104, self.RULE_label)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 600
+            self.state = 611
             self.match(Ah4Parser.LABEL)
         except RecognitionException as re:
             localctx.exception = re
@@ -4910,7 +4943,7 @@ class Ah4Parser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 602
+            self.state = 613
             _la = self._input.LA(1)
             if not(((((_la - 77)) & ~0x3f) == 0 and ((1 << (_la - 77)) & ((1 << (Ah4Parser.SCRIPT - 77)) | (1 << (Ah4Parser.STATIC - 77)) | (1 << (Ah4Parser.ASYNC - 77)))) != 0)):
                 self._errHandler.recoverInline(self)
@@ -4961,7 +4994,7 @@ class Ah4Parser ( Parser ):
         self.enterRule(localctx, 108, self.RULE_atom_string)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 604
+            self.state = 615
             self.match(Ah4Parser.STRING)
         except RecognitionException as re:
             localctx.exception = re
@@ -5011,7 +5044,7 @@ class Ah4Parser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 606
+            self.state = 617
             _la = self._input.LA(1)
             if not(_la==Ah4Parser.INT or _la==Ah4Parser.FLOAT):
                 self._errHandler.recoverInline(self)
@@ -5066,7 +5099,7 @@ class Ah4Parser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 608
+            self.state = 619
             _la = self._input.LA(1)
             if not(_la==Ah4Parser.FALSE or _la==Ah4Parser.TRUE):
                 self._errHandler.recoverInline(self)
@@ -5117,7 +5150,7 @@ class Ah4Parser ( Parser ):
         self.enterRule(localctx, 114, self.RULE_atom_hex)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 610
+            self.state = 621
             self.match(Ah4Parser.HEX)
         except RecognitionException as re:
             localctx.exception = re
@@ -5163,7 +5196,7 @@ class Ah4Parser ( Parser ):
         self.enterRule(localctx, 116, self.RULE_atom_none)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 612
+            self.state = 623
             self.match(Ah4Parser.NONE)
         except RecognitionException as re:
             localctx.exception = re

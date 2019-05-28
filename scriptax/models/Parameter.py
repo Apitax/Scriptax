@@ -1,4 +1,7 @@
-class Parameter:
-    def __init__(self, name, value=None):
-        self.name = name
-        self.value = value
+from pydantic import BaseModel
+from typing import Any
+
+
+class Parameter(BaseModel):
+    name: str
+    value: Any = None

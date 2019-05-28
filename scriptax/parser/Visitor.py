@@ -4,12 +4,15 @@ from scriptax.grammar.build.Ah4Parser import Ah4Parser as AhParser, Ah4Parser
 from scriptax.grammar.build.Ah4Visitor import Ah4Visitor as AhVisitorOriginal
 from scriptax.drivers.Driver import Driver
 from scriptax.models.Parameter import Parameter
+from scriptax.models.Attributes import Attributes
+from scriptax.models.AhOptions import AhOptions
 
 from commandtax.models.Command import Command
 
 from scriptax.parser.SymbolTable import SymbolTable, ExtendedImport, create_table
 from scriptax.parser.symbols.SymbolScope import SymbolScope, SCOPE_GLOBAL, SCOPE_MODULE
-from scriptax.parser.symbols.Symbol import Symbol, DATA_NUMBER, DATA_BOOLEAN, DATA_HEX, DATA_NONE, DATA_STRING,DATA_DICT,DATA_LIST,DATA_METHOD,DATA_THREAD,DATA_PYTHONIC,DATA_INSTANCE,SYMBOL_VAR,SYMBOL_MODULE
+from scriptax.parser.symbols.Symbol import Symbol, DATA_NUMBER, DATA_BOOLEAN, DATA_HEX, DATA_NONE, DATA_STRING, \
+    DATA_DICT, DATA_LIST, DATA_METHOD, DATA_THREAD, DATA_PYTHONIC, DATA_INSTANCE, SYMBOL_VAR, SYMBOL_MODULE
 
 from apitaxcore.models.State import State
 from apitaxcore.models.Options import Options
@@ -23,8 +26,7 @@ import re
 import threading
 import traceback
 
-from typing import Tuple, Any, List
-
+from typing import Tuple, Any, List, Union, Dict
 
 
 # TODO: SCOPE GENERATION:
@@ -51,10 +53,6 @@ from typing import Tuple, Any, List
 #
 # TODO: Variable access in DOT notation (dict, list, symbol, straight up data)
 # TODO: Variable setting in DOT notation (dict, list, symbol, straight up data)
-# vTODO: Implement class signatures using `sig`
-# TODO: Implement reflection according to GitHub issue
-# TODO: Pull code out of newInstance and extends to another method
-# TODO: Support sig polymorphism for extends
 # TODO: Async, Await
 #
 # TODO: Combine class attributes: parser `state`, `status`, and `message` into a single dict
@@ -81,8 +79,6 @@ class AhVisitor(AhVisitorOriginal):
         Application options such as debug mode
     parameters : dict
         Parameters sent to the parser. Typically method or constructor arguments
-    threads : List[Thread]
-        Holds the threads that this execution spawns
     state : dict
         Holds the state of execution. This includes the current file name, line, and character number of execution
     parser : Antlr4 Ctx Parser, deprecated
@@ -98,7 +94,8 @@ class AhVisitor(AhVisitorOriginal):
     regexVar : str
         The regex used for detecting mustache syntax
     """
-    def __init__(self, parameters: dict = None, options: Options = None, file=None, symbol_table: SymbolTable=None):
+
+    def __init__(self, parameters: dict = None, options: Options = None, file=None, symbol_table: SymbolTable = None):
         """
         Parameters
         ----------
@@ -121,13 +118,10 @@ class AhVisitor(AhVisitorOriginal):
         # self.appOptions.debug = True
         self.parameters: dict = parameters if parameters is not None else {}
 
-        # Async Threading
-        self.threads = []
-
         # TODO: Evaluate necessity of these
         self.state = {'file': file, 'line': 0, 'char': 0}
         self.parser = None
-        self.options = {}
+        self.options: AhOptions = AhOptions()
 
         # Parsing status
         # Values: ok, error, exit, return
@@ -216,7 +210,7 @@ class AhVisitor(AhVisitorOriginal):
             return None, None
         return result
 
-    def setState(self, file: str=None, line: int=None, char: int=None):
+    def setState(self, file: str = None, line: int = None, char: int = None):
         """
         Sets the current state of the parser
         """
@@ -235,7 +229,6 @@ class AhVisitor(AhVisitorOriginal):
         if not isinstance(name, str):
             name = self.visit(label)
         return name
-            
 
     # TODO
     def executeOs(self):
@@ -285,7 +278,7 @@ class AhVisitor(AhVisitorOriginal):
         # return customizableContextParser(context=callback['block'], symbol_table=table, options=self.appOptions)[0][1]
         pass
 
-    # TODO
+    # TODO exceptions
     def set_variable(self, label, value=None):
         """
         Sets the value of a variable. Creates the variable if it does not exist yet.
@@ -293,7 +286,7 @@ class AhVisitor(AhVisitorOriginal):
         label = self.resolve_label(label)
         self.symbol_table.set_symbol(name=label, value=value)
 
-    # TODO
+    # TODO exceptions
     def get_variable(self, label=None):
         """
         Gets the value of a variable. Raises an exception if that variable does not exist.
@@ -308,13 +301,27 @@ class AhVisitor(AhVisitorOriginal):
         #     self.error(message="Symbol `" + label + "` not found in scope `" + self.symbol_table.current.name + "`")
         #     return None
 
-    # TODO
+    # TODO exceptions
     def delete_variable(self, label):
         """
 
         """
         label = self.resolve_label(label)
         self.symbol_table.remove_symbol(name=label)
+
+    def get_symbol(self, label) -> Symbol:
+        """
+        :param label:
+        :return:
+        """
+        label = self.resolve_label(label)
+        try:
+            return self.symbol_table.get_symbol(name=label, as_value=False)
+        except Exception:
+            try:
+                return self.symbol_table.get_symbol(name=label, type=SYMBOL_MODULE, as_value=False)
+            except Exception:
+                raise Exception("Could not find symbol")
 
     def new_instance(self, import_name, var_name):
         """
@@ -347,15 +354,14 @@ class AhVisitor(AhVisitorOriginal):
         self.symbol_table.complete_execution()
         return result
 
-    def import_module(self, label, path : str):
+    def import_module(self, label, path: str):
         label = self.resolve_label(label)
         # TODO: Don't import if a import already exists
         module = self.symbol_table.new(name=label, path=path)
         # Don't parse here due to the new inheritance format
         # module_table = create_table(module.value)
-        
 
-    def extend(self, label, path : str):
+    def extend(self, label, path: str):
         """
 
         """
@@ -596,53 +602,6 @@ class AhVisitor(AhVisitorOriginal):
 
         return self.visitChildren(ctx)
 
-    # Visit a parse tree produced by AhParser#set_var.
-    def visitAssignment(self, ctx: AhParser.AssignmentContext):
-        label = self.visit(ctx.labels())
-        value = None
-
-        if ctx.expr():
-            value = self.visit(ctx.expr())
-
-        if not ctx.EQUAL():
-            var = self.getVariable(label=label, convert=False)
-            if ctx.D_PLUS():
-                value = var + 1
-            elif ctx.D_MINUS():
-                value = var - 1
-            else:
-                if ctx.PE():
-                    value = var + value
-                elif ctx.ME():
-                    value = var - value
-                elif ctx.MUE():
-                    value = var * value
-                elif ctx.DE():
-                    value = var / value
-
-        if ctx.SOPEN():
-            var = self.getVariable(label=label, convert=False)
-            if not isinstance(var, list):
-                self.error("Appending to a list requires the variable being a list")
-                return
-            var.append(value)
-            tval = value
-            value = var
-            self.setVariable(label=label, value=value, convert=False)
-            if isinstance(tval, threading.Thread):
-                tval.label = label + "." + str(len(value) - 1)
-                tval.start()
-        else:
-            self.setVariable(label=label, value=value, convert=False)
-            if isinstance(value, threading.Thread):
-                value.label = label
-                value.start()
-
-        if self.appOptions.debug:
-            self.log.log('> Assigning Variable: ' + label + ' = ' + str(
-                value))
-            self.log.log('')
-
     # Visit a parse tree produced by AhParser#flow.
     def visitFlow(self, ctx: AhParser.FlowContext) -> tuple:
         if ctx.if_statement():
@@ -651,20 +610,6 @@ class AhVisitor(AhVisitorOriginal):
             return self.visit(ctx.while_statement())
         if ctx.for_statement():
             return self.visit(ctx.for_statement())
-
-    # Visit a parse tree produced by Ah4Parser#create_instance.
-    def visitCreate_instance(self, ctx: AhParser.Create_instanceContext):
-        label = self.visit(ctx.label())
-        symbol: ScriptSymbol = self.symbol_table.getSymbol(name=label, symbolType=SYMBOL_SCRIPT)
-        scriptax = symbol.driver.getDriverScript(symbol.path)
-        parameters = self.visit(ctx.optional_parameters_block())
-        parser = self.parseScript(scriptax, parameters=parameters)[1]
-        instanceTable: SymbolTable = parser.symbol_table
-        instanceTable.resetTable()
-        instanceTable.enterScope()  # SymbolTable()
-        instanceScope = instanceTable.current
-        instanceScope.setMeta(name=label, scopeType=SCOPE_SCRIPT)
-        return instanceScope
 
     # Visit a parse tree produced by Ah4Parser#method_statement.
     def visitMethod_statement(self, ctx: AhParser.Method_statementContext):
@@ -836,16 +781,6 @@ class AhVisitor(AhVisitorOriginal):
         else:
             self.error("An each loop must be passed a list")
 
-    # Visit a parse tree produced by AhParser#condition.
-    def visitCondition(self, ctx: AhParser.ConditionContext):
-        condition = self.visit(ctx.expr())
-
-        if self.appOptions.debug:
-            self.log.log('>> Evaluated Flow Condition as: ' + str(condition))
-            self.log.log('')
-
-        return condition
-
     # Visit a parse tree produced by AhParser#block.
     def visitBlock(self, ctx: AhParser.BlockContext) -> tuple:
         self.symbol_table.enterScope()
@@ -869,26 +804,12 @@ class AhVisitor(AhVisitorOriginal):
     def visitCallback_block(self, ctx: AhParser.Callback_blockContext):
         return self.visit(ctx.statements())
 
-    # Visit a parse tree produced by AhParser#optional_parameters_block.
-    def visitOptional_parameters_block(self, ctx: AhParser.Optional_parameters_blockContext) -> dict:
-        i = 0
-        parameters = {}
-        while ctx.optional_parameter(i):
-            opParam = self.visit(ctx.optional_parameter(i))
-            parameters[opParam['label']] = opParam['value']
-            i += 1
-        return parameters
-
     # Visit a parse tree produced by AhParser#call_parameter.
     def visitCall_parameter(self, ctx: AhParser.Call_parameterContext):
         if ctx.expr():
             return {"value": self.visit(ctx.expr())}
         else:
             return self.visit(ctx.optional_parameter())
-
-    # Visit a parse tree produced by AhParser#optional_parameter.
-    def visitOptional_parameter(self, ctx: AhParser.Optional_parameterContext):
-        return {"label": self.visit(ctx.labels()), "value": self.visit(ctx.expr())}
 
     # Visit a parse tree produced by AhParser#execute.
     def visitExecute(self, ctx):
@@ -913,34 +834,6 @@ class AhVisitor(AhVisitorOriginal):
             result = self.executeCallback(callback=callback, response=response)
 
         return dict({"command": command, "commandHandler": response, "result": result})
-
-    # Visit a parse tree produced by AhParser#labels.
-    def visitLabels(self, ctx: AhParser.LabelsContext):
-
-        label = [self.visit(ctx.label_comp(0))]
-        i = 0
-        while ctx.DOT(i):
-            label.append(str(self.visit(ctx.label_comp(i + 1))))
-            i += 1
-
-        label = '.'.join(label)
-
-        return label.replace('$', '')
-
-    # Visit a parse tree produced by AhParser#label_comp.
-    def visitLabel_comp(self, ctx: AhParser.Label_compContext):
-        if ctx.label():
-            return self.visit(ctx.label())
-        else:
-            return self.visit(ctx.inject())
-
-    # Visit a parse tree produced by Ah4Parser#label.
-    def visitLabel(self, ctx: AhParser.LabelContext):
-        return ctx.LABEL().getText()
-
-    # Visit a parse tree produced by Ah4Parser#attribute.
-    def visitAttribute(self, ctx: AhParser.AttributeContext):
-        return self.visitChildren(ctx)
 
     # Visit a parse tree produced by Ah4Parser#extends_statement.
     def visitExtends_statement(self, ctx: AhParser.Extends_statementContext):
@@ -967,50 +860,6 @@ class AhVisitor(AhVisitorOriginal):
         self.symbol_table.insertScope(scope=extendsScope)
         self.symbol_table.insertScope(scope=current)
         # print(self.symbol_table.printTable())
-
-    # Visit a parse tree produced by AhParser#options_statement.
-    def visitOptions_statement(self, ctx: AhParser.Options_statementContext):
-        # name -> str
-        # help -> str
-        # summary -> str
-        # description -> str
-        # author -> str
-        # version -> str
-        # link -> str
-        # available -> bool
-        # enabled -> bool
-        # access -> list['apitax', 'roles']
-        self.options = self.visit(ctx.optional_parameters_block())
-
-    # Visit a parse tree produced by AhParser#delete_statement.
-    def visitDelete_statement(self, ctx: AhParser.Delete_statementContext):
-        label = self.visit(ctx.labels())
-        self.deleteVariable(label=label, convert=False)
-        if self.appOptions.debug:
-            self.log.log('> Deleteing variable: ' + label)
-            self.log.log('')
-
-    # Visit a parse tree produced by AhParser#error_statement.
-    def visitError_statement(self, ctx: AhParser.Error_statementContext):
-        message = "No error message was specified"
-        if ctx.expr():
-            message = self.visit(ctx.expr())
-        self.error(message)
-
-    # Visit a parse tree produced by AhParser#return_statement.
-    def visitReturn_statement(self, ctx: AhParser.Return_statementContext):
-        exportation = None
-        if ctx.expr():
-            exportation = self.visit(ctx.expr())
-
-        if self.appOptions.debug:
-            if exportation:
-                self.log.log('> Returning with value: ' + str(exportation))
-            else:
-                self.log.log('> Returning with value: None')
-            self.log.log('')
-
-        return exportation
 
     # Visit a parse tree produced by Ah4Parser#import_statement.
     def visitImport_statement(self, ctx: AhParser.Import_statementContext):
@@ -1052,8 +901,78 @@ class AhVisitor(AhVisitorOriginal):
                                 driver=driver))
         # return self.visitChildren(ctx)
 
-    # Visit a parse tree produced by AhParser#casting.
-    def visitCasting(self, ctx: AhParser.CastingContext):
+    # Visit a parse tree produced by AhParser#log.
+    def visitLog(self, ctx: AhParser.LogContext):
+        if ctx.expr():
+            self.log.log('> Logging: ' + json.dumps(self.visit(ctx.expr())))
+            self.log.log('')
+
+    def visitAtom(self, ctx: AhParser.AtomContext):
+
+        if ctx.atom_obj_dict():
+            return self.visit(ctx.atom_obj_dict())
+
+        if ctx.atom_obj_list():
+            return self.visit(ctx.atom_obj_list())
+
+        if ctx.atom_obj_enum():
+            return self.visit(ctx.atom_obj_enum())
+
+        if ctx.atom_string():
+            return self.visit(ctx.atom_string())
+
+        if ctx.atom_number():
+            return self.visit(ctx.atom_number())
+
+        if ctx.atom_boolean():
+            return self.visit(ctx.atom_boolean())
+
+        if ctx.atom_hex():
+            return self.visit(ctx.atom_hex())
+
+        if ctx.atom_none():
+            return self.visit(ctx.atom_none())
+
+    def visitCreate_instance(self, ctx: AhParser.Create_instanceContext):
+        label = self.visit(ctx.label())
+
+        parameters = self.visit(ctx.optional_parameters_block())
+
+        return instanceScope
+
+    def visitAhoptions_statement(self, ctx: AhParser.Ahoptions_statementContext):
+        data = self.visit(ctx.atom_obj_dict())
+        self.options = AhOptions(**data)
+
+    def visitOptional_parameters_block(self, ctx: AhParser.Optional_parameters_blockContext) -> List[Parameter]:
+        i = 0
+        parameters: List[Parameter] = []
+        while ctx.optional_parameter(i):
+            parameters.append(self.visit(ctx.optional_parameter(i)))
+            i += 1
+        return parameters
+
+    def visitOptional_parameter(self, ctx: AhParser.Optional_parameterContext) -> Parameter:
+        return Parameter(name=self.visit(ctx.labels()), value=self.visit(ctx.expr()))
+
+    def visitDict_signal(self, ctx: AhParser.Dict_signalContext) -> List[Parameter]:
+        data = {}
+        if ctx.labels():
+            data = self.get_variable(label=ctx.labels())
+        else:
+            data = self.visit(ctx.atom_obj_dict())
+
+        if not isinstance(data, dict):
+            raise Exception("Not a dict")
+
+        parameters: List[Parameter] = []
+        for key, value in data.items():
+            parameters.append(Parameter(name=key, value=value))
+
+        return parameters
+
+    # TODO: Support casting between enums and dicts
+    def visitCasting(self, ctx: AhParser.CastingContext) -> Any:
         value = self.visit(ctx.expr())
         returner = None
         if ctx.TYPE_INT():
@@ -1112,55 +1031,7 @@ class AhVisitor(AhVisitorOriginal):
 
         return returner
 
-    # Visit a parse tree produced by AhParser#log.
-    def visitLog(self, ctx: AhParser.LogContext):
-        if ctx.expr():
-            self.log.log('> Logging: ' + json.dumps(self.visit(ctx.expr())))
-            self.log.log('')
-
-    # Visit a parse tree produced by AhParser#count.
-    def visitCount(self, ctx: AhParser.CountContext):
-        return len(self.visit(ctx.expr()))
-
-    # Visit a parse tree produced by Ah4Parser#reflection.
-    def visitReflection(self, ctx: AhParser.ReflectionContext):
-        symbol = self.getSymbol(label=ctx.labels())
-        return symbol.getSymbolDebug()
-
-    # Visit a parse tree produced by AhParser#inject.
-    def visitInject(self, ctx: AhParser.InjectContext):
-        returner = self.visit(ctx.expr())
-        if self.appOptions.debug:
-            self.log.log('> Injecting into: ' + ctx.getText() + ' with the value ' + str(returner))
-            self.log.log('')
-        return returner
-
-    # Visit a parse tree produced by AhParser#atom.
-    def visitAtom(self, ctx: AhParser.AtomContext):
-
-        if ctx.atom_obj_dict():
-            return self.visit(ctx.atom_obj_dict())
-
-        if ctx.atom_obj_list():
-            return self.visit(ctx.atom_obj_list())
-
-        if ctx.atom_string():
-            return self.visit(ctx.atom_string())
-
-        if ctx.atom_number():
-            return self.visit(ctx.atom_number())
-
-        if ctx.atom_boolean():
-            return self.visit(ctx.atom_boolean())
-
-        if ctx.atom_hex():
-            return self.visit(ctx.atom_hex())
-
-        if ctx.atom_none():
-            return self.visit(ctx.atom_none())
-
-    # Visit a parse tree produced by AhParser#obj_dict.
-    def visitAtom_obj_dict(self, ctx: AhParser.Atom_obj_dictContext):
+    def visitAtom_obj_dict(self, ctx: AhParser.Atom_obj_dictContext) -> dict:
         dictionary = {}
         i = 0
         if ctx.COLON(0):
@@ -1171,8 +1042,53 @@ class AhVisitor(AhVisitorOriginal):
             i += 1
         return dictionary
 
-    # Visit a parse tree produced by AhParser#obj_list.
-    def visitAtom_obj_list(self, ctx: AhParser.Atom_obj_listContext):
+    def visitAssignment_statement(self, ctx: AhParser.Assignment_statementContext):
+        label = self.visit(ctx.labels())
+        value = None
+
+        if ctx.expr():
+            value = self.visit(ctx.expr())
+
+        if not ctx.EQUAL():
+            var = self.get_variable(label=label)
+            if ctx.D_PLUS():
+                value = var + 1
+            elif ctx.D_MINUS():
+                value = var - 1
+            else:
+                if ctx.PE():
+                    value = var + value
+                elif ctx.ME():
+                    value = var - value
+                elif ctx.MUE():
+                    value = var * value
+                elif ctx.DE():
+                    value = var / value
+
+        if ctx.SOPEN():
+            var = self.get_variable(label=label)
+            if not isinstance(var, list):
+                self.error("Appending to a list requires the variable being a list")
+                return
+            var.append(value)
+            tval = value
+            value = var
+            self.set_variable(label=label, value=value)
+            if isinstance(tval, threading.Thread):
+                tval.label = label + "." + str(len(value) - 1)
+                tval.start()
+        else:
+            self.set_variable(label=label, value=value)
+            if isinstance(value, threading.Thread):
+                value.label = label
+                value.start()
+
+        if self.appOptions.debug:
+            self.log.log('> Assigning Variable: ' + label + ' = ' + str(
+                value))
+            self.log.log('')
+
+    def visitAtom_obj_list(self, ctx: AhParser.Atom_obj_listContext) -> list:
         parameters = []
         i = 0
         if ctx.expr(0):
@@ -1182,8 +1098,120 @@ class AhVisitor(AhVisitorOriginal):
             i += 1
         return parameters
 
-    # Visit a parse tree produced by AhParser#string.
-    def visitAtom_string(self, ctx: AhParser.Atom_stringContext):
+    def visitAtom_obj_enum(self, ctx: AhParser.Atom_obj_enumContext) -> List[Parameter]:
+        parameters: List[Parameter] = []
+        i = 0
+        if ctx.expr(0):
+            # Using the arrow format
+            if ctx.label(0):
+                parameters.append(Parameter(name=self.visit(ctx.label(0)), value=self.visit(ctx.expr(0))))
+            while ctx.COMMA(i) and ctx.label(i + 1):
+                parameters.append(Parameter(name=self.visit(ctx.label(i + 1)), value=self.visit(ctx.expr(i + 1))))
+                i += 1
+        else:
+            # Not using the arrow format
+            if ctx.label(0):
+                parameters.append(Parameter(name=self.visit(ctx.label(0)), value=i))
+            while ctx.COMMA(i) and ctx.label(i + 1):
+                parameters.append(Parameter(name=self.visit(ctx.label(i + 1)), value=i + 1))
+                i += 1
+
+        return parameters
+
+    def visitError_statement(self, ctx: AhParser.Error_statementContext):
+        message = "No error message was specified"
+        if ctx.expr():
+            message = self.visit(ctx.expr())
+        self.error(message)
+
+    def visitInject(self, ctx: AhParser.InjectContext):
+        returner = self.visit(ctx.expr())
+        if self.appOptions.debug:
+            self.log.log('> Injecting into: ' + ctx.getText() + ' with the value ' + str(returner))
+            self.log.log('')
+        return returner
+
+    def visitCondition(self, ctx: AhParser.ConditionContext):
+        condition = self.visit(ctx.expr())
+
+        if self.appOptions.debug:
+            self.log.log('>> Evaluated Flow Condition as: ' + str(condition))
+            self.log.log('')
+
+        return condition
+
+    def visitReturn_statement(self, ctx: AhParser.Return_statementContext):
+        exportation = None
+        if ctx.expr():
+            exportation = self.visit(ctx.expr())
+
+        if self.appOptions.debug:
+            if exportation:
+                self.log.log('> Returning with value: ' + str(exportation))
+            else:
+                self.log.log('> Returning with value: None')
+            self.log.log('')
+
+        return exportation
+
+    def visitCount(self, ctx: AhParser.CountContext) -> int:
+        return len(self.visit(ctx.expr()))
+
+    def visitDelete_statement(self, ctx: AhParser.Delete_statementContext):
+        label = self.resolve_label(ctx.labels())
+        self.delete_variable(label=label)
+        if self.appOptions.debug:
+            self.log.log('> Deleteing variable: ' + label)
+            self.log.log('')
+
+    def visitAwait_statement(self, ctx: AhParser.Await_statementContext):
+        label = self.resolve_label(ctx.labels())
+        var = self.get_variable(label=label)
+        if isinstance(var, GenericExecution):
+            var.join()
+        return var
+
+    def visitReflection(self, ctx: AhParser.ReflectionContext) -> dict:
+        symbol = self.get_symbol(label=ctx.labels())
+        return symbol.get_symbol_debug()
+
+    def visitRequired_parameter(self, ctx: AhParser.Required_parameterContext) -> Parameter:
+        label = self.resolve_label(ctx.labels())
+        value = self.get_variable(label=label)
+        return Parameter(name=label, value=value)
+
+    def visitLabels(self, ctx: AhParser.LabelsContext) -> str:
+
+        label = [self.visit(ctx.label_comp(0))]
+        i = 0
+        while ctx.DOT(i):
+            label.append(str(self.visit(ctx.label_comp(i + 1))))
+            i += 1
+
+        label = '.'.join(label)
+
+        return label.replace('$', '')
+
+    def visitLabel_comp(self, ctx: AhParser.Label_compContext) -> str:
+        if ctx.label():
+            return self.visit(ctx.label())
+        else:
+            return self.visit(ctx.inject())
+
+    def visitLabel(self, ctx: AhParser.LabelContext) -> str:
+        return ctx.LABEL().getText()
+
+    def visitAttribute(self, ctx: AhParser.AttributeContext) -> Attributes:
+        attributes = Attributes()
+        if ctx.SCRIPT():
+            attributes.script = True
+        if ctx.STATIC():
+            attributes.static = True
+        if ctx.ASYNC():
+            attributes.asynchronous = True
+        return attributes
+
+    def visitAtom_string(self, ctx: AhParser.Atom_stringContext) -> str:
         line = ctx.STRING().getText()[1:-1]
         line = line.replace('\\"', '"')
         line = line.replace('\\\'', '\'')
@@ -1191,86 +1219,63 @@ class AhVisitor(AhVisitorOriginal):
         for match in matches:
             label = match[2:-2].strip()
             label = label.replace('$', '')
-            replacer = str(self.getVariable(label, convert=False))
+            replacer = str(self.get_variable(label))
             line = line.replace(match, replacer)
             if self.appOptions.debug:
                 self.log.log('> Injecting Variable into String \'' + label + '\': ' + line)
                 self.log.log('')
         return line
 
-    # Visit a parse tree produced by AhParser#number.
-    def visitAtom_number(self, ctx: AhParser.Atom_numberContext):
+    def visitAtom_number(self, ctx: AhParser.Atom_numberContext) -> Union[int, float]:
         if ctx.INT():
             return int(ctx.INT().getText())
         else:
             return float(ctx.FLOAT().getText())
 
-    # Visit a parse tree produced by AhParser#boolean.
-    def visitAtom_boolean(self, ctx: AhParser.Atom_booleanContext):
+    def visitAtom_boolean(self, ctx: AhParser.Atom_booleanContext) -> bool:
         if ctx.TRUE():
             return True
         if ctx.FALSE():
             return False
 
-    # Visit a parse tree produced by Ah4Parser#atom_hex.
     def visitAtom_hex(self, ctx: AhParser.Atom_hexContext):
         return '0x' + str(ctx.HEX().getText())[2:].upper()
 
-    # Visit a parse tree produced by Ah4Parser#atom_none.
     def visitAtom_none(self, ctx: AhParser.Atom_noneContext):
         return None
 
-    def visitRunnable_statements(self, ctx: Ah4Parser.Runnable_statementsContext):
+    def visitRunnable_statements(self, ctx: AhParser.Runnable_statementsContext):
         return super().visitRunnable_statements(ctx)
 
-    def visitMethod_call_statement(self, ctx: Ah4Parser.Method_call_statementContext):
+    def visitMethod_call_statement(self, ctx: AhParser.Method_call_statementContext):
         return super().visitMethod_call_statement(ctx)
 
-    def visitCommandtax_statement(self, ctx: Ah4Parser.Commandtax_statementContext):
+    def visitCommandtax_statement(self, ctx: AhParser.Commandtax_statementContext):
         return super().visitCommandtax_statement(ctx)
 
-    def visitOs_statement(self, ctx: Ah4Parser.Os_statementContext):
+    def visitOs_statement(self, ctx: AhParser.Os_statementContext):
         return super().visitOs_statement(ctx)
 
-    def visitAtom_callback(self, ctx: Ah4Parser.Atom_callbackContext):
+    def visitAtom_callback(self, ctx: AhParser.Atom_callbackContext):
         return super().visitAtom_callback(ctx)
 
-    def visitMethod_def_atom(self, ctx: Ah4Parser.Method_def_atomContext):
+    def visitMethod_def_atom(self, ctx: AhParser.Method_def_atomContext):
         return super().visitMethod_def_atom(ctx)
 
-    def visitSwitch_statement(self, ctx: Ah4Parser.Switch_statementContext):
+    def visitSwitch_statement(self, ctx: AhParser.Switch_statementContext):
         return super().visitSwitch_statement(ctx)
 
-    def visitCase_statement(self, ctx: Ah4Parser.Case_statementContext):
+    def visitCase_statement(self, ctx: AhParser.Case_statementContext):
         return super().visitCase_statement(ctx)
 
-    def visitDefault_statement(self, ctx: Ah4Parser.Default_statementContext):
+    def visitDefault_statement(self, ctx: AhParser.Default_statementContext):
         return super().visitDefault_statement(ctx)
 
-    def visitLog_statement(self, ctx: Ah4Parser.Log_statementContext):
+    def visitLog_statement(self, ctx: AhParser.Log_statementContext):
         return super().visitLog_statement(ctx)
 
-    def visitFlexible_parameter_block(self, ctx: Ah4Parser.Flexible_parameter_blockContext):
+    def visitFlexible_parameter_block(self, ctx: AhParser.Flexible_parameter_blockContext):
         return super().visitFlexible_parameter_block(ctx)
 
-    def visitFlexible_parameter(self, ctx: Ah4Parser.Flexible_parameterContext):
+    def visitFlexible_parameter(self, ctx: AhParser.Flexible_parameterContext):
         return super().visitFlexible_parameter(ctx)
-
-    def visitAhoptions_statement(self, ctx: Ah4Parser.Ahoptions_statementContext):
-        return super().visitAhoptions_statement(ctx)
-
-    def visitDict_signal(self, ctx: Ah4Parser.Dict_signalContext):
-        return super().visitDict_signal(ctx)
-
-    def visitAssignment_statement(self, ctx: Ah4Parser.Assignment_statementContext):
-        return super().visitAssignment_statement(ctx)
-
-    def visitAtom_obj_enum(self, ctx: Ah4Parser.Atom_obj_enumContext):
-        return super().visitAtom_obj_enum(ctx)
-
-    def visitAwait_statement(self, ctx: Ah4Parser.Await_statementContext):
-        return super().visitAwait_statement(ctx)
-
-    def visitRequired_parameter(self, ctx: Ah4Parser.Required_parameterContext):
-        return super().visitRequired_parameter(ctx)
-

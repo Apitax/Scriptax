@@ -23,5 +23,6 @@ setup(
         'antlr4-python3-runtime',
         'apitaxcore==3.0.9',
         'commandtax==0.0.8',
+        'pydantic'
     ],
 )
