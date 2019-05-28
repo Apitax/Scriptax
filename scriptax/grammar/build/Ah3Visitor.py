@@ -1,4 +1,4 @@
-# Generated from D:/Programming/Projects/Apitax/Scriptax/scriptax/grammar/src\Ah3.g4 by ANTLR 4.7
+# Generated from src/Ah3.g4 by ANTLR 4.7.2
 from antlr4 import *
 if __name__ is not None and "." in __name__:
     from .Ah3Parser import Ah3Parser

@@ -140,6 +140,13 @@ table.complete_execution()
 print(table.execute(name="self.get_value2"))
 table.complete_execution()
 
+print("deletion tests")
+print(table.get_symbol("parent.myInstance.mydict.shawn"))
+table.remove_symbol("parent.myInstance.mydict.shawn.1")
+table.remove_symbol("parent.myInstance.mydict.someindex")
+print(table.get_symbol("parent.myInstance.mydict"))
+
+
 # Complete the execution of the constructor
 table.complete_execution()
 

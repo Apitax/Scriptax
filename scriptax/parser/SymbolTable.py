@@ -231,7 +231,7 @@ class SymbolTable(GenericTable):
         name: list = self.make_and_verify_name(name)
         scope: SymbolScope = self.traverse_up(name)
 
-        # See if a symbol already exists, if not, it excepts and will insert a new symbol
+        # See if a symbol already exists, if not, it excepts
         try:
             symbol: Symbol = self.search_scope_for_symbol(scope, name[0], type)
         except:
@@ -256,7 +256,7 @@ class SymbolTable(GenericTable):
                 elif symbol.data_type == DATA_DICT:
                     symbol.value.pop(str(index))
                 # If the symbol is a LIST, remove the index
-                elif symbol.data_type == DATA_DICT:
+                elif symbol.data_type == DATA_LIST:
                     symbol.value.pop(int(index))
                 # If the symbol is any other type, then we should not be able to apply another name component to it,
                 #   thus it is an error
@@ -269,6 +269,15 @@ class SymbolTable(GenericTable):
         except:
             raise Exception("Removing existing symbol failed. Scriptax.SymbolTable@remove_symbol")
 
+    def register_method(self, name: str, body_context, static: bool = False, attributes: dict = None):
+        """
+        Registers a method to the symbol table
+        """
+        if not attributes:
+            attributes = {}
+        symbol_attributes: dict = {**attributes, 'static': static}
+        symbol: Symbol = Symbol(name=name, data_type=DATA_METHOD, value=body_context, attributes=symbol_attributes)
+        self.scope().insert_symbol(symbol)
 
     def execute(self, name: str, parameters: List[Parameter] = None, isolated_scope: bool = False):
         """

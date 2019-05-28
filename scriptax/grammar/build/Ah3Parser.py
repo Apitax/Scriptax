@@ -1,9 +1,10 @@
-# Generated from D:/Programming/Projects/Apitax/Scriptax/scriptax/grammar/src\Ah3.g4 by ANTLR 4.7
+# Generated from src/Ah3.g4 by ANTLR 4.7.2
 # encoding: utf-8
 from antlr4 import *
 from io import StringIO
 from typing.io import TextIO
 import sys
+
 
 def serializedATN():
     with StringIO() as buf:
@@ -484,9 +485,10 @@ class Ah3Parser ( Parser ):
 
     def __init__(self, input:TokenStream, output:TextIO = sys.stdout):
         super().__init__(input, output)
-        self.checkVersion("4.7")
+        self.checkVersion("4.7.2")
         self._interp = ParserATNSimulator(self, self.atn, self.decisionsToDFA, self.sharedContextCache)
         self._predicates = None
+
 
 
 
@@ -540,6 +542,7 @@ class Ah3Parser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Script_structureContext(ParserRuleContext):
 
@@ -598,6 +601,7 @@ class Ah3Parser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Global_statementsContext(ParserRuleContext):
 
@@ -707,6 +711,7 @@ class Ah3Parser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Root_level_statementsContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -765,6 +770,7 @@ class Ah3Parser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class StatementsContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -822,6 +828,7 @@ class Ah3Parser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class StatementContext(ParserRuleContext):
 
@@ -896,6 +903,7 @@ class Ah3Parser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class TerminatedContext(ParserRuleContext):
 
@@ -1027,6 +1035,7 @@ class Ah3Parser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Non_terminatedContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -1072,6 +1081,7 @@ class Ah3Parser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Execute_statementContext(ParserRuleContext):
 
@@ -1135,6 +1145,7 @@ class Ah3Parser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class ExprContext(ParserRuleContext):
 
@@ -1497,6 +1508,7 @@ class Ah3Parser ( Parser ):
             self.unrollRecursionContexts(_parentctx)
         return localctx
 
+
     class AssignmentContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -1640,6 +1652,7 @@ class Ah3Parser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class FlowContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -1712,6 +1725,7 @@ class Ah3Parser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Create_instanceContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -1778,6 +1792,7 @@ class Ah3Parser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Method_statementContext(ParserRuleContext):
 
@@ -1878,6 +1893,7 @@ class Ah3Parser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Method_callContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -1963,6 +1979,7 @@ class Ah3Parser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class If_statementContext(ParserRuleContext):
 
@@ -2063,6 +2080,7 @@ class Ah3Parser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class While_statementContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -2119,6 +2137,7 @@ class Ah3Parser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class For_statementContext(ParserRuleContext):
 
@@ -2188,6 +2207,7 @@ class Ah3Parser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Each_statementContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -2245,6 +2265,7 @@ class Ah3Parser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class ConditionContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -2300,6 +2321,7 @@ class Ah3Parser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class BlockContext(ParserRuleContext):
 
@@ -2373,6 +2395,7 @@ class Ah3Parser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class CallbackContext(ParserRuleContext):
 
@@ -2448,6 +2471,7 @@ class Ah3Parser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Callback_blockContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -2503,6 +2527,7 @@ class Ah3Parser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Optional_parameters_blockContext(ParserRuleContext):
 
@@ -2578,6 +2603,7 @@ class Ah3Parser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Sig_parameter_blockContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -2652,6 +2678,7 @@ class Ah3Parser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Sig_parameterContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -2714,6 +2741,7 @@ class Ah3Parser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Call_parameterContext(ParserRuleContext):
 
@@ -2778,6 +2806,7 @@ class Ah3Parser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Optional_parameterContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -2834,6 +2863,7 @@ class Ah3Parser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class CommandtaxContext(ParserRuleContext):
 
@@ -2951,6 +2981,7 @@ class Ah3Parser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class ExecuteContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -3008,6 +3039,7 @@ class Ah3Parser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Async_executeContext(ParserRuleContext):
 
@@ -3072,6 +3104,7 @@ class Ah3Parser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Await_statementContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -3129,6 +3162,7 @@ class Ah3Parser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class LabelsContext(ParserRuleContext):
 
@@ -3198,6 +3232,7 @@ class Ah3Parser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Label_compContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -3261,6 +3296,7 @@ class Ah3Parser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class LabelContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -3305,6 +3341,7 @@ class Ah3Parser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class AttributeContext(ParserRuleContext):
 
@@ -3359,6 +3396,7 @@ class Ah3Parser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Extends_statementContext(ParserRuleContext):
 
@@ -3439,6 +3477,7 @@ class Ah3Parser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Sig_statementContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -3499,6 +3538,7 @@ class Ah3Parser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Options_statementContext(ParserRuleContext):
 
@@ -3561,6 +3601,7 @@ class Ah3Parser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Delete_statementContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -3621,6 +3662,7 @@ class Ah3Parser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Error_statementContext(ParserRuleContext):
 
@@ -3690,6 +3732,7 @@ class Ah3Parser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Return_statementContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -3747,6 +3790,7 @@ class Ah3Parser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Auth_statementContext(ParserRuleContext):
 
@@ -3809,6 +3853,7 @@ class Ah3Parser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Endpoint_statementContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -3869,6 +3914,7 @@ class Ah3Parser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Import_statementContext(ParserRuleContext):
 
@@ -3977,6 +4023,7 @@ class Ah3Parser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class CastingContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -4059,6 +4106,7 @@ class Ah3Parser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class LogContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -4120,6 +4168,7 @@ class Ah3Parser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class CountContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -4171,6 +4220,7 @@ class Ah3Parser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class ReflectionContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -4221,6 +4271,7 @@ class Ah3Parser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class InjectContext(ParserRuleContext):
 
@@ -4277,6 +4328,7 @@ class Ah3Parser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class AtomContext(ParserRuleContext):
 
@@ -4386,6 +4438,7 @@ class Ah3Parser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Atom_obj_dictContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -4490,6 +4543,7 @@ class Ah3Parser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Atom_obj_listContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -4580,6 +4634,7 @@ class Ah3Parser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Atom_stringContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -4624,6 +4679,7 @@ class Ah3Parser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Atom_numberContext(ParserRuleContext):
 
@@ -4679,6 +4735,7 @@ class Ah3Parser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Atom_booleanContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -4733,6 +4790,7 @@ class Ah3Parser ( Parser ):
             self.exitRule()
         return localctx
 
+
     class Atom_hexContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -4777,6 +4835,7 @@ class Ah3Parser ( Parser ):
         finally:
             self.exitRule()
         return localctx
+
 
     class Atom_noneContext(ParserRuleContext):
 

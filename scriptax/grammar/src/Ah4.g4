@@ -39,7 +39,6 @@ expr :
       | expr OR expr
       | create_instance
       | runnable_statements
-      | execute
       | casting
       | count
       | reflection
@@ -64,26 +63,23 @@ terminated :
         | return_statement
         | error_statement
         | delete_statement
-        | execute_statement
         | await_statement
         | assignment_statement
         | runnable_statements
       ) TERMINATOR ;
 
-runnable_statements : 
-      method_call_statement
-      | os_statement
-      | commandtax_statement ;
+runnable_statements : AWAIT?
+      (
+        method_call_statement
+        | os_statement
+        | commandtax_statement
+      ) atom_callback? ;
+
+method_call_statement : labels LPAREN optional_parameters_block RPAREN ;
 
 commandtax_statement : COMMANDTAX LPAREN expr RPAREN ;
 
 os_statement : OS LPAREN expr RPAREN ;
-
-method_call_statement : AWAIT? labels LPAREN optional_parameters_block RPAREN atom_callback? ;
-
-execute_statement : execute ;
-
-execute : ASYNC? commandtax atom_callback? ;
 
 each_statement : EACH expr atom_callback ;
 
@@ -119,7 +115,7 @@ case_statement : CASE LPAREN (
 
 default_statement : DEFAULT block ;
 
-block : BLOCKOPEN (statements | DONE | CONTINUE)* BLOCKCLOSE | (statement | DONE | CONTINUE) ;
+block : BLOCKOPEN (statement | DONE | CONTINUE)* BLOCKCLOSE | (statement | DONE | CONTINUE) ;
 
 // statements
 
@@ -175,7 +171,7 @@ atom_obj_enum : LPAREN label (ARROW expr)? (COMMA label (ARROW expr)?)* RPAREN ;
 
 error_statement : ERROR LPAREN expr? RPAREN;
 
-inject : MUSTACHEOPEN expr MUSTACHECLOSE ;
+inject : LT BAR expr GT ;
 
 condition : LPAREN expr RPAREN ;
 
@@ -254,6 +250,7 @@ DOT :     '.' ;
 COLON :   ':' ;
 PERCENT : '%' ;
 COMMA :   ',' ;
+BAR :     '|' ;
 
 
 /** TYPES **/
@@ -269,8 +266,6 @@ NONE : N O N E | N U L L ;
 /** BLOCKS AND ENCLOSURES **/
 EXECUTEOPEN : '{%' ;
 EXECUTECLOSE : '%}' ;
-MUSTACHEOPEN : '<' ;
-MUSTACHECLOSE : '>' ;
 BLOCKOPEN : '{';
 BLOCKCLOSE : '}';
 LPAREN : '(';

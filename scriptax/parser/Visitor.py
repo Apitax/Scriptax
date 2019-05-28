@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 from scriptax.grammar.build.Ah3Parser import Ah3Parser as AhParser, Ah3Parser
 from scriptax.grammar.build.Ah3Visitor import Ah3Visitor as AhVisitorOriginal
 from scriptax.drivers.Driver import Driver
+from scriptax.models.Parameter import Parameter
 
 from commandtax.models.Command import Command
 
@@ -20,7 +23,8 @@ import re
 import threading
 import traceback
 
-from typing import Tuple, Any
+from typing import Tuple, Any, List
+
 
 
 # TODO: SCOPE GENERATION:
@@ -56,8 +60,8 @@ from typing import Tuple, Any
 # TODO: Combine class attributes: parser `state`, `status`, and `message` into a single dict
 # TODO: Parameters must be injected into the symbol scope
 #
-#
-#
+# TODO: Support parameters when creating a new instance. myvar = new strings(param1="val1", param2="val2");
+# TODO: Support builder pattern when creating a new instance. myvar = new strings(param1="val1", param2="val2").doSomeAction().doSomeOtherAction();
 #
 #
 
@@ -132,7 +136,7 @@ class AhVisitor(AhVisitorOriginal):
 
         # Symbol Table
         if not symbol_table:
-            self.symbol_table: SymbolTable = SymbolTable()
+            self.symbol_table: SymbolTable = SymbolTable(name="program", type=SCOPE_GLOBAL)
         else:
             self.symbol_table: SymbolTable = symbol_table
 
@@ -223,9 +227,27 @@ class AhVisitor(AhVisitorOriginal):
         if char:
             self.state['char'] = char
 
+    def resolve_label(self, label):
+        """
+        Resolves a name
+        """
+        name = label
+        if not isinstance(name, str):
+            name = self.visit(label)
+        return name
+            
+
+    # TODO
+    def executeOs(self):
+        """
+        Executes an OS line
+        """
+        pass
+
+    # TODO: This needs to be redone
     def executeCommand(self, command: Command) -> ApitaxResponse:
         """
-        Helper method which executes commandtax
+        Executes commandtax
         """
         from commandtax.flow.Connector import Connector
         if self.appOptions.debug:
@@ -243,48 +265,114 @@ class AhVisitor(AhVisitorOriginal):
                               command=command.command, parameters=command.parameters, request=command.request)
         return connector.execute()
 
+    # TODO: this needs to be redone
     def executeCallback(self, callback=None, response: ApitaxResponse = None, result=None):
         """
-        Helper method which executes a callback
+        Executes a callback
         """
-        from scriptax.parser.utils.BoilerPlate import customizableContextParser
-        table = SymbolTable()
-        if not result:
-            result = response.getResponseBody()
-        elif response:
-            result = {'result': result, 'response': response}
+        # from scriptax.parser.utils.BoilerPlate import customizableContextParser
+        # table = SymbolTable()
+        # if not result:
+        #     result = response.getResponseBody()
+        # elif response:
+        #     result = {'result': result, 'response': response}
 
-        table.putSymbol(Symbol(name='result', symbolType=SYMBOL_VARIABLE, value=result))
-        for key, value in callback['params'].items():
-            table.putSymbol(Symbol(name=key, symbolType=SYMBOL_VARIABLE, value=value))
-        # Returns the value found in any return statement within the callback.
-        # If no return statement is in the callback this will be None
-        return customizableContextParser(context=callback['block'], symbol_table=table, options=self.appOptions)[0][1]
+        # table.putSymbol(Symbol(name='result', symbolType=SYMBOL_VARIABLE, value=result))
+        # for key, value in callback['params'].items():
+        #     table.putSymbol(Symbol(name=key, symbolType=SYMBOL_VARIABLE, value=value))
+        # # Returns the value found in any return statement within the callback.
+        # # If no return statement is in the callback this will be None
+        # return customizableContextParser(context=callback['block'], symbol_table=table, options=self.appOptions)[0][1]
+        pass
 
-    def setVariable(self, label, value=None, convert=True):
+    # TODO
+    def set_variable(self, label, value=None):
+        """
+        Sets the value of a variable. Creates the variable if it does not exist yet.
+        """
+        label = self.resolve_label(label)
+        self.symbol_table.set_symbol(name=label, value=value)
+
+    # TODO
+    def get_variable(self, label=None):
+        """
+        Gets the value of a variable. Raises an exception if that variable does not exist.
+        """
+        label = self.resolve_label(label)
+        return self.symbol_table.get_symbol(name=label)
+        # if convert:
+        #     label = self.visit(label)
+        # try:
+        #     return self.getSymbol(label, False).value
+        # except:
+        #     self.error(message="Symbol `" + label + "` not found in scope `" + self.symbol_table.current.name + "`")
+        #     return None
+
+    # TODO
+    def delete_variable(self, label):
         """
 
         """
-        return self.setSymbol(label, value=value, convert=convert)
+        label = self.resolve_label(label)
+        self.symbol_table.remove_symbol(name=label)
 
-    def getVariable(self, label=None, convert=True):
+    def new_instance(self, import_name, var_name):
         """
 
         """
-        if convert:
-            label = self.visit(label)
-        try:
-            return self.getSymbol(label, False).value
-        except:
-            self.error(message="Symbol `" + label + "` not found in scope `" + self.symbol_table.current.name + "`")
+        import_name = self.resolve_label(import_name)
+        var_name = self.resolve_label(var_name)
+        instance = self.symbol_table.copy(import_name=import_name, var_name=var_name)
+        instance = create_table(instance.value)
+        # TODO: Parse the instance with the created table
+
+    def register_method(self, label, body_context, static=False):
+        """
+
+        """
+        label = self.resolve_label(label)
+        self.symbol_table.register_method(name=label, body_context=body_context, static=static)
+
+    def execute_method(self, label, parameters: List[Parameter]):
+        """
+
+        """
+        label = self.resolve_label(label)
+        body_context = self.symbol_table.execute(name=label, parameters=parameters)
+        if not body_context:
+            # TODO: This should throw exception
+            self.symbol_table.complete_execution()
             return None
+        result = self.visit(body_context)
+        self.symbol_table.complete_execution()
+        return result
 
-    def deleteVariable(self, label, convert=True):
+    def import_module(self, label, path : str):
+        label = self.resolve_label(label)
+        # TODO: Don't import if a import already exists
+        module = self.symbol_table.new(name=label, path=path)
+        # Don't parse here due to the new inheritance format
+        # module_table = create_table(module.value)
+        
+
+    def extend(self, label, path : str):
         """
 
         """
-        return self.deleteSymbol(label, convert=convert)
+        label = self.resolve_label(label)
+        self.symbol_table.new(name=label, path=path)
+        self.symbol_table.extends(label)
+        # TODO: We need to parse that import, but not execute the constructor
 
+    def implements(self, label):
+        """
+
+        """
+        label = self.resolve_label(label)
+        # table.implements(import_name="strings")
+        self.symbol_table.implements(import_name=label)
+        # TODO: We need to parse the module given the module table to import each static method.
+        #       This should probably use a separate purpose built parser - just a new visitor class essentially
 
     def inject(self, line):
         """
