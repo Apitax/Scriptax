@@ -503,12 +503,12 @@ class Ah4Listener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by Ah4Parser#attribute.
-    def enterAttribute(self, ctx:Ah4Parser.AttributeContext):
+    # Enter a parse tree produced by Ah4Parser#attributes.
+    def enterAttributes(self, ctx:Ah4Parser.AttributesContext):
         pass
 
-    # Exit a parse tree produced by Ah4Parser#attribute.
-    def exitAttribute(self, ctx:Ah4Parser.AttributeContext):
+    # Exit a parse tree produced by Ah4Parser#attributes.
+    def exitAttributes(self, ctx:Ah4Parser.AttributesContext):
         pass
 
 

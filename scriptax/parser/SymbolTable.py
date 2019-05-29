@@ -6,6 +6,7 @@ from typing import List
 from pydantic import BaseModel, PyObject
 
 from scriptax.models.Parameter import Parameter
+from scriptax.models.Attributes import Attributes
 from scriptax.grammar.build.Ah4Parser import Ah4Parser
 from scriptax.parser.symbols.ARISymbolTable import ARISymbolTable as GenericTable
 from scriptax.parser.symbols.ARISymbolTable import create_table as create_generic_table
@@ -269,14 +270,11 @@ class SymbolTable(GenericTable):
         except:
             raise Exception("Removing existing symbol failed. Scriptax.SymbolTable@remove_symbol")
 
-    def register_method(self, name: str, body_context, static: bool = False, attributes: dict = None):
+    def register_method(self, name: str, method_context, attributes: Attributes):
         """
         Registers a method to the symbol table
         """
-        if not attributes:
-            attributes = {}
-        symbol_attributes: dict = {**attributes, 'static': static}
-        symbol: Symbol = Symbol(name=name, data_type=DATA_METHOD, value=body_context, attributes=symbol_attributes)
+        symbol: Symbol = Symbol(name=name, data_type=DATA_METHOD, value=method_context, attributes=attributes.dict())
         self.scope().insert_symbol(symbol)
 
     def execute(self, name: str, parameters: List[Parameter] = None, isolated_scope: bool = False):
@@ -285,8 +283,13 @@ class SymbolTable(GenericTable):
         Returns the method body
         """
 
+        if self.has_symbol(name, SYMBOL_MODULE):
+            print("here")
+            module_import: Import = self.get_symbol(name, type=SYMBOL_MODULE, as_value=False).value
+
         # Ensures that the method symbol exists
         if not self.has_symbol(name) and self.has_symbol(name, SYMBOL_MODULE):
+            # TODO we need to handle when its a module
             raise Exception(
                 "Cannot execute `" + name + "` as it does not exist within scope. Scriptax.SymbolTable@execute")
 
@@ -355,7 +358,7 @@ class SymbolTable(GenericTable):
         return method.value
 
     def enter_block_scope(self, name: str = 'anonymous') -> SymbolScope:
-        return self.enter_scope(name=name + "_method")
+        return self.enter_scope(name=name + "_method", type=SCOPE_BLOCK)
 
     def exit_block_scope(self):
         self.exit_scope()

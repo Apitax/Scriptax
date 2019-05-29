@@ -2,8 +2,8 @@ from pydantic import BaseModel, Any
 
 
 class BlockStatus(BaseModel):
-    returned: bool
-    result: Any
+    returned: bool = False
+    result: Any = None
 
-    continued: bool
-    done: bool
+    continued: bool = False
+    done: bool = False

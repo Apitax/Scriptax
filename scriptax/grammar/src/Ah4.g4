@@ -91,7 +91,7 @@ callback_block : EXECUTEOPEN statements EXECUTECLOSE ;
 
 // seperataition between callback blocks and regular blocks
 
-method_def_atom : attribute+ label LPAREN flexible_parameter_block RPAREN block ;
+method_def_atom : attributes label LPAREN flexible_parameter_block RPAREN block ;
 
 non_terminated : flow ;
 
@@ -106,14 +106,9 @@ for_statement : FOR labels IN expr block ;
 
 while_statement : WHILE condition block ;
 
-switch_statement : SWITCH LPAREN labels RPAREN case_statement* default_statement ;
+switch_statement : SWITCH BLOCKOPEN case_statement* default_statement? BLOCKCLOSE ;
 
-case_statement : CASE LPAREN (
-        (GE | LE | GT | LT) expr
-        | (EQ | NEQ) expr
-        | AND expr
-        | OR expr
-      ) RPAREN block ;
+case_statement : CASE condition block ;
 
 default_statement : DEFAULT block ;
 
@@ -201,7 +196,7 @@ label_comp : label (SOPEN (expr COLON | COLON expr | expr COLON expr) SCLOSE)? |
 
 label : LABEL ;
 
-attribute : SCRIPT | STATIC | ASYNC ;
+attributes : (SCRIPT | STATIC | ASYNC)+ ;
 
 atom_string : STRING ;
 

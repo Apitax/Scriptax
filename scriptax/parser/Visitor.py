@@ -7,10 +7,12 @@ from scriptax.models.Parameter import Parameter
 from scriptax.models.Attributes import Attributes
 from scriptax.models.AhOptions import AhOptions
 from scriptax.models.BlockStatus import BlockStatus
+from scriptax.models.CaseStatus import CaseStatus
+from scriptax.models.Callback import Callback
 
 from scriptax.parser.utils.BoilerPlate import generate_parse_tree, read_file, read_string, customizable_tree_parser
 
-from scriptax.parser.SymbolTable import SymbolTable, ExtendedImport, create_table, Import
+from scriptax.parser.SymbolTable import SymbolTable, create_table, Import
 from scriptax.parser.symbols.SymbolScope import SymbolScope, SCOPE_GLOBAL, SCOPE_MODULE
 from scriptax.parser.symbols.Symbol import Symbol, DATA_NUMBER, DATA_BOOLEAN, DATA_HEX, DATA_NONE, DATA_STRING, \
     DATA_DICT, DATA_LIST, DATA_METHOD, DATA_THREAD, DATA_PYTHONIC, DATA_INSTANCE, SYMBOL_VAR, SYMBOL_MODULE
@@ -114,7 +116,7 @@ class AhVisitor(AhVisitorOriginal):
         """
 
         # Aliases
-        self.log = State.log
+        self.logger = State.log
         self.config = State.config
 
         # Parameters
@@ -167,6 +169,12 @@ class AhVisitor(AhVisitorOriginal):
 
     def isReturn(self):
         return self.status == 'return'
+
+    def log(self, message: str, no_linebreak: bool = False):
+        if self.appOptions.debug:
+            self.logger.log('> ' + message)
+            if not no_linebreak:
+                self.logger.log('')
 
     def parseScript(self, scriptax: str, parameters: dict = None) -> Tuple[Any, AhVisitor]:
         """
@@ -262,25 +270,18 @@ class AhVisitor(AhVisitorOriginal):
                               command=command.command, parameters=command.parameters, request=command.request)
         return connector.execute()
 
-    # TODO: this needs to be redone
-    def execute_callback(self, callback=None, response: ApitaxResponse = None, result=None):
+    def execute_callback(self, callback: Callback = None, parameters: List[Parameter] = None) -> BlockStatus:
         """
         Executes a callback
         """
-        # from scriptax.parser.utils.BoilerPlate import customizableContextParser
-        # table = SymbolTable()
-        # if not result:
-        #     result = response.getResponseBody()
-        # elif response:
-        #     result = {'result': result, 'response': response}
-
-        # table.putSymbol(Symbol(name='result', symbolType=SYMBOL_VARIABLE, value=result))
-        # for key, value in callback['params'].items():
-        #     table.putSymbol(Symbol(name=key, symbolType=SYMBOL_VARIABLE, value=value))
-        # # Returns the value found in any return statement within the callback.
-        # # If no return statement is in the callback this will be None
-        # return customizableContextParser(context=callback['block'], symbol_table=table, options=self.appOptions)[0][1]
-        pass
+        self.symbol_table.execute(name=callback.name, parameters=parameters + callback.parameters, isolated_scope=True)
+        if not callback.block:
+            # TODO: This should throw exception
+            self.symbol_table.complete_execution()
+            return BlockStatus()
+        result = self.visit(callback.block())
+        self.symbol_table.complete_execution()
+        return result
 
     # TODO exceptions
     def set_variable(self, label, value=None):
@@ -401,24 +402,26 @@ class AhVisitor(AhVisitorOriginal):
         # TODO : Call constructor if it exists
         return instance.scope
 
-    def register_method(self, label, body_context, static=False):
+    def register_method(self, label, method_context, attributes: Attributes):
         """
 
         """
         label = self.resolve_label(label)
-        self.symbol_table.register_method(name=label, body_context=body_context, static=static)
+        self.symbol_table.register_method(name=label, method_context=method_context, attributes=attributes)
 
-    def execute_method(self, label, parameters: List[Parameter]):
+    def execute_method(self, label, parameters: List[Parameter]) -> BlockStatus:
         """
 
         """
         label = self.resolve_label(label)
-        body_context = self.symbol_table.execute(name=label, parameters=parameters)
-        if not body_context:
+        method_context: AhParser.Method_def_atomContext = self.symbol_table.execute(name=label, parameters=parameters)
+        if not method_context:
             # TODO: This should throw exception
             self.symbol_table.complete_execution()
-            return None
-        result = self.visit(body_context)
+            return BlockStatus()
+        # TODO: Check the passed in list of parameters against method_context.flexible_parameter_block() to ensure it is
+        #          correct.
+        result = self.visit(method_context.block())
         self.symbol_table.complete_execution()
         return result
 
@@ -429,32 +432,29 @@ class AhVisitor(AhVisitorOriginal):
         matches = re.findall(self.regexVar, line)
         for match in matches:
             label = match[2:-2].strip()
-            replacer = self.getVariable(label, convert=False)
+            replacer = self.get_variable(label)
             line = line.replace(match, replacer)
         return line
 
     # TODO: Improve error message format
-    def visitProg(self, ctx: AhParser.ProgContext):
+    def visitProg(self, ctx: AhParser.ProgContext) -> BlockStatus:
         """
         Visit a parse tree produced by AhParser#prog.
         """
-        self.symbol_table.enterScope()
-        self.symbol_table.current.setMeta(name=self.state['file'], scopeType=SCOPE_SCRIPT)
         self.parser = ctx.parser
         result = self.visit(ctx.script_structure())
 
         if self.isError():
-            self.log.error(
+            self.logger.error(
                 self.message + ' in ' + str(self.state['file']) + ' @' + str(self.state['line']) + ':' + str(
                     self.state['char']))
-            if self.appOptions.debug:
-                self.log.log('')
-                self.log.log('')
-        self.symbol_table.exitScope()
+
+            self.log('')
+            self.log('')
         return result
 
     # Visit a parse tree produced by Ah4Parser#script_structure.
-    def visitScript_structure(self, ctx: AhParser.Script_structureContext):
+    def visitScript_structure(self, ctx: AhParser.Script_structureContext) -> BlockStatus:
         self.visit(ctx.global_statements())
         self.visit(ctx.root_level_statements())
         return self.visit(ctx.statements())
@@ -471,34 +471,32 @@ class AhVisitor(AhVisitorOriginal):
     def visitStatements(self, ctx: AhParser.StatementsContext) -> BlockStatus:
         i = 0
         while ctx.statement(i):
-            result: tuple = self.visit(ctx.statement(
-                i))  # First index of tuple is whether it is a return statement (bool), second is the statement result
-            if result[0]:
+            result: BlockStatus = self.visit(ctx.statement(
+                i))
+            if result.returned:
                 return result
-            if self.isReturn() or self.isError():
-                return False, None
+            if self.isError():
+                return BlockStatus()
             i += 1
-        return False, None
+        return BlockStatus()
 
     # Visit a parse tree produced by AhParser#statement.
     def visitStatement(self, ctx: AhParser.StatementContext) -> BlockStatus:
-        debugTemp = self.appOptions.debug
-        sensitiveTemp = self.appOptions.sensitive
+        debug_temp = self.appOptions.debug
+        sensitive_temp = self.appOptions.sensitive
 
         line = ctx.getText().strip()
         if line != "" and self.appOptions.debug:
             if ctx.NOT():
-                self.log.log(
-                    '> Now processing: (This lines contents has been hidden via the \'!\' operator. This is usually done to hide sensitive information)')
-                self.log.log('')
-                self.log.log('> Treating the rest of this statement as sensitive and disabling debug')
-                self.log.log('')
+                self.log(
+                    'Now processing: (This lines contents has been hidden via the \'!\' operator. This is usually done to hide sensitive information)')
+                self.log('')
+                self.log('Treating the rest of this statement as sensitive and disabling debug')
 
                 self.appOptions.debug = False
                 self.appOptions.sensitive = True
             else:
-                self.log.log('> Now processing: ' + line)
-                self.log.log('')
+                self.log('Now processing: ' + line)
 
         if ctx.terminated():
             temp = self.visit(ctx.terminated())
@@ -506,56 +504,27 @@ class AhVisitor(AhVisitorOriginal):
             temp = self.visit(ctx.non_terminated())
 
         if line != "" and self.appOptions.debug:
-            self.log.log('')
+            self.log('')
 
         self.set_state(line=ctx.start.line)  # TODO: Try to add character here as well
 
-        if ctx.NOT() and line != "" and debugTemp:
-            self.log.log('> Setting debug and sensitive back to their original values')
-            self.log.log('')
-            self.log.log('')
-            self.appOptions.debug = debugTemp
-            self.appOptions.sensitive = sensitiveTemp
+        if ctx.NOT() and line != "" and debug_temp:
+            self.log('Setting debug and sensitive back to their original values')
+            self.appOptions.debug = debug_temp
+            self.appOptions.sensitive = sensitive_temp
 
         return temp
 
-    # Visit a parse tree produced by AhParser#terminated.
-    def visitTerminated(self, ctx: AhParser.TerminatedContext) -> tuple:
-        if ctx.return_statement():
-            return True, self.visit(ctx.return_statement())
-        return False, self.visitChildren(ctx)
-
-    # Visit a parse tree produced by AhParser#non_terminated.
-    def visitNon_terminated(self, ctx: AhParser.Non_terminatedContext) -> tuple:
-        temp = self.visit(ctx.flow())
-        return temp
-
-    # Visit a parse tree produced by AhParser#executers.
-    def visitExecute_statement(self, ctx: AhParser.Execute_statementContext):
-        if ctx.execute():
-            return self.visit(ctx.execute())
-        if ctx.async_execute():
-            thread = self.visit(ctx.async_execute())
-            thread.start()
-            return thread
-
-    # Visit a parse tree produced by AhParser#expr.
     def visitExpr(self, ctx):
-
+        # These need to be in order
         if ctx.reflection():
             return self.visit(ctx.reflection())
 
         if ctx.create_instance():
             return self.visit(ctx.create_instance())
 
-        if ctx.method_call():
-            return self.visit(ctx.method_call())[0][1]
-
-        if ctx.execute():
-            return self.visit(ctx.execute())['result']
-
-        if ctx.async_execute():
-            return self.visit(ctx.async_execute())
+        if ctx.runnable_statements():
+            return self.visit(ctx.runnable_statements()).result
 
         if ctx.atom():
             return self.visit(ctx.atom())
@@ -563,17 +532,11 @@ class AhVisitor(AhVisitorOriginal):
         if ctx.casting():
             return self.visit(ctx.casting())
 
-        if ctx.auth_statement():
-            return self.visit(ctx.auth_statement())
-
-        if ctx.endpoint_statement():
-            return self.visit(ctx.endpoint_statement())
-
         if ctx.count():
             return self.visit(ctx.count())
 
         if ctx.labels():
-            return self.getVariable(ctx.labels())
+            return self.get_variable(ctx.labels())
 
         if ctx.inject():
             return self.visit(ctx.inject())
@@ -624,17 +587,49 @@ class AhVisitor(AhVisitorOriginal):
         if ctx.PLUS():
             left = self.visit(ctx.expr(0))
             right = self.visit(ctx.expr(1))
+
+            # Dictionary addition
+            if isinstance(left, dict) and isinstance(right, dict):
+                left.update(right)
+                return left
+
+            # Concatenating strings, and ez conversion of either side to string
             if (isinstance(left, str) and not isinstance(right, str)) or (
                     isinstance(right, str) and not isinstance(left, str)):
                 left = str(left)
                 right = str(right)
                 if self.appOptions.debug:
-                    self.log.log('> Implicit cast to string: \'' + left + '\' + \'' + right + '\'')
-                    self.log.log('')
+                    self.log('Implicit cast to string: \'' + left + '\' + \'' + right + '\'')
+
             return left + right
 
         if ctx.MINUS():
-            return self.visit(ctx.expr(0)) - self.visit(ctx.expr(1))
+            left = self.visit(ctx.expr(0))
+            right = self.visit(ctx.expr(1))
+
+            # List subtraction
+            if isinstance(left, list) and isinstance(right, list):
+                for item in right:
+                    if item in left:
+                        left.remove(item)
+                return left
+
+            # Dict subtraction
+            if isinstance(left, dict) and isinstance(right, dict):
+                for key, value in right.items():
+                    if key in left:
+                        del left[key]
+                return left
+
+            # Dict subtract list
+            if isinstance(left, dict) and isinstance(right, list):
+                for item in right:
+                    if item in left:
+                        del left[item]
+                return left
+
+            # Regular subtraction
+            return left - right
 
         if ctx.MUL():
             return self.visit(ctx.expr(0)) * self.visit(ctx.expr(1))
@@ -643,229 +638,6 @@ class AhVisitor(AhVisitorOriginal):
             return self.visit(ctx.expr(0)) / self.visit(ctx.expr(1))
 
         return self.visitChildren(ctx)
-
-    # Visit a parse tree produced by AhParser#flow.
-    def visitFlow(self, ctx: AhParser.FlowContext) -> tuple:
-        if ctx.if_statement():
-            return self.visit(ctx.if_statement())
-        if ctx.while_statement():
-            return self.visit(ctx.while_statement())
-        if ctx.for_statement():
-            return self.visit(ctx.for_statement())
-
-    # Visit a parse tree produced by Ah4Parser#method_statement.
-    def visitMethod_statement(self, ctx: AhParser.Method_statementContext):
-        self.symbol_table.current.addSymbol(
-            symbol=Symbol(name=self.visit(ctx.label()), symbolType=SYMBOL_METHOD, dataType=DATA_CONTEXT,
-                          value=ctx))
-        # return self.visitChildren(ctx)
-
-    # Visit a parse tree produced by Ah4Parser#method_call.
-    def visitMethod_call(self, ctx: AhParser.Method_callContext) -> tuple:
-        # TODO: Check to see whether ASYNC should be used here and if so execute in thread
-
-        label = self.visit(ctx.labels())
-        labels = label.split('.')
-
-        context: AhParser.Method_statementContext = None  # ANTLR context of the method
-        scope: SymbolScope = None  # Scope to execute the block within
-
-        # print(self.getSymbol(label=label, symbolType=SYMBOL_METHOD, convert=False).getSymbolDebug())
-
-        # Gathering the correct context and scope
-        if len(labels) == 1:
-            # Executing a method on the current scope
-            scope = self.symbol_table.current
-            # This is so that method calls inside of methods don't become child scopes of the calling method
-            # Weird things happen if method scopes are children of method scopes
-            if scope.parent.type == SCOPE_METHOD:
-                scope = scope.parent.parent
-            context = self.symbol_table.getSymbol(name=labels[0]).value
-            if not context:
-                self.error(message="Method not found:" + labels[0])
-                return None, None
-        elif len(labels) == 2:
-            # Executing a method on an instance variable or imported script
-            scope = self.symbol_table.getSymbol(name=labels[0]).value
-            if not scope:
-                self.error(message="Symbol not found:" + labels[0])
-                return None, None
-            context = createTableFromScope(scope).getSymbol(name=labels[1]).value
-            if not context:
-                self.error(message="Method not found:" + labels[1])
-                return None, None
-        else:
-            self.error(message="Method chaining is not supported yet")
-
-        expectedParameters = self.visit(context.sig_parameter_block())
-        parameters = self.visit(ctx.optional_parameters_block())
-
-        invertedExpectedParameters = []
-
-        # Checking to ensure parameters are correct and filling in optional parameters where necessary
-        for expected in expectedParameters:
-            key = expected['label']
-            invertedExpectedParameters.append(key)
-            required = False
-            if 'value' not in expected:
-                required = True
-            if key not in parameters and required:
-                self.error(message="Required parameter not found in parameter list: " + key)
-                return None, None
-            if key not in parameters:
-                parameters[key] = expected['value']
-
-        # Creating the symbol table to execute the context within
-        table: SymbolTable = createTableFromScope(scope)
-        table.deleteOnExit = True  # Prevents hanging method & block scopes when debugging
-        table.enterScope()
-        table.current.setMeta(scopeType=SCOPE_METHOD)
-        table.current.variableScanBlocked = True
-
-        # Adding parameters as symbols
-        for key, value in parameters.items():
-            if key not in invertedExpectedParameters:
-                self.error(message="Unexpected parameter passed to method: " + key)
-                return None, None
-            else:
-                table.putSymbol(symbol=Symbol(name=key, symbolType=SYMBOL_VARIABLE, value=value))
-
-        result = self.parseScriptCustom(context.block(), table)
-        table.exitScope()
-        # self.symbol_table.exitScopeAndDelete()  # This way we dont get a bunch of hanging method scopes when we debug
-        return result
-
-    # Visit a parse tree produced by AhParser#if_statement.
-    def visitIf_statement(self, ctx: AhParser.If_statementContext) -> tuple:
-        i = 0
-        while True:
-            if ctx.condition(i) is None:
-                if ctx.ELSE():
-                    return self.visit(ctx.block(i))
-                else:
-                    return False, None
-            condition = self.visit(ctx.condition(i))
-            if condition:
-                return self.visit(ctx.block(i))
-            else:
-                i += 1
-
-    # Visit a parse tree produced by AhParser#while_statement.
-    def visitWhile_statement(self, ctx: AhParser.While_statementContext) -> tuple:
-        while self.visit(ctx.condition()):
-            result = self.visit(ctx.block())
-            if result[0]:
-                return result
-        return False, None
-
-    # Visit a parse tree produced by AhParser#for_statement.
-    def visitFor_statement(self, ctx: AhParser.For_statementContext) -> tuple:
-        clause = self.visit(ctx.expr())
-        label = self.visit(ctx.labels())
-
-        if isinstance(clause, str) and isJson(clause):
-            clause = json.loads(clause)
-
-        if isinstance(clause, list):
-            if self.appOptions.debug:
-                self.log.log('> Looping through list with var ' + label)
-                self.log.log('')
-            for item in clause:
-                if self.appOptions.debug:
-                    self.log.log('>> Assigning ' + label + ' = ' + str(item))
-                    self.log.log('')
-                    self.log.log('')
-                self.setVariable(label=label, value=item, convert=False)
-                result = self.visit(ctx.block())
-                if result[0]:
-                    return result
-            self.deleteVariable(label=label, convert=False)
-
-        elif isinstance(clause, float) or isinstance(clause, int):
-            if self.appOptions.debug:
-                self.log.log('> Looping through range with var ' + label)
-                self.log.log('')
-            for i in range(0, int(clause)):
-                if self.appOptions.debug:
-                    self.log.log('>> Assigning ' + label + ' = ' + str(i))
-                    self.log.log('')
-                    self.log.log('')
-                self.setVariable(label=label, value=i, convert=False)
-                result = self.visit(ctx.block())
-                if result[0]:
-                    return result
-            self.deleteVariable(label=label, convert=False)
-
-        else:
-            if self.appOptions.debug:
-                self.error('Invalid Loop Type: ' + str(type(clause)))
-                self.log.log('')
-        return False, None
-
-    # Visit a parse tree produced by AhParser#each_statement.
-    def visitEach_statement(self, ctx: AhParser.Each_statementContext):
-        clause = self.visit(ctx.expr())
-
-        if isinstance(clause, str) and isJson(clause):
-            clause = json.loads(clause)
-
-        if isinstance(clause, list):
-            if self.appOptions.debug:
-                self.log.log('> Looping through result')
-                self.log.log('')
-            callback = self.visit(ctx.callback())
-            for item in clause:
-                if self.appOptions.debug:
-                    self.log.log('>> Assigning result = ' + str(item))
-                    self.log.log('')
-                    self.log.log('')
-                self.execute_callback(callback=callback, result=item)
-        else:
-            self.error("An each loop must be passed a list")
-
-
-
-    # Visit a parse tree produced by AhParser#callback.
-    def visitCallback(self, ctx: AhParser.CallbackContext):
-        parameters = {}
-        if ctx.optional_parameters_block():
-            parameters = self.visit(ctx.optional_parameters_block())
-        return {"params": parameters, "block": ctx.callback_block()}
-
-    # Visit a parse tree produced by AhParser#callback_block.
-    def visitCallback_block(self, ctx: AhParser.Callback_blockContext):
-        return self.visit(ctx.statements())
-
-    # Visit a parse tree produced by AhParser#call_parameter.
-    def visitCall_parameter(self, ctx: AhParser.Call_parameterContext):
-        if ctx.expr():
-            return {"value": self.visit(ctx.expr())}
-        else:
-            return self.visit(ctx.optional_parameter())
-
-    # Visit a parse tree produced by AhParser#execute.
-    def visitExecute(self, ctx):
-        resolvedCommand = self.visit(ctx.commandtax())
-        strict = resolvedCommand['strict']
-
-        command = Command(command=resolvedCommand['command'], parameters=resolvedCommand['parameters'],
-                          credentials=resolvedCommand['credentials'])
-
-        response: ApitaxResponse = self.execute_command(command)
-
-        if strict and not response.isStatusSuccess():
-            self.error('Request returned non-success status code while in strict mode. Request returned: Status ' +
-                       str(
-                           response.getResponseStatusCode()) + ' ' + str(response.getResponseBody()))
-            return None
-
-        result = response.getResponseBody()
-
-        if ctx.callback():
-            callback = self.visit(ctx.callback())
-            result = self.execute_callback(callback=callback, response=response)
-
-        return dict({"command": command, "commandHandler": response, "result": result})
 
     def visitAtom(self, ctx: AhParser.AtomContext):
 
@@ -893,10 +665,161 @@ class AhVisitor(AhVisitorOriginal):
         if ctx.atom_none():
             return self.visit(ctx.atom_none())
 
-    def visitCase_statement(self, ctx: AhParser.Case_statementContext):
-        return super().visitCase_statement(ctx)
+        if ctx.atom_callback():
+            return self.visit(ctx.atom_callback())
 
-    def visitDefault_statement(self, ctx: AhParser.Default_statementContext):
+        if ctx.method_def_atom():
+            return self.visit(ctx.method_def_atom())
+
+    def visitTerminated(self, ctx: AhParser.TerminatedContext) -> BlockStatus:
+        if ctx.return_statement():
+            return BlockStatus(returned=True, result=self.visit(ctx.return_statement()))
+        return BlockStatus(result=self.visitChildren(ctx))
+
+    def visitRunnable_statements(self, ctx: AhParser.Runnable_statementsContext) -> BlockStatus:
+        # TODO: Must be changed to execute and await threads
+        result = BlockStatus()
+        if ctx.method_call_statement():
+            result = self.visit(ctx.method_call_statement())
+        elif ctx.os_statement():
+            result = self.visit(ctx.os_statement())
+        elif ctx.commandtax_statement():
+            result = self.visit(ctx.commandtax_statement())
+
+        if ctx.atom_callback():
+            callback = self.visit(ctx.atom_callback())
+            self.execute_callback(callback=callback, parameters=[Parameter(name="result", value=result)])
+
+        return result
+
+    def visitMethod_call_statement(self, ctx: AhParser.Method_call_statementContext) -> BlockStatus:
+        name = self.resolve_label(ctx.labels())
+        parameters: List[Parameter] = self.visit(ctx.optional_parameters_block())
+        return self.execute_method(label=name, parameters=parameters)
+
+    # TODO
+    def visitCommandtax_statement(self, ctx: AhParser.Commandtax_statementContext):
+        return super().visitCommandtax_statement(ctx)
+
+    # TODO
+    def visitOs_statement(self, ctx: AhParser.Os_statementContext):
+        return super().visitOs_statement(ctx)
+
+    def visitEach_statement(self, ctx: AhParser.Each_statementContext):
+        clause = self.visit(ctx.expr())
+
+        if isinstance(clause, list):
+            self.log('Looping through result')
+
+            callback = self.visit(ctx.atom_callback())
+            for item in clause:
+                self.log('> Assigning result = ' + str(item))
+                self.execute_callback(callback=callback, parameters=[Parameter(name="result", value=item)])
+        else:
+            self.error("An each loop must be passed a list")
+
+    def visitAtom_callback(self, ctx: AhParser.Atom_callbackContext) -> Callback:
+        callback: Callback = Callback(parameters=self.visit(ctx.optional_parameters_block()), block=ctx.callback_block())
+        self.register_method(label=callback.name, method_context=callback.block, attributes=Attributes())
+        return callback
+
+    def visitCallback_block(self, ctx: AhParser.Callback_blockContext) -> BlockStatus:
+        return self.visit(ctx.statements())
+
+    def visitMethod_def_atom(self, ctx: AhParser.Method_def_atomContext):
+        attributes: Attributes = self.visit(ctx.attributes())
+        label: str = self.resolve_label(ctx.label())
+        self.register_method(label=label, method_context=ctx, attributes=attributes)
+
+    def visitNon_terminated(self, ctx: AhParser.Non_terminatedContext) -> BlockStatus:
+        temp = self.visit(ctx.flow())
+        return temp
+
+    def visitFlow(self, ctx: AhParser.FlowContext) -> BlockStatus:
+        if ctx.if_statement():
+            return self.visit(ctx.if_statement())
+        if ctx.while_statement():
+            return self.visit(ctx.while_statement())
+        if ctx.for_statement():
+            return self.visit(ctx.for_statement())
+
+    def visitIf_statement(self, ctx: AhParser.If_statementContext) -> BlockStatus:
+        i = 0
+        while ctx.condition(i):
+            if self.visit(ctx.condition(i)):
+                return self.visit(ctx.block(i))
+            i += 1
+
+        if ctx.ELSE():
+            return self.visit(ctx.block(i))
+
+        return BlockStatus()
+
+    def visitFor_statement(self, ctx: AhParser.For_statementContext) -> BlockStatus:
+        clause = self.visit(ctx.expr())
+        label = self.visit(ctx.labels())
+
+        if isinstance(clause, list):
+            self.log('Looping through list with var ' + label)
+
+            for item in clause:
+                self.log('> Assigning ' + label + ' = ' + str(item))
+
+                self.symbol_table.enter_block_scope()
+                self.set_variable(label=label, value=item)
+                block_status: BlockStatus = self.visit(ctx.block())
+                self.symbol_table.exit_block_scope()
+                if block_status.done or block_status.returned:
+                    return block_status
+
+        elif isinstance(clause, float) or isinstance(clause, int):
+            self.log('Looping through range with var ' + label)
+
+            for i in range(0, int(clause)):
+                self.log('> Assigning ' + label + ' = ' + str(i))
+
+                self.symbol_table.enter_block_scope()
+                self.set_variable(label=label, value=i)
+                block_status: BlockStatus = self.visit(ctx.block())
+                self.symbol_table.exit_block_scope()
+                if block_status.done or block_status.returned:
+                    return block_status
+
+        else:
+            self.error('Invalid Loop Type: ' + str(type(clause)))
+
+        return BlockStatus()
+
+    def visitWhile_statement(self, ctx: AhParser.While_statementContext) -> BlockStatus:
+        while self.visit(ctx.condition()):
+            block_status: BlockStatus = self.visit(ctx.block())
+            if block_status.done or block_status.returned:
+                return block_status
+        return BlockStatus()
+
+    def visitSwitch_statement(self, ctx: AhParser.Switch_statementContext) -> BlockStatus:
+        i = 0
+        while ctx.case_statement(i):
+            case_status: CaseStatus = self.visit(ctx.case_statement())
+            if case_status.executed and not case_status.continued:
+                return BlockStatus(returned=case_status.returned, result=case_status.result)
+            i += 1
+
+        if ctx.default_statement():
+            block_status: BlockStatus = self.visit(ctx.case_statement())
+            block_status.continued = False
+            block_status.done = False
+            return block_status
+        return BlockStatus()
+
+    def visitCase_statement(self, ctx: AhParser.Case_statementContext) -> CaseStatus:
+        case_status = CaseStatus()
+        if self.visit(ctx.condition()):
+            case_status = CaseStatus(**self.visit(ctx.block()).dict())
+            case_status.executed = True
+        return case_status
+
+    def visitDefault_statement(self, ctx: AhParser.Default_statementContext) -> BlockStatus:
         return self.visit(ctx.block())
 
     # Visit a parse tree produced by AhParser#block.
@@ -917,8 +840,7 @@ class AhVisitor(AhVisitorOriginal):
 
     def visitLog_statement(self, ctx: AhParser.Log_statementContext):
         if ctx.expr():
-            self.log.log('> Logging: ' + json.dumps(self.visit(ctx.expr())))
-            self.log.log('')
+            self.log('Logging: ' + json.dumps(self.visit(ctx.expr())))
 
     def visitFlexible_parameter_block(self, ctx: AhParser.Flexible_parameter_blockContext) -> List[Parameter]:
         parameters: List[Parameter] = []
@@ -1026,37 +948,27 @@ class AhVisitor(AhVisitorOriginal):
         returner = None
         if ctx.TYPE_INT():
             returner = int(value)
-            if self.appOptions.debug:
-                self.log.log('> Explicitly Casting \'' + str(value) + '\' to int: ' + json.dumps(returner))
-                self.log.log('')
+            self.log('Explicitly Casting \'' + str(value) + '\' to int: ' + json.dumps(returner))
             return returner
 
         if ctx.TYPE_DEC():
             returner = float(value)
-            if self.appOptions.debug:
-                self.log.log('> Explicitly Casting \'' + str(value) + '\' to number: ' + json.dumps(returner))
-                self.log.log('')
+            self.log('Explicitly Casting \'' + str(value) + '\' to number: ' + json.dumps(returner))
             return returner
 
         if ctx.TYPE_BOOL():
             returner = bool(value)
-            if self.appOptions.debug:
-                self.log.log('> Explicitly Casting \'' + str(value) + '\' to boolean: ' + json.dumps(returner))
-                self.log.log('')
+            self.log('Explicitly Casting \'' + str(value) + '\' to boolean: ' + json.dumps(returner))
             return returner
 
         if ctx.TYPE_STR():
             returner = str(value)
-            if self.appOptions.debug:
-                self.log.log('> Explicitly Casting \'' + str(value) + '\' to string: ' + json.dumps(returner))
-                self.log.log('')
+            self.log('Explicitly Casting \'' + str(value) + '\' to string: ' + json.dumps(returner))
             return returner
 
         if ctx.TYPE_LIST():
             returner = list(str(value).split(","))
-            if self.appOptions.debug:
-                self.log.log('> Explicitly Casting \'' + str(value) + '\' to list: ' + json.dumps(returner))
-                self.log.log('')
+            self.log('Explicitly Casting \'' + str(value) + '\' to list: ' + json.dumps(returner))
             return returner
 
         if ctx.TYPE_DICT():
@@ -1074,9 +986,7 @@ class AhVisitor(AhVisitorOriginal):
             else:
                 returner = dict({"default": value})
 
-            if self.appOptions.debug:
-                self.log.log('> Explicitly Casting \'' + str(value) + '\' to dictionary: ' + json.dumps(returner))
-                self.log.log('')
+            self.log('Explicitly Casting \'' + str(value) + '\' to dictionary: ' + json.dumps(returner))
 
         return returner
 
@@ -1132,10 +1042,7 @@ class AhVisitor(AhVisitorOriginal):
                 value.label = label
                 value.start()
 
-        if self.appOptions.debug:
-            self.log.log('> Assigning Variable: ' + label + ' = ' + str(
-                value))
-            self.log.log('')
+        self.log('Assigning Variable: ' + label + ' = ' + str(value))
 
     def visitAtom_obj_list(self, ctx: AhParser.Atom_obj_listContext) -> list:
         parameters = []
@@ -1175,31 +1082,25 @@ class AhVisitor(AhVisitorOriginal):
 
     def visitInject(self, ctx: AhParser.InjectContext):
         returner = self.visit(ctx.expr())
-        if self.appOptions.debug:
-            self.log.log('> Injecting into: ' + ctx.getText() + ' with the value ' + str(returner))
-            self.log.log('')
+        self.log('Injecting into: ' + ctx.getText() + ' with the value ' + str(returner))
         return returner
 
-    def visitCondition(self, ctx: AhParser.ConditionContext):
+    def visitCondition(self, ctx: AhParser.ConditionContext) -> bool:
         condition = self.visit(ctx.expr())
 
-        if self.appOptions.debug:
-            self.log.log('>> Evaluated Flow Condition as: ' + str(condition))
-            self.log.log('')
+        self.log('> Evaluated Flow Condition as: ' + str(condition))
 
-        return condition
+        return bool(condition)
 
     def visitReturn_statement(self, ctx: AhParser.Return_statementContext) -> Any:
         exportation = None
         if ctx.expr():
             exportation = self.visit(ctx.expr())
 
-        if self.appOptions.debug:
-            if exportation:
-                self.log.log('> Returning with value: ' + str(exportation))
-            else:
-                self.log.log('> Returning with value: None')
-            self.log.log('')
+        if exportation:
+            self.log('Returning with value: ' + str(exportation))
+        else:
+            self.log('Returning with value: None')
 
         return exportation
 
@@ -1209,9 +1110,7 @@ class AhVisitor(AhVisitorOriginal):
     def visitDelete_statement(self, ctx: AhParser.Delete_statementContext):
         label = self.resolve_label(ctx.labels())
         self.delete_variable(label=label)
-        if self.appOptions.debug:
-            self.log.log('> Deleteing variable: ' + label)
-            self.log.log('')
+        self.log('Deleteing variable: ' + label)
 
     def visitAwait_statement(self, ctx: AhParser.Await_statementContext):
         label = self.resolve_label(ctx.labels())
@@ -1249,13 +1148,13 @@ class AhVisitor(AhVisitorOriginal):
     def visitLabel(self, ctx: AhParser.LabelContext) -> str:
         return ctx.LABEL().getText()
 
-    def visitAttribute(self, ctx: AhParser.AttributeContext) -> Attributes:
+    def visitAttributes(self, ctx: AhParser.AttributesContext) -> Attributes:
         attributes = Attributes()
-        if ctx.SCRIPT():
+        if ctx.SCRIPT(0):
             attributes.script = True
-        if ctx.STATIC():
+        if ctx.STATIC(0):
             attributes.static = True
-        if ctx.ASYNC():
+        if ctx.ASYNC(0):
             attributes.asynchronous = True
         return attributes
 
@@ -1269,9 +1168,7 @@ class AhVisitor(AhVisitorOriginal):
             label = label.replace('$', '')
             replacer = str(self.get_variable(label))
             line = line.replace(match, replacer)
-            if self.appOptions.debug:
-                self.log.log('> Injecting Variable into String \'' + label + '\': ' + line)
-                self.log.log('')
+            self.log('Injecting Variable into String \'' + label + '\': ' + line)
         return line
 
     def visitAtom_number(self, ctx: AhParser.Atom_numberContext) -> Union[int, float]:
@@ -1291,29 +1188,6 @@ class AhVisitor(AhVisitorOriginal):
 
     def visitAtom_none(self, ctx: AhParser.Atom_noneContext):
         return None
-
-    def visitRunnable_statements(self, ctx: AhParser.Runnable_statementsContext):
-        return super().visitRunnable_statements(ctx)
-
-    def visitMethod_call_statement(self, ctx: AhParser.Method_call_statementContext):
-        return super().visitMethod_call_statement(ctx)
-
-    def visitCommandtax_statement(self, ctx: AhParser.Commandtax_statementContext):
-        return super().visitCommandtax_statement(ctx)
-
-    def visitOs_statement(self, ctx: AhParser.Os_statementContext):
-        return super().visitOs_statement(ctx)
-
-    def visitAtom_callback(self, ctx: AhParser.Atom_callbackContext):
-        return super().visitAtom_callback(ctx)
-
-    def visitMethod_def_atom(self, ctx: AhParser.Method_def_atomContext):
-        return super().visitMethod_def_atom(ctx)
-
-    def visitSwitch_statement(self, ctx: AhParser.Switch_statementContext):
-        return super().visitSwitch_statement(ctx)
-
-
 
 
 

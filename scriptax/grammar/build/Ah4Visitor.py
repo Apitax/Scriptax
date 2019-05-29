@@ -284,8 +284,8 @@ class Ah4Visitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by Ah4Parser#attribute.
-    def visitAttribute(self, ctx:Ah4Parser.AttributeContext):
+    # Visit a parse tree produced by Ah4Parser#attributes.
+    def visitAttributes(self, ctx:Ah4Parser.AttributesContext):
         return self.visitChildren(ctx)
 
 
