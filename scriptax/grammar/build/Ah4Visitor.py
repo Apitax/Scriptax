@@ -139,6 +139,16 @@ class Ah4Visitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by Ah4Parser#done_statement.
+    def visitDone_statement(self, ctx:Ah4Parser.Done_statementContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by Ah4Parser#continue_statement.
+    def visitContinue_statement(self, ctx:Ah4Parser.Continue_statementContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by Ah4Parser#log_statement.
     def visitLog_statement(self, ctx:Ah4Parser.Log_statementContext):
         return self.visitChildren(ctx)

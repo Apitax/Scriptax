@@ -61,6 +61,8 @@ terminated :
         log_statement
         | each_statement
         | return_statement
+        | done_statement
+        | continue_statement
         | error_statement
         | delete_statement
         | await_statement
@@ -115,7 +117,11 @@ case_statement : CASE LPAREN (
 
 default_statement : DEFAULT block ;
 
-block : BLOCKOPEN (statement | DONE | CONTINUE)* BLOCKCLOSE | (statement | DONE | CONTINUE) ;
+block : BLOCKOPEN statements BLOCKCLOSE | statement ;
+
+done_statement : DONE ;
+
+continue_statement : CONTINUE ;
 
 // statements
 
@@ -125,7 +131,7 @@ flexible_parameter_block : flexible_parameter? (COMMA flexible_parameter)* ; // 
 
 flexible_parameter : required_parameter | optional_parameter ;
 
-import_statement : (FROM label)? IMPORT labels (LPAREN optional_parameters_block RPAREN)? (AS label)? ;
+import_statement : (FROM label)? IMPORT labels (AS label)? ;
 
 extends_statement : EXTEND 
       (

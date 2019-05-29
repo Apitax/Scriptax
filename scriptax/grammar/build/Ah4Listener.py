@@ -242,6 +242,24 @@ class Ah4Listener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by Ah4Parser#done_statement.
+    def enterDone_statement(self, ctx:Ah4Parser.Done_statementContext):
+        pass
+
+    # Exit a parse tree produced by Ah4Parser#done_statement.
+    def exitDone_statement(self, ctx:Ah4Parser.Done_statementContext):
+        pass
+
+
+    # Enter a parse tree produced by Ah4Parser#continue_statement.
+    def enterContinue_statement(self, ctx:Ah4Parser.Continue_statementContext):
+        pass
+
+    # Exit a parse tree produced by Ah4Parser#continue_statement.
+    def exitContinue_statement(self, ctx:Ah4Parser.Continue_statementContext):
+        pass
+
+
     # Enter a parse tree produced by Ah4Parser#log_statement.
     def enterLog_statement(self, ctx:Ah4Parser.Log_statementContext):
         pass

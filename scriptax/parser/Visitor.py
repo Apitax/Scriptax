@@ -6,13 +6,16 @@ from scriptax.drivers.Driver import Driver
 from scriptax.models.Parameter import Parameter
 from scriptax.models.Attributes import Attributes
 from scriptax.models.AhOptions import AhOptions
+from scriptax.models.BlockStatus import BlockStatus
 
-from commandtax.models.Command import Command
+from scriptax.parser.utils.BoilerPlate import generate_parse_tree, read_file, read_string, customizable_tree_parser
 
-from scriptax.parser.SymbolTable import SymbolTable, ExtendedImport, create_table
+from scriptax.parser.SymbolTable import SymbolTable, ExtendedImport, create_table, Import
 from scriptax.parser.symbols.SymbolScope import SymbolScope, SCOPE_GLOBAL, SCOPE_MODULE
 from scriptax.parser.symbols.Symbol import Symbol, DATA_NUMBER, DATA_BOOLEAN, DATA_HEX, DATA_NONE, DATA_STRING, \
     DATA_DICT, DATA_LIST, DATA_METHOD, DATA_THREAD, DATA_PYTHONIC, DATA_INSTANCE, SYMBOL_VAR, SYMBOL_MODULE
+
+from commandtax.models.Command import Command
 
 from apitaxcore.models.State import State
 from apitaxcore.models.Options import Options
@@ -95,7 +98,8 @@ class AhVisitor(AhVisitorOriginal):
         The regex used for detecting mustache syntax
     """
 
-    def __init__(self, parameters: dict = None, options: Options = None, file=None, symbol_table: SymbolTable = None):
+    def __init__(self, parameters: List[Parameter] = None, options: Options = None, file=None,
+                 symbol_table: SymbolTable = None):
         """
         Parameters
         ----------
@@ -116,7 +120,7 @@ class AhVisitor(AhVisitorOriginal):
         # Parameters
         self.appOptions: Options = options if options is not None else Options()
         # self.appOptions.debug = True
-        self.parameters: dict = parameters if parameters is not None else {}
+        self.parameters: List[Parameter] = parameters if parameters is not None else []
 
         # TODO: Evaluate necessity of these
         self.state = {'file': file, 'line': 0, 'char': 0}
@@ -180,8 +184,8 @@ class AhVisitor(AhVisitorOriginal):
         Tuple[Any, AhVisitor]
             The first index is the returned result, the second is the parsing class
         """
-        from scriptax.parser.utils.BoilerPlate import customizableParser
-        result = customizableParser(scriptax, parameters=parameters)
+        from scriptax.parser.utils.BoilerPlate import customizable_parser
+        result = customizable_parser(scriptax, parameters=parameters)
         if result[1].isError():
             self.error(message=result[1].message)
             return None, None
@@ -203,14 +207,14 @@ class AhVisitor(AhVisitorOriginal):
         Tuple[Any, AhVisitor]
             The first index is the returned result, the second is the parsing class
         """
-        from scriptax.parser.utils.BoilerPlate import customizableContextParser
-        result = customizableContextParser(context, symbol_table=symbol_table)
+        from scriptax.parser.utils.BoilerPlate import customizable_context_parser
+        result = customizable_context_parser(context, symbol_table=symbol_table)
         if result[1].isError():
             self.error(message=result[1].message)
             return None, None
         return result
 
-    def setState(self, file: str = None, line: int = None, char: int = None):
+    def set_state(self, file: str = None, line: int = None, char: int = None):
         """
         Sets the current state of the parser
         """
@@ -231,14 +235,14 @@ class AhVisitor(AhVisitorOriginal):
         return name
 
     # TODO
-    def executeOs(self):
+    def execute_os(self):
         """
         Executes an OS line
         """
         pass
 
     # TODO: This needs to be redone
-    def executeCommand(self, command: Command) -> ApitaxResponse:
+    def execute_command(self, command: Command) -> ApitaxResponse:
         """
         Executes commandtax
         """
@@ -259,7 +263,7 @@ class AhVisitor(AhVisitorOriginal):
         return connector.execute()
 
     # TODO: this needs to be redone
-    def executeCallback(self, callback=None, response: ApitaxResponse = None, result=None):
+    def execute_callback(self, callback=None, response: ApitaxResponse = None, result=None):
         """
         Executes a callback
         """
@@ -323,15 +327,79 @@ class AhVisitor(AhVisitorOriginal):
             except Exception:
                 raise Exception("Could not find symbol")
 
-    def new_instance(self, import_name, var_name):
+    def import_module_file(self, path: str, driver=None, as_label=None):
+        """
+
+        :param path:
+        :param driver:
+        :param as_label:
+        :return:
+        """
+        # Avoids circular dependencies
+        from scriptax.parser.ModuleVisitor import ModuleParser
+
+        driver = self.resolve_label(driver)
+        as_label = self.resolve_label(as_label)
+
+        driver_instance: Driver = LoadedDrivers.getPrimaryDriver()
+        if driver:
+            driver_instance = LoadedDrivers.getDriver(driver)
+
+        scriptax = driver_instance.getDriverScript(path)
+        tree = generate_parse_tree(read_string(scriptax))
+
+        import_table = SymbolTable(name=as_label + "_import")
+        module_parser = ModuleParser(symbol_table=import_table)
+        module_parser.visit(tree)
+        module = Import(tree=tree, scope=module_parser.symbol_table.scope())
+        self.symbol_table.import_module(name=as_label, module=module)
+
+    def import_module_string(self, label, scriptax: str):
+        """
+
+        :param label:
+        :param scriptax:
+        :return:
+        """
+        # Avoids circular dependencies
+        from scriptax.parser.ModuleVisitor import ModuleParser
+
+        label = self.resolve_label(label)
+        tree = generate_parse_tree(read_string(scriptax))
+        import_table = SymbolTable(name=label + "_import")
+        module_parser = ModuleParser(symbol_table=import_table)
+        module_parser.visit(tree)
+        module = Import(tree=tree, scope=module_parser.symbol_table.scope())
+        self.symbol_table.import_module(name=label, module=module)
+
+    def extend(self, import_name):
         """
 
         """
         import_name = self.resolve_label(import_name)
-        var_name = self.resolve_label(var_name)
-        instance = self.symbol_table.copy(import_name=import_name, var_name=var_name)
-        instance = create_table(instance.value)
-        # TODO: Parse the instance with the created table
+        module: Import = self.symbol_table.extends(import_name=import_name)
+        module_table = create_table(module.scope)
+        customizable_tree_parser(tree=module.tree, symbol_table=module_table, options=self.options)
+        # never call the constructor here. never ever ever
+
+    def implements(self, label):
+        """
+
+        """
+        label = self.resolve_label(label)
+        self.symbol_table.implements(import_name=label)
+
+    def new_instance(self, import_name, parameters: List[Parameter] = None) -> SymbolScope:
+        """
+
+        """
+        import_name = self.resolve_label(import_name)
+        instance: Import = self.symbol_table.new_instance(import_name=import_name)
+        instance_table = create_table(instance.scope)
+        customizable_tree_parser(tree=instance.tree, symbol_table=instance_table, options=self.options,
+                                 parameters=parameters)
+        # TODO : Call constructor if it exists
+        return instance.scope
 
     def register_method(self, label, body_context, static=False):
         """
@@ -353,32 +421,6 @@ class AhVisitor(AhVisitorOriginal):
         result = self.visit(body_context)
         self.symbol_table.complete_execution()
         return result
-
-    def import_module(self, label, path: str):
-        label = self.resolve_label(label)
-        # TODO: Don't import if a import already exists
-        module = self.symbol_table.new(name=label, path=path)
-        # Don't parse here due to the new inheritance format
-        # module_table = create_table(module.value)
-
-    def extend(self, label, path: str):
-        """
-
-        """
-        label = self.resolve_label(label)
-        self.symbol_table.new(name=label, path=path)
-        self.symbol_table.extends(label)
-        # TODO: We need to parse that import, but not execute the constructor
-
-    def implements(self, label):
-        """
-
-        """
-        label = self.resolve_label(label)
-        # table.implements(import_name="strings")
-        self.symbol_table.implements(import_name=label)
-        # TODO: We need to parse the module given the module table to import each static method.
-        #       This should probably use a separate purpose built parser - just a new visitor class essentially
 
     def inject(self, line):
         """
@@ -426,7 +468,7 @@ class AhVisitor(AhVisitorOriginal):
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by AhParser#statements.
-    def visitStatements(self, ctx: AhParser.StatementsContext) -> tuple:
+    def visitStatements(self, ctx: AhParser.StatementsContext) -> BlockStatus:
         i = 0
         while ctx.statement(i):
             result: tuple = self.visit(ctx.statement(
@@ -439,7 +481,7 @@ class AhVisitor(AhVisitorOriginal):
         return False, None
 
     # Visit a parse tree produced by AhParser#statement.
-    def visitStatement(self, ctx: AhParser.StatementContext) -> tuple:
+    def visitStatement(self, ctx: AhParser.StatementContext) -> BlockStatus:
         debugTemp = self.appOptions.debug
         sensitiveTemp = self.appOptions.sensitive
 
@@ -466,7 +508,7 @@ class AhVisitor(AhVisitorOriginal):
         if line != "" and self.appOptions.debug:
             self.log.log('')
 
-        self.setState(line=ctx.start.line)  # TODO: Try to add character here as well
+        self.set_state(line=ctx.start.line)  # TODO: Try to add character here as well
 
         if ctx.NOT() and line != "" and debugTemp:
             self.log.log('> Setting debug and sensitive back to their original values')
@@ -777,21 +819,11 @@ class AhVisitor(AhVisitorOriginal):
                     self.log.log('>> Assigning result = ' + str(item))
                     self.log.log('')
                     self.log.log('')
-                self.executeCallback(callback=callback, result=item)
+                self.execute_callback(callback=callback, result=item)
         else:
             self.error("An each loop must be passed a list")
 
-    # Visit a parse tree produced by AhParser#block.
-    def visitBlock(self, ctx: AhParser.BlockContext) -> tuple:
-        self.symbol_table.enterScope()
-        self.symbol_table.current.setMeta(scopeType=SCOPE_BLOCK)
-        result = False, None
-        if ctx.statements():
-            result = self.visit(ctx.statements())
-        else:
-            result = self.visit(ctx.statement())
-        self.symbol_table.exitScope()
-        return result
+
 
     # Visit a parse tree produced by AhParser#callback.
     def visitCallback(self, ctx: AhParser.CallbackContext):
@@ -819,7 +851,7 @@ class AhVisitor(AhVisitorOriginal):
         command = Command(command=resolvedCommand['command'], parameters=resolvedCommand['parameters'],
                           credentials=resolvedCommand['credentials'])
 
-        response: ApitaxResponse = self.executeCommand(command)
+        response: ApitaxResponse = self.execute_command(command)
 
         if strict and not response.isStatusSuccess():
             self.error('Request returned non-success status code while in strict mode. Request returned: Status ' +
@@ -831,81 +863,9 @@ class AhVisitor(AhVisitorOriginal):
 
         if ctx.callback():
             callback = self.visit(ctx.callback())
-            result = self.executeCallback(callback=callback, response=response)
+            result = self.execute_callback(callback=callback, response=response)
 
         return dict({"command": command, "commandHandler": response, "result": result})
-
-    # Visit a parse tree produced by Ah4Parser#extends_statement.
-    def visitExtends_statement(self, ctx: AhParser.Extends_statementContext):
-        label = self.visit(ctx.label())
-        symbol: ScriptSymbol = self.symbol_table.getSymbol(name=label, symbolType=SYMBOL_SCRIPT)
-        scriptax = symbol.driver.getDriverScript(symbol.path)
-        parameters = {'import': None}
-        if ctx.optional_parameters_block():
-            parameters = self.visit(ctx.optional_parameters_block())
-        parser = self.parseScript(scriptax, parameters=parameters)[1]
-
-        extendsTable: SymbolTable = parser.symbol_table
-        extendsTable.resetTable()
-        extendsTable.enterScope()
-        extendsScope: SymbolScope = extendsTable.current
-        extendsScope.setMeta(name=label, scopeType=SCOPE_SCRIPT)
-
-        # print(extendsTable.printTable())
-
-        # for sym in extendsScope.symbols:
-
-        current = self.symbol_table.current
-        self.symbol_table.exitScopeAndDelete()
-        self.symbol_table.insertScope(scope=extendsScope)
-        self.symbol_table.insertScope(scope=current)
-        # print(self.symbol_table.printTable())
-
-    # Visit a parse tree produced by Ah4Parser#import_statement.
-    def visitImport_statement(self, ctx: AhParser.Import_statementContext):
-        driver: Driver = LoadedDrivers.getPrimaryDriver()
-        labelIndex = 0
-        if ctx.FROM():
-            driver = self.visit(ctx.label(labelIndex))
-            driver = LoadedDrivers.getDriver(driver)
-            labelIndex += 1
-
-        path = self.visit(ctx.labels())
-
-        name = None
-        if ctx.AS():
-            name = self.visit(ctx.label(labelIndex))
-        else:
-            name = path.split('.')[-1]
-
-        path = path.replace('.', '/') + '.ah'
-
-        scriptax = driver.getDriverScript(path)
-
-        parameters = {'import': None}
-        if ctx.optional_parameters_block():
-            parameters = self.visit(ctx.optional_parameters_block())
-        parser = self.parseScript(scriptax, parameters=parameters)[1]
-
-        importTable: SymbolTable = parser.symbol_table
-        importTable.resetTable()
-        importTable.enterScope()  # SymbolTable()
-        importScope = importTable.current
-        importScope.setMeta(name=name, scopeType=SCOPE_SCRIPT)
-
-        # Insert the script scope into our scope and add a symbol to reference it
-        reference = self.symbol_table.current.parent.insertScope(importScope)
-        # self.symbol_table.exitScope()
-        self.symbol_table.current.addSymbol(
-            symbol=ScriptSymbol(name=name, symbolType=SYMBOL_SCRIPT, dataType=DATA_SCRIPT, value=reference, path=path,
-                                driver=driver))
-        # return self.visitChildren(ctx)
-
-    # Visit a parse tree produced by AhParser#log.
-    def visitLog(self, ctx: AhParser.LogContext):
-        if ctx.expr():
-            self.log.log('> Logging: ' + json.dumps(self.visit(ctx.expr())))
-            self.log.log('')
 
     def visitAtom(self, ctx: AhParser.AtomContext):
 
@@ -933,12 +893,96 @@ class AhVisitor(AhVisitorOriginal):
         if ctx.atom_none():
             return self.visit(ctx.atom_none())
 
+    def visitCase_statement(self, ctx: AhParser.Case_statementContext):
+        return super().visitCase_statement(ctx)
+
+    def visitDefault_statement(self, ctx: AhParser.Default_statementContext):
+        return self.visit(ctx.block())
+
+    # Visit a parse tree produced by AhParser#block.
+    def visitBlock(self, ctx: AhParser.BlockContext) -> BlockStatus:
+        self.symbol_table.enter_block_scope()
+        if ctx.statements():
+            result = self.visit(ctx.statements())
+        else:
+            result = self.visit(ctx.statement())
+        self.symbol_table.exit_block_scope()
+        return result
+
+    def visitDone_statement(self, ctx: Ah4Parser.Done_statementContext) -> bool:
+        return True
+
+    def visitContinue_statement(self, ctx: Ah4Parser.Continue_statementContext) -> bool:
+        return True
+
+    def visitLog_statement(self, ctx: AhParser.Log_statementContext):
+        if ctx.expr():
+            self.log.log('> Logging: ' + json.dumps(self.visit(ctx.expr())))
+            self.log.log('')
+
+    def visitFlexible_parameter_block(self, ctx: AhParser.Flexible_parameter_blockContext) -> List[Parameter]:
+        parameters: List[Parameter] = []
+        i = 0
+        while ctx.flexible_parameter(i):
+            parameters.append(self.visit(ctx.flexible_parameter(i)))
+            i += 1
+        return parameters
+
+    def visitFlexible_parameter(self, ctx: AhParser.Flexible_parameterContext) -> Parameter:
+        if ctx.required_parameter():
+            return self.visit(ctx.required_parameter())
+        if ctx.optional_parameter():
+            return self.visit(ctx.optional_parameter())
+
+    def visitImport_statement(self, ctx: AhParser.Import_statementContext):
+        labelIndex = 0
+        driver = None
+        if ctx.FROM():
+            driver = self.visit(ctx.label(0))
+            labelIndex += 1
+
+        path = self.visit(ctx.labels())
+
+        name = None
+        if ctx.AS():
+            name = self.visit(ctx.label(labelIndex))
+        else:
+            name = path.split('.')[-1]
+
+        path = path.replace('.', '/') + '.ah'
+
+        self.import_module_file(path=path, driver=driver, as_label=name)
+
+    def visitExtends_statement(self, ctx: AhParser.Extends_statementContext):
+        if not ctx.WITH():
+            # Inheritance only
+            self.extend(import_name=self.resolve_label(ctx.label(0)))
+        else:
+            label_count = 0
+            comma_count = 0
+
+            while ctx.label(label_count):
+                label_count += 1
+
+            while ctx.label(comma_count):
+                comma_count += 1
+
+            i = 0
+            if label_count > (comma_count + 1):
+                # If the first label is for inheritance
+                self.extend(self.resolve_label(ctx.label(0)))
+                i = 1
+
+            while ctx.label(i):
+                self.implements(self.resolve_label(ctx.label(i)))
+                i += 1
+
     def visitCreate_instance(self, ctx: AhParser.Create_instanceContext):
         label = self.visit(ctx.label())
 
         parameters = self.visit(ctx.optional_parameters_block())
 
-        return instanceScope
+        return self.new_instance(import_name=label, parameters=parameters)
 
     def visitAhoptions_statement(self, ctx: AhParser.Ahoptions_statementContext):
         data = self.visit(ctx.atom_obj_dict())
@@ -949,6 +993,11 @@ class AhVisitor(AhVisitorOriginal):
         parameters: List[Parameter] = []
         while ctx.optional_parameter(i):
             parameters.append(self.visit(ctx.optional_parameter(i)))
+            i += 1
+
+        i = 0
+        while ctx.dict_signal(i):
+            parameters += self.visit(ctx.dict_signal(i))
             i += 1
         return parameters
 
@@ -1140,7 +1189,7 @@ class AhVisitor(AhVisitorOriginal):
 
         return condition
 
-    def visitReturn_statement(self, ctx: AhParser.Return_statementContext):
+    def visitReturn_statement(self, ctx: AhParser.Return_statementContext) -> Any:
         exportation = None
         if ctx.expr():
             exportation = self.visit(ctx.expr())
@@ -1177,8 +1226,7 @@ class AhVisitor(AhVisitorOriginal):
 
     def visitRequired_parameter(self, ctx: AhParser.Required_parameterContext) -> Parameter:
         label = self.resolve_label(ctx.labels())
-        value = self.get_variable(label=label)
-        return Parameter(name=label, value=value)
+        return Parameter(name=label)
 
     def visitLabels(self, ctx: AhParser.LabelsContext) -> str:
 
@@ -1265,17 +1313,12 @@ class AhVisitor(AhVisitorOriginal):
     def visitSwitch_statement(self, ctx: AhParser.Switch_statementContext):
         return super().visitSwitch_statement(ctx)
 
-    def visitCase_statement(self, ctx: AhParser.Case_statementContext):
-        return super().visitCase_statement(ctx)
 
-    def visitDefault_statement(self, ctx: AhParser.Default_statementContext):
-        return super().visitDefault_statement(ctx)
 
-    def visitLog_statement(self, ctx: AhParser.Log_statementContext):
-        return super().visitLog_statement(ctx)
 
-    def visitFlexible_parameter_block(self, ctx: AhParser.Flexible_parameter_blockContext):
-        return super().visitFlexible_parameter_block(ctx)
 
-    def visitFlexible_parameter(self, ctx: AhParser.Flexible_parameterContext):
-        return super().visitFlexible_parameter(ctx)
+
+
+
+
+

@@ -1,7 +1,7 @@
 import threading
 import uuid
 from apitaxcore.models.Options import Options
-from scriptax.parser.utils.BoilerPlate import customizableContextParser
+from scriptax.parser.utils.BoilerPlate import customizable_context_parser
 from scriptax.parser.Visitor import AhVisitor
 from scriptax.models.Parameter import Parameter
 from typing import List
@@ -30,11 +30,11 @@ class GenericExecution(threading.Thread):
             self.log.log('')
 
         # Execute command
-        result = customizableContextParser(context=self.body_context, parameters=self.body_parameters,
-                                           options=self.options)
+        result = customizable_context_parser(context=self.body_context, parameters=self.body_parameters,
+                                             options=self.options)
 
         if self.callback_context:
-            result = customizableContextParser(context=self.callback_context, parameters=self.callback_parameters + [
+            result = customizable_context_parser(context=self.callback_context, parameters=self.callback_parameters + [
                 Parameter(name="result", value=result[0], options=self.options)])
 
         if self.result_label:

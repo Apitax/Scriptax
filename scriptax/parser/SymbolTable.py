@@ -1,5 +1,12 @@
+from __future__ import annotations
+
+import uuid
+
 from typing import List
+from pydantic import BaseModel, PyObject
+
 from scriptax.models.Parameter import Parameter
+from scriptax.grammar.build.Ah4Parser import Ah4Parser
 from scriptax.parser.symbols.ARISymbolTable import ARISymbolTable as GenericTable
 from scriptax.parser.symbols.ARISymbolTable import create_table as create_generic_table
 from scriptax.parser.symbols.SymbolScope import SymbolScope, SCOPE_MODULE, SCOPE_BLOCK
@@ -333,7 +340,7 @@ class SymbolTable(GenericTable):
             method_scope = SymbolTable(name=method_name + "_isolated_method", type=SCOPE_BLOCK).scope()
         else:
             # Births a new scope for the method body inside of its static parent scope
-            instance_table: SymbolTable = create_generic_table(instance_scope)
+            instance_table: GenericTable = create_generic_table(instance_scope)
             method_scope: SymbolScope = instance_table.birth_scope(name=method_name + "_method")
 
         # Adds each parameter into the method scope
@@ -347,6 +354,12 @@ class SymbolTable(GenericTable):
         # Returns the body method such that some parser or compiler can execute its body
         return method.value
 
+    def enter_block_scope(self, name: str = 'anonymous') -> SymbolScope:
+        return self.enter_scope(name=name + "_method")
+
+    def exit_block_scope(self):
+        self.exit_scope()
+
     def complete_execution(self):
         """
         Completes execution
@@ -357,10 +370,23 @@ class SymbolTable(GenericTable):
         """
         No parameters on this one as it is handled via the constructor
         After calling this, use the returned scope symbol to parse the file
+
+        DEPRECATED
         """
         import_table = SymbolTable(name=name + "_import")
         return self.scope().insert_symbol(
             Symbol(name=name, symbol_type=SYMBOL_MODULE, value=import_table.scope(), attributes={"path": path}))
+
+    def import_module(self, name: str, module: Import) -> Symbol:
+        """
+        Imports a new module to the symbol table
+        This does not handle the parse tree or the static method scoping and that should be done prior to calling this
+
+        :param name:
+        :param module:
+        :return:
+        """
+        return self.scope().insert_symbol(Symbol(name=name, symbol_type=SYMBOL_MODULE, value=module))
 
     def _get_import(self, name: str) -> Symbol:
         """
@@ -385,6 +411,8 @@ class SymbolTable(GenericTable):
         """
         Uses the import to generate a fresh object of that type
         After calling this, use the returned scope symbol to parse the file and call the constructor
+
+        DEPRECATED
         """
 
         # If we imported module exists, then get the symbol for it
@@ -397,9 +425,21 @@ class SymbolTable(GenericTable):
         return self.scope().insert_symbol(
             Symbol(name=var_name, value=instance_table.scope(), attributes={"path": symbol.attributes['path']}))
 
-    def new_instance(self, import_name: str) -> :
+    def new_instance(self, import_name: str) -> Import:
+        """
+        Used to create new instances without requiring a var name
+        :param import_name:
+        :return:
+        """
+        # If we imported module exists, then get the symbol for it
+        symbol: Symbol = self._get_import(import_name)
 
-    def extends(self, import_name: str) -> 'ExtendedImport':
+        # Generate a fresh symbol table for the new instance
+        instance_table = SymbolTable(name=import_name + str(uuid.uuid4()) + "_instance")
+
+        return Import(scope=instance_table.scope(), tree=symbol.value.tree)
+
+    def extends(self, import_name: str) -> Import:
         """
         Extends the current scope by an imported scope.
         Returns the SymbolTable of the extended scope (the copy of the imported scope) in order to parse using it
@@ -414,9 +454,7 @@ class SymbolTable(GenericTable):
         # Injects the extended scope into the static link chain
         self.scope().extends(instance_table.scope())
 
-        # Returns the import symbol so that we have the path to re-parse as well as the
-        #   symbol table to parse with
-        return ExtendedImport(sym_import=symbol, table_extended=instance_table)
+        return Import(tree=symbol.value.tree, scope=instance_table.scope())
 
     def implements(self, import_name: str):
         """
@@ -432,18 +470,23 @@ class SymbolTable(GenericTable):
             sym: Symbol = sym
 
             # If the symbol is a static method, then we need to add it to our current module scope
-            if sym.data_type == DATA_METHOD and 'static' in sym.attributes and sym.attributes['static'] == True:
+            if sym.data_type == DATA_METHOD and 'static' in sym.attributes and sym.attributes['static']:
                 self.scope().insert_symbol(sym)
 
 
-class ExtendedImport:
-    """
-    A model class used for extending scopes
-    """
+class CustomType(str):
+    @classmethod
+    def __get_validators__(cls):
+        yield cls.validate
 
-    def __init__(self, sym_import: Symbol, table_extended: SymbolTable):
-        self.sym_import: Symbol = sym_import
-        self.table: SymbolTable = table_extended
+    @classmethod
+    def validate(cls, v):
+        return v
+
+
+class Import(BaseModel):
+    tree: CustomType  # Ah4Parser.ProgContext
+    scope: CustomType  # SymbolScope
 
 
 def create_table(scope: SymbolScope) -> SymbolTable:
