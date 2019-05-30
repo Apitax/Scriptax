@@ -176,6 +176,10 @@ class AhVisitor(AhVisitorOriginal):
             if not no_linebreak:
                 self.logger.log('')
 
+    def log_br(self):
+        if self.appOptions.debug:
+            self.logger.log('')
+
     def parseScript(self, scriptax: str, parameters: dict = None) -> Tuple[Any, AhVisitor]:
         """
         Helper method which executes a given scriptax string
@@ -193,7 +197,7 @@ class AhVisitor(AhVisitorOriginal):
             The first index is the returned result, the second is the parsing class
         """
         from scriptax.parser.utils.BoilerPlate import customizable_parser
-        result = customizable_parser(scriptax, parameters=parameters)
+        result = customizable_parser(scriptax, parameters=parameters, options=self.appOptions)
         if result[1].isError():
             self.error(message=result[1].message)
             return None, None
@@ -216,7 +220,7 @@ class AhVisitor(AhVisitorOriginal):
             The first index is the returned result, the second is the parsing class
         """
         from scriptax.parser.utils.BoilerPlate import customizable_context_parser
-        result = customizable_context_parser(context, symbol_table=symbol_table)
+        result = customizable_context_parser(context, symbol_table=symbol_table, options=self.appOptions)
         if result[1].isError():
             self.error(message=result[1].message)
             return None, None
@@ -255,10 +259,8 @@ class AhVisitor(AhVisitorOriginal):
         Executes commandtax
         """
         from commandtax.flow.Connector import Connector
-        if self.appOptions.debug:
-            self.log.log('> Executing Commandtax: \'' + command.command + '\' ' + 'with parameters: ' + str(
-                command.parameters))
-            self.log.log('')
+        self.log('Executing Commandtax: \'' + command.command + '\' ' + 'with parameters: ' + str(
+            command.parameters))
 
         if not command.options:
             command.options = self.appOptions
@@ -380,7 +382,7 @@ class AhVisitor(AhVisitorOriginal):
         import_name = self.resolve_label(import_name)
         module: Import = self.symbol_table.extends(import_name=import_name)
         module_table = create_table(module.scope)
-        customizable_tree_parser(tree=module.tree, symbol_table=module_table, options=self.options)
+        customizable_tree_parser(tree=module.tree, symbol_table=module_table, options=self.appOptions)
         # never call the constructor here. never ever ever
 
     def implements(self, label):
@@ -397,7 +399,7 @@ class AhVisitor(AhVisitorOriginal):
         import_name = self.resolve_label(import_name)
         instance: Import = self.symbol_table.new_instance(import_name=import_name)
         instance_table = create_table(instance.scope)
-        customizable_tree_parser(tree=instance.tree, symbol_table=instance_table, options=self.options,
+        customizable_tree_parser(tree=instance.tree, symbol_table=instance_table, options=self.appOptions,
                                  parameters=parameters)
         # TODO : Call constructor if it exists
         return instance.scope
@@ -449,8 +451,8 @@ class AhVisitor(AhVisitorOriginal):
                 self.message + ' in ' + str(self.state['file']) + ' @' + str(self.state['line']) + ':' + str(
                     self.state['char']))
 
-            self.log('')
-            self.log('')
+            self.log_br()
+            self.log_br()
         return result
 
     # Visit a parse tree produced by Ah4Parser#script_structure.
@@ -490,7 +492,7 @@ class AhVisitor(AhVisitorOriginal):
             if ctx.NOT():
                 self.log(
                     'Now processing: (This lines contents has been hidden via the \'!\' operator. This is usually done to hide sensitive information)')
-                self.log('')
+                self.log_br()
                 self.log('Treating the rest of this statement as sensitive and disabling debug')
 
                 self.appOptions.debug = False
@@ -504,7 +506,7 @@ class AhVisitor(AhVisitorOriginal):
             temp = self.visit(ctx.non_terminated())
 
         if line != "" and self.appOptions.debug:
-            self.log('')
+            self.log_br()
 
         self.set_state(line=ctx.start.line)  # TODO: Try to add character here as well
 

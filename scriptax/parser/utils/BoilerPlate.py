@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from scriptax.grammar.build.Ah4Lexer import Ah4Lexer
 from scriptax.grammar.build.Ah4Parser import Ah4Parser
+from apitaxcore.models.Options import Options
 
 from antlr4 import *
 from typing import Tuple, Any, TYPE_CHECKING
@@ -50,7 +51,8 @@ def standard_parser(scriptax: InputStream) -> Tuple[Any, AhVisitor]:
     return result, visitor
 
 
-def customizable_parser(scriptax: InputStream, symbol_table=None, file=None, parameters=None, options=None) -> Tuple[
+def customizable_parser(scriptax: InputStream, symbol_table=None, file=None, parameters=None,
+                        options: Options = None) -> Tuple[
     Any, AhVisitor]:
     """ 
     Executes Scriptax
@@ -107,7 +109,7 @@ def standard_context_parser(context: ParserRuleContext) -> Tuple[Any, AhVisitor]
 
 
 def customizable_context_parser(context: ParserRuleContext, symbol_table=None, file=None, parameters=None,
-                                options=None) -> Tuple[Any, AhVisitor]:
+                                options: Options = None) -> Tuple[Any, AhVisitor]:
     """ 
     Executes an Antlr4 context
 
@@ -149,7 +151,7 @@ def standard_tree_parser(tree: Ah4Parser.ProgContext) -> Tuple[Any, AhVisitor]:
 
 
 def customizable_tree_parser(tree: Ah4Parser.ProgContext, symbol_table=None, file=None, parameters=None,
-                             options=None) -> Tuple[Any, AhVisitor]:
+                             options: Options = None) -> Tuple[Any, AhVisitor]:
     """
     Executes a parse tree
     This is just an alias function
@@ -173,4 +175,5 @@ def customizable_tree_parser(tree: Ah4Parser.ProgContext, symbol_table=None, fil
         The first index is the result returned, and the second index is the visitor class used for executing the script
     """
 
-    return customizable_context_parser(tree, symbol_table=symbol_table, file=file, parameters=parameters, options=options)
+    return customizable_context_parser(tree, symbol_table=symbol_table, file=file, parameters=parameters,
+                                       options=options)

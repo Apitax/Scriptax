@@ -55,12 +55,12 @@ class SymbolTable(GenericTable):
         Because name is a mutable list, it will return without any up traversal keywords left in it
         """
         scope = self.scope()
-        if self.name_has_up([name[0]]):
+        while len(name) > 0 and self.name_has_up([name[0]]):
             while scope.type != SCOPE_MODULE:
                 scope = scope.scope_parent
-                name.pop(0)
                 if not scope:
                     raise Exception("Invalid symbol access. Too many up traversals. Scriptax.SymbolTable@traverse_up")
+            name.pop(0)
         return scope
 
     def _get_parent_module(self):
@@ -284,8 +284,25 @@ class SymbolTable(GenericTable):
         """
 
         if self.has_symbol(name, SYMBOL_MODULE):
-            print("here")
             module_import: Import = self.get_symbol(name, type=SYMBOL_MODULE, as_value=False).value
+            scope = module_import.scope
+            method_name = self.make_and_verify_name(name)[1]
+            tbl = create_table(scope)
+            method: Symbol = tbl.get_symbol(name=method_name, as_value=False)
+            instance_table: GenericTable = create_generic_table(scope)
+            method_scope: SymbolScope = instance_table.birth_scope(name=method_name + "_method")
+            # Adds each parameter into the method scope
+            if parameters:
+                for parameter in parameters:
+                    method_scope.insert_symbol(Symbol(name=parameter.name, value=parameter.value))
+
+            # Sets up the dynamic links from the currently executing code to the called method
+            self.call(method_scope)
+
+            # Returns the body method such that some parser or compiler can execute its body
+            return method.value
+
+
 
         # Ensures that the method symbol exists
         if not self.has_symbol(name) and self.has_symbol(name, SYMBOL_MODULE):
@@ -438,7 +455,7 @@ class SymbolTable(GenericTable):
         symbol: Symbol = self._get_import(import_name)
 
         # Generate a fresh symbol table for the new instance
-        instance_table = SymbolTable(name=import_name + str(uuid.uuid4()) + "_instance")
+        instance_table = SymbolTable(name=import_name + "_" + str(uuid.uuid4()) + "_instance")
 
         return Import(scope=instance_table.scope(), tree=symbol.value.tree)
 
