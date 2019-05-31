@@ -263,3 +263,258 @@ def test_label_escaping_5():
     '''
     block_status, visitor = execute(scriptax)
     assert block_status.result == "worked"
+
+
+def test_injection():
+    scriptax = '''
+    inject = "worked";
+    return "<|inject>";
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == "worked"
+
+
+def test_injection_2():
+    scriptax = '''
+    inject = "worked";
+    return "   <|   inject         >     ";
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == "   worked     "
+
+
+def test_injection_3():
+    scriptax = '''
+    inject = "worked";
+    return "hi the  test   <|   inject         >     !";
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == "hi the  test   worked     !"
+
+
+def test_injection_4():
+    scriptax = '''
+    inject = 42;
+    return "hi the  test   <|   inject         >     !";
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == "hi the  test   42     !"
+
+
+def test_injection_5():
+    scriptax = '''
+    inject = true;
+    return "hi the  test   <|   inject         >     !";
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == "hi the  test   True     !"
+
+
+def test_injection_6():
+    scriptax = '''
+    inject = 0xabcdef1234567890;
+    return "hi the  test   <|   inject         >     !";
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == "hi the  test   0xABCDEF1234567890     !"
+
+
+def test_injection_7():
+    scriptax = '''
+    inject = null;
+    return "hi the  test   <|   inject         >     !";
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == "hi the  test   None     !"
+
+
+def test_injection_8():
+    scriptax = '''
+    mylist = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    inject = 5;
+    return mylist.<|inject>;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == 5
+
+
+def test_injection_9():
+    scriptax = '''
+    test = {"test": "worked", "test2": [{"yes": "no"}, {"day": "night"}, {"weekend": ["sunday", {"name": "saturday", "best_day": true}]}]};
+    inject=["test", "test2", "2", "weekend", "1", "best_day"];
+    return <|inject.0>.test2.2.weekend.1.best_day;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == True
+
+
+def test_injection_10():
+    scriptax = '''
+    test = {"test": "worked", "test2": [{"yes": "no"}, {"day": "night"}, {"weekend": ["sunday", {"name": "saturday", "best_day": true}]}]};
+    inject=["test", "test2", "2", "weekend", "1", "best_day"];
+    return <|inject.0>.test2.2.weekend.1.<|inject.5>;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == True
+
+
+def test_injection_11():
+    scriptax = '''
+    test = {"test": "worked", "test2": [{"yes": "no"}, {"day": "night"}, {"weekend": ["sunday", {"name": "saturday", "best_day": true}]}]};
+    inject=["test", "test2", "2", "weekend", "1", "best_day"];
+    return <|inject.0>.<|inject.1>.<|inject.2>.<|inject.3>.<|inject.4>.<|inject.5>;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == True
+
+
+def test_injection_12():
+    scriptax = '''
+    test = {"test": "worked", "test2": [{"yes": "no"}, {"day": "night"}, {"weekend": ["sunday", {"name": "saturday", "best_day": true}]}]};
+    inject=["test.test2", "2", "weekend", "1", "best_day"];
+    return <|inject.0>.<|inject.1>.<|inject.2>.<|inject.3>.<|inject.4>;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == True
+
+
+def test_reflection():
+    scriptax = '''
+    test = {"test": "worked", "test2": [{"yes": "no"}, {"day": "night"}, {"weekend": ["sunday", {"name": "saturday", "best_day": true}]}]};
+    return @test;
+    '''
+    block_status, visitor = execute(scriptax)
+    print(block_status.result)
+    assert block_status.result == {'name': 'test', 'symbol-type': 'var', 'data-type': 'dict',
+                                   'value': "{'test': 'worked', 'test2': [{'yes': 'no'}, {'day': 'night'}, {'weekend': ['sunday', {'name': 'saturday', 'best_day': True}]}]}",
+                                   'attributes': {}}
+
+
+def test_delete():
+    scriptax = '''
+    test = "test";
+    del(test);
+    return test;
+    '''
+    try:
+        block_status, visitor = execute(scriptax)
+        assert False
+    except:
+        assert True
+
+
+def test_delete_2():
+    scriptax = '''
+    test = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    del(test);
+    '''
+    try:
+        block_status, visitor = execute(scriptax)
+        assert True
+    except:
+        assert False
+
+
+def test_delete_3():
+    scriptax = '''
+    test = {"day":"night", "up":"down", "yes":"no"};
+    del(test);
+    '''
+    try:
+        block_status, visitor = execute(scriptax)
+        assert True
+    except:
+        assert False
+
+
+def test_delete_4():
+    scriptax = '''
+    test = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    del(test.5);
+    return test;
+    '''
+    try:
+        block_status, visitor = execute(scriptax)
+        assert block_status.result == [0, 1, 2, 3, 4, 6, 7, 8, 9, 10]
+    except:
+        assert False
+
+
+def test_delete_5():
+    scriptax = '''
+    test = {"day":"night", "up":"down", "yes":"no"};
+    del(test.up);
+    return test;
+    '''
+    try:
+        block_status, visitor = execute(scriptax)
+        assert block_status.result == {"day": "night", "yes": "no"}
+    except:
+        assert False
+
+
+def test_count():
+    scriptax = '''
+    test = "hi my name is test";
+    return #test;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == 18
+
+def test_count_2():
+    scriptax = '''
+    test = "";
+    return #test;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == 0
+
+
+def test_count_3():
+    scriptax = '''
+    test = [0,1,2,3,4,5,6,7,8,9,10];
+    return #test;
+    '''
+    block_status, visitor = execute(scriptax)
+    print(block_status.result)
+    assert block_status.result == 11
+
+
+def test_count_4():
+    scriptax = '''
+    test = [];
+    return #test;
+    '''
+    block_status, visitor = execute(scriptax)
+    print(block_status.result)
+    assert block_status.result == 0
+
+
+def test_count_5():
+    scriptax = '''
+    test = {"up":"down", "yes":"no"};
+    return #test;
+    '''
+    block_status, visitor = execute(scriptax)
+    print(block_status.result)
+    assert block_status.result == 2
+
+
+def test_count_6():
+    scriptax = '''
+    test = {};
+    return #test;
+    '''
+    block_status, visitor = execute(scriptax)
+    print(block_status.result)
+    assert block_status.result == 0
+
+
+def test_error():
+    scriptax = '''
+    test = "didn't work";
+    error("worked");
+    return test;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == None and visitor.isError() and visitor.message == "worked"

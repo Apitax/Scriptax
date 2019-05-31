@@ -141,7 +141,8 @@ class AhVisitor(AhVisitorOriginal):
             self.symbol_table: SymbolTable = symbol_table
 
         # Used for mustache syntax dynamic replacement
-        self.regexVar = '{{[ ]{0,}[A-z0-9_$.\-]{1,}[ ]{0,}}}'
+        # self.regexVar = '{{[ ]{0,}[A-z0-9_$.\-]{1,}[ ]{0,}}}'
+        self.regexVar = r"<\|[ ]{0,}[A-z0-9_$.\-]{1,}[ ]{0,}>" # Needs the r to indicate raw string to avoid escaping errors
 
     # TODO: Find a way to incorporate this into a parser status field
     # Sets the program into error mode
@@ -1166,7 +1167,7 @@ class AhVisitor(AhVisitorOriginal):
         line = line.replace('\\\'', '\'')
         matches = re.findall(self.regexVar, line)
         for match in matches:
-            label = match[2:-2].strip()
+            label = match[2:-1].strip()
             label = label.replace('$', '')
             replacer = str(self.get_variable(label))
             line = line.replace(match, replacer)
