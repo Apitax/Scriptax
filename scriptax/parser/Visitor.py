@@ -950,7 +950,7 @@ class AhVisitor(AhVisitorOriginal):
         value = self.visit(ctx.expr())
         returner = None
         if ctx.TYPE_INT():
-            returner = int(value)
+            returner = int(float(value))
             self.log('Explicitly Casting \'' + str(value) + '\' to int: ' + json.dumps(returner))
             return returner
 
@@ -960,7 +960,13 @@ class AhVisitor(AhVisitorOriginal):
             return returner
 
         if ctx.TYPE_BOOL():
-            returner = bool(value)
+            if isinstance(value, str):
+                if value in ["false", "False", ""]:
+                    returner = False
+                else:
+                    returner = True
+            else:
+                returner = bool(value)
             self.log('Explicitly Casting \'' + str(value) + '\' to boolean: ' + json.dumps(returner))
             return returner
 
@@ -1057,22 +1063,22 @@ class AhVisitor(AhVisitorOriginal):
             i += 1
         return parameters
 
-    def visitAtom_obj_enum(self, ctx: AhParser.Atom_obj_enumContext) -> List[Parameter]:
-        parameters: List[Parameter] = []
+    def visitAtom_obj_enum(self, ctx: AhParser.Atom_obj_enumContext) -> dict:
+        parameters:dict = {}
         i = 0
         if ctx.expr(0):
             # Using the arrow format
             if ctx.label(0):
-                parameters.append(Parameter(name=self.visit(ctx.label(0)), value=self.visit(ctx.expr(0))))
+                parameters[self.visit(ctx.label(0))] = self.visit(ctx.expr(0))
             while ctx.COMMA(i) and ctx.label(i + 1):
-                parameters.append(Parameter(name=self.visit(ctx.label(i + 1)), value=self.visit(ctx.expr(i + 1))))
+                parameters[self.visit(ctx.label(i + 1))] = self.visit(ctx.expr(i + 1))
                 i += 1
         else:
             # Not using the arrow format
             if ctx.label(0):
-                parameters.append(Parameter(name=self.visit(ctx.label(0)), value=i))
+                parameters[self.visit(ctx.label(0))] = i
             while ctx.COMMA(i) and ctx.label(i + 1):
-                parameters.append(Parameter(name=self.visit(ctx.label(i + 1)), value=i + 1))
+                parameters[self.visit(ctx.label(i + 1))] = i + 1
                 i += 1
 
         return parameters

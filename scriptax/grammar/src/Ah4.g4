@@ -168,7 +168,7 @@ assignment_statement :
 
 atom_obj_list : SOPEN expr? (COMMA expr?)* SCLOSE ;
 
-atom_obj_enum : LPAREN (label ARROW expr (COMMA (label ARROW expr)?)*) | (label (COMMA label?)*) RPAREN ;
+atom_obj_enum : LPAREN ((label ARROW expr (COMMA (label ARROW expr)?)*) | (label (COMMA label?)*))? RPAREN ;
 
 error_statement : ERROR LPAREN expr? RPAREN;
 

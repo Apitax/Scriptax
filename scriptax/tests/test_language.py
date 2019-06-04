@@ -461,6 +461,7 @@ def test_count():
     block_status, visitor = execute(scriptax)
     assert block_status.result == 18
 
+
 def test_count_2():
     scriptax = '''
     test = "";
@@ -476,7 +477,6 @@ def test_count_3():
     return #test;
     '''
     block_status, visitor = execute(scriptax)
-    print(block_status.result)
     assert block_status.result == 11
 
 
@@ -486,7 +486,6 @@ def test_count_4():
     return #test;
     '''
     block_status, visitor = execute(scriptax)
-    print(block_status.result)
     assert block_status.result == 0
 
 
@@ -496,7 +495,6 @@ def test_count_5():
     return #test;
     '''
     block_status, visitor = execute(scriptax)
-    print(block_status.result)
     assert block_status.result == 2
 
 
@@ -506,7 +504,6 @@ def test_count_6():
     return #test;
     '''
     block_status, visitor = execute(scriptax)
-    print(block_status.result)
     assert block_status.result == 0
 
 
@@ -518,3 +515,454 @@ def test_error():
     '''
     block_status, visitor = execute(scriptax)
     assert block_status.result == None and visitor.isError() and visitor.message == "worked"
+
+
+def test_enum():
+    scriptax = '''
+    test = ();
+    return test;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == {}
+
+
+def test_enum_2():
+    scriptax = '''
+    test = (Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday);
+    return test;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == {"Monday": 0, "Tuesday": 1, "Wednesday": 2, "Thursday": 3, "Friday": 4, "Saturday": 5, "Sunday": 6}
+
+
+def test_enum_3():
+    scriptax = '''
+    test = (Monday -> 42, Tuesday -> 84, Wednesday -> 126);
+    return test;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == {"Monday": 42, "Tuesday": 84, "Wednesday": 126}
+
+
+def test_enum_4():
+    scriptax = '''
+    worked = "test";
+    test = (Monday -> 42, Tuesday -> worked, Wednesday -> 126);
+    return test;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == {"Monday": 42, "Tuesday": "test", "Wednesday": 126}
+
+
+def test_enum_5():
+    scriptax = '''
+    worked = "test";
+    test = (Monday -> 42, Tuesday -> worked, Wednesday -> 126);
+    return test.Tuesday;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == "test"
+
+
+def test_enum_6():
+    scriptax = '''
+    worked = "test";
+    test = (Monday -> 42, Tuesday -> worked, Wednesday -> 126);
+    return test.Wednesday;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == 126
+
+
+def test_enum_7():
+    scriptax = '''
+    test = (Monday -> 42, Tuesday -> 42, Wednesday -> 126);
+    return test.Monday == test.Monday;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == True
+
+
+def test_enum_8():
+    scriptax = '''
+    test = (Monday -> 42, Tuesday -> 42, Wednesday -> 126);
+    return test.Monday == test.Tuesday;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == True
+
+
+def test_enum_9():
+    scriptax = '''
+    test = (Monday -> 42, Tuesday -> 42, Wednesday -> 126);
+    return test.Wednesday == test.Monday;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == False
+
+
+def test_enum_10():
+    scriptax = '''
+    test = (Monday, Tuesday, Wednesday);
+    return test.Wednesday == test.Monday;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == False
+
+
+def test_enum_11():
+    scriptax = '''
+    test = (Monday, Tuesday, Wednesday);
+    return test.Monday == test.Monday;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == True
+
+
+def test_d_plus():
+    scriptax = '''
+    test = 5;
+    test++;
+    return test;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == 6
+
+
+def test_d_plus_2():
+    scriptax = '''
+    test = 5.78;
+    test++;
+    return test;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == 6.78
+
+
+def test_d_minus():
+    scriptax = '''
+    test = 5;
+    test--;
+    return test;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == 4
+
+
+def test_d_minus_2():
+    scriptax = '''
+    test = 5.12;
+    test--;
+    return test;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == 4.12
+
+
+def test_pe():
+    scriptax = '''
+    test = 5;
+    test += 4;
+    return test;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == 9
+
+def test_pe_2():
+    scriptax = '''
+    test = 5;
+    test += 4.55;
+    return test;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == (5 + 4.55)
+
+
+def test_pe_3():
+    scriptax = '''
+    test = 5;
+    test += -4.8;
+    return test;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == (5 - 4.8)
+
+
+def test_me():
+    scriptax = '''
+    test = 5;
+    test -= 4;
+    return test;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == 1
+
+
+def test_me_2():
+    scriptax = '''
+    test = 5;
+    test -= 4.6;
+    return test;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == (5 - 4.6)
+
+
+def test_mue():
+    scriptax = '''
+    test = 5;
+    test *= 4;
+    return test;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == 20
+
+
+def test_mue_2():
+    scriptax = '''
+    test = 5.34;
+    test *= 0.54;
+    return test;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == 2.8836
+
+
+def test_de():
+    scriptax = '''
+    test = 12;
+    test /= 4;
+    return test;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == 3
+
+
+def test_de_2():
+    scriptax = '''
+    test = 5.34;
+    test /= 0.54;
+    return test;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == (5.34 / 0.54)
+
+
+def test_list_append():
+    scriptax = '''
+    test = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    test[] = 11;
+    return test;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+
+
+def test_list_append_2():
+    scriptax = '''
+    test = [];
+    test[] = 0;
+    return test;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == [0]
+
+
+def test_list_append_3():
+    scriptax = '''
+    test = [];
+    test[] = 0;
+    test[] = 1;
+    return test;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == [0, 1]
+
+
+def test_cast_int():
+    scriptax = '''
+    test = "5";
+    return int(test);
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == 5
+
+
+def test_cast_int_2():
+    scriptax = '''
+    test = "5.4";
+    return int(test);
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == 5
+
+
+def test_cast_int_3():
+    scriptax = '''
+    test = "5.8";
+    return int(test);
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == 5
+
+
+def test_cast_dec():
+    scriptax = '''
+    test = "5";
+    return dec(test);
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == 5
+
+
+def test_cast_dec_2():
+    scriptax = '''
+    test = "5.4";
+    return dec(test);
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == 5.4
+
+
+def test_cast_dec_3():
+    scriptax = '''
+    test = "5.8";
+    return dec(test);
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == 5.8
+
+
+def test_cast_bool():
+    scriptax = '''
+    test = 1;
+    return bool(test);
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == True
+
+
+def test_cast_bool_2():
+    scriptax = '''
+    test = 0;
+    return bool(test);
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == False
+
+
+def test_cast_bool_3():
+    scriptax = '''
+    test = 5.8;
+    return bool(test);
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == True
+
+
+def test_cast_bool_4():
+    scriptax = '''
+    test = -5.8;
+    return bool(test);
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == True
+
+
+def test_cast_bool_5():
+    scriptax = '''
+    test = "true";
+    return bool(test);
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == True
+
+
+def test_cast_bool_6():
+    scriptax = '''
+    test = "True";
+    return bool(test);
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == True
+
+
+def test_cast_bool_7():
+    scriptax = '''
+    test = "false";
+    return bool(test);
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == False
+
+
+def test_cast_bool_8():
+    scriptax = '''
+    test = "False";
+    return bool(test);
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == False
+
+
+def test_cast_bool_9():
+    scriptax = '''
+    test = "";
+    return bool(test);
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == False
+
+
+def test_cast_string():
+    scriptax = '''
+    test = 0;
+    return str(test);
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == "0"
+
+
+def test_cast_string_2():
+    scriptax = '''
+    test = -5.6987;
+    return str(test);
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == "-5.6987"
+
+
+def test_cast_string_3():
+    scriptax = '''
+    test = 96766744532;
+    return str(test);
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == "96766744532"
+
+
+def test_cast_string_4():
+    scriptax = '''
+    test = true;
+    return str(test);
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == "True"
+
+
+def test_cast_string_5():
+    scriptax = '''
+    test = false;
+    return str(test);
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == "False"
+
+
+def test_cast_string_6():
+    scriptax = '''
+    test = null;
+    return str(test);
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == "None"
