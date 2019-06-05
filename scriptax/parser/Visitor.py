@@ -142,7 +142,7 @@ class AhVisitor(AhVisitorOriginal):
 
         # Used for mustache syntax dynamic replacement
         # self.regexVar = '{{[ ]{0,}[A-z0-9_$.\-]{1,}[ ]{0,}}}'
-        self.regexVar = r"<\|[ ]{0,}[A-z0-9_$.\-]{1,}[ ]{0,}>" # Needs the r to indicate raw string to avoid escaping errors
+        self.regexVar = r"<\|[ ]{0,}[A-z0-9_$.\-]{1,}[ ]{0,}>"  # Needs the r to indicate raw string to avoid escaping errors
 
     # TODO: Find a way to incorporate this into a parser status field
     # Sets the program into error mode
@@ -402,7 +402,8 @@ class AhVisitor(AhVisitorOriginal):
         instance_table = create_table(instance.scope)
         customizable_tree_parser(tree=instance.tree, symbol_table=instance_table, options=self.appOptions,
                                  parameters=parameters)
-        # TODO : Call constructor if it exists
+        # vTODO : Call constructor if it exists
+        self.execute_method("self.construct", parameters=parameters)
         return instance.scope
 
     def register_method(self, label, method_context, attributes: Attributes):
@@ -444,6 +445,7 @@ class AhVisitor(AhVisitorOriginal):
         """
         Visit a parse tree produced by AhParser#prog.
         """
+        self.symbol_table.enter_scope(name='main', type=SCOPE_MODULE)
         self.parser = ctx.parser
         result = self.visit(ctx.script_structure())
 
@@ -454,6 +456,7 @@ class AhVisitor(AhVisitorOriginal):
 
             self.log_br()
             self.log_br()
+        self.symbol_table.exit_scope()
         return result
 
     # Visit a parse tree produced by Ah4Parser#script_structure.
@@ -722,7 +725,8 @@ class AhVisitor(AhVisitorOriginal):
             self.error("An each loop must be passed a list")
 
     def visitAtom_callback(self, ctx: AhParser.Atom_callbackContext) -> Callback:
-        callback: Callback = Callback(parameters=self.visit(ctx.optional_parameters_block()), block=ctx.callback_block())
+        callback: Callback = Callback(parameters=self.visit(ctx.optional_parameters_block()),
+                                      block=ctx.callback_block())
         self.register_method(label=callback.name, method_context=callback.block, attributes=Attributes())
         return callback
 
@@ -741,6 +745,8 @@ class AhVisitor(AhVisitorOriginal):
     def visitFlow(self, ctx: AhParser.FlowContext) -> BlockStatus:
         if ctx.if_statement():
             return self.visit(ctx.if_statement())
+        if ctx.switch_statement():
+            return self.visit(ctx.switch_statement())
         if ctx.while_statement():
             return self.visit(ctx.while_statement())
         if ctx.for_statement():
@@ -803,13 +809,12 @@ class AhVisitor(AhVisitorOriginal):
     def visitSwitch_statement(self, ctx: AhParser.Switch_statementContext) -> BlockStatus:
         i = 0
         while ctx.case_statement(i):
-            case_status: CaseStatus = self.visit(ctx.case_statement())
+            case_status: CaseStatus = self.visit(ctx.case_statement(i))
             if case_status.executed and not case_status.continued:
                 return BlockStatus(returned=case_status.returned, result=case_status.result)
             i += 1
-
         if ctx.default_statement():
-            block_status: BlockStatus = self.visit(ctx.case_statement())
+            block_status: BlockStatus = self.visit(ctx.default_statement())
             block_status.continued = False
             block_status.done = False
             return block_status
@@ -912,6 +917,7 @@ class AhVisitor(AhVisitorOriginal):
     def visitAhoptions_statement(self, ctx: AhParser.Ahoptions_statementContext):
         data = self.visit(ctx.atom_obj_dict())
         self.options = AhOptions(**data)
+        self.symbol_table.get_nearest_module().attributes.update(self.options.dict())
 
     def visitOptional_parameters_block(self, ctx: AhParser.Optional_parameters_blockContext) -> List[Parameter]:
         i = 0
@@ -1064,7 +1070,7 @@ class AhVisitor(AhVisitorOriginal):
         return parameters
 
     def visitAtom_obj_enum(self, ctx: AhParser.Atom_obj_enumContext) -> dict:
-        parameters:dict = {}
+        parameters: dict = {}
         i = 0
         if ctx.expr(0):
             # Using the arrow format
@@ -1129,8 +1135,13 @@ class AhVisitor(AhVisitorOriginal):
         return var
 
     def visitReflection(self, ctx: AhParser.ReflectionContext) -> dict:
-        symbol = self.get_symbol(label=ctx.labels())
-        return symbol.get_symbol_debug()
+        label = self.resolve_label(ctx.labels())
+        try:
+            reflection = self.get_symbol(label=label).get_symbol_debug()
+        except Exception:
+            if label in self.symbol_table.up_words:
+                reflection = self.symbol_table.get_nearest_module().get_scope_debug()
+        return reflection
 
     def visitRequired_parameter(self, ctx: AhParser.Required_parameterContext) -> Parameter:
         label = self.resolve_label(ctx.labels())
@@ -1197,11 +1208,3 @@ class AhVisitor(AhVisitorOriginal):
 
     def visitAtom_none(self, ctx: AhParser.Atom_noneContext):
         return None
-
-
-
-
-
-
-
-

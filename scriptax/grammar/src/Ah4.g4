@@ -98,7 +98,8 @@ non_terminated : flow ;
 flow :
       if_statement
       | while_statement
-      | for_statement ;
+      | for_statement
+      | switch_statement ;
 
 if_statement : IF condition block (ELSE IF condition block)* (ELSE block)? ;
 

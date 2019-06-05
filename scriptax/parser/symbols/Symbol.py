@@ -118,7 +118,9 @@ class Symbol:
         """
         from scriptax.parser.symbols.SymbolScope import SymbolScope
 
-        value = str(self.value)
+        value = self.value
+        if not isinstance(value, (str, float, int, bool, dict, list)):
+            value = str(value)
 
         if isinstance(self.value, SymbolScope):
             value = {"pointer": {"reference": value, "pointing-to-scope": instance_to_hexid(self.value)}}

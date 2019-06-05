@@ -24,13 +24,13 @@ class SymbolTable(GenericTable):
         super().__init__(name, type)
         self.up_words = ['parent', 'self', 'this', 'me']
 
-    def name_has_up(self, name: list):
+    def name_has_up(self, name: list) -> bool:
         """
         Returns whether or not the name has an 'up' keyword anywhere in it
         """
         return any(keyword in self.up_words for keyword in name)
 
-    def is_name_valid(self, name: list):
+    def is_name_valid(self, name: list) -> bool:
         """
         Verifies a name to be valid
         Ensures that only the first name element is an 'up' keyword
@@ -39,7 +39,7 @@ class SymbolTable(GenericTable):
             return False
         return True
 
-    def make_and_verify_name(self, name: str):
+    def make_and_verify_name(self, name: str) -> list:
         """
         Splits a string name into a list name
         Also verifies the name has broadly correct syntax.
@@ -49,7 +49,7 @@ class SymbolTable(GenericTable):
             raise Exception("Invalid symbol access `" + name + "` Scriptax.SymbolTable@make_and_verify_name")
         return comps
 
-    def traverse_up(self, name: list):
+    def traverse_up(self, name: list) -> SymbolScope:
         """
         Returns the proper static parent scope based on up traversals
         Because name is a mutable list, it will return without any up traversal keywords left in it
@@ -63,12 +63,21 @@ class SymbolTable(GenericTable):
             name.pop(0)
         return scope
 
-    def _get_parent_module(self):
+    def _get_parent_module(self) -> SymbolScope:
         """
         Returns the parent module within this static scope
         """
         name = [self.up_words[0]]
         return self.traverse_up(name)
+
+    def get_nearest_module(self) -> SymbolScope:
+        """
+        Returns the nearest module scope
+        :return:
+        """
+        if self.scope().type == SCOPE_MODULE:
+            return self.scope()
+        return self._get_parent_module()
 
     def search_scope_for_symbol(self, scope: SymbolScope, name: str, type=SYMBOL_VAR) -> Symbol:
         """

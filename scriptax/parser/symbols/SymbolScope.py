@@ -39,6 +39,8 @@ class SymbolScope:
         This scopes referencing environment in the form of a list of Symbol objects
         Each time a symbol is parsed within this scope, it should be added to this list
         Symbols should not be removed from this list unless we call a delete on them
+    attributes : dict
+        Arbitrary attributes which can be applied to a symbol scope
     """
     def __init__(self, scope_parent, type=None, caller=None, name=''):
         
@@ -55,6 +57,8 @@ class SymbolScope:
         self.calling: SymbolScope = None
 
         self.symbols: List[Symbol] = []
+
+        self.attributes: dict = {}
 
 
     @staticmethod
@@ -257,6 +261,7 @@ class SymbolScope:
                 'name': str(self.name),
                 'scope-type': str(self.type),
                 'address': instance_to_hexid(self),
+                'attributes': self.attributes,
                 'symbols': [],
                 'dynamic_links': {"caller": {}, "calling": {}},
                 'static_links': {"parent": {}, "children": []},
