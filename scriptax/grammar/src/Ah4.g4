@@ -31,7 +31,7 @@ expr :
       | <assoc=right> expr POW expr
       | MINUS expr
       | NOT expr
-      | expr (MUL|DIV) expr
+      | expr (MUL|DIV|PERCENT) expr
       | expr (PLUS|MINUS) expr
       | expr (GE | LE | GT | LT) expr
       | expr (EQ | NEQ) expr

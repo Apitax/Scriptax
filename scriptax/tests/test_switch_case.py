@@ -93,3 +93,36 @@ def test_switch_case_return_2():
     '''
     block_status, visitor = execute(scriptax)
     assert block_status.result == False
+
+
+def test_switch_case_form():
+    scriptax = '''
+    test = "worked";
+    test_result = false;
+    switch {
+        default {
+            return true;
+        }
+
+    }
+    return test_result;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == True
+
+
+def test_switch_case_form_2():
+    scriptax = '''
+    test = "worked";
+    test_result = false;
+    switch {
+        case(test == null)
+        {
+            return true;
+        }
+
+    }
+    return test_result;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == False

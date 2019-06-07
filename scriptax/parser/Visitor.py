@@ -479,7 +479,7 @@ class AhVisitor(AhVisitorOriginal):
         while ctx.statement(i):
             result: BlockStatus = self.visit(ctx.statement(
                 i))
-            if result.returned:
+            if result.returned or result.continued or result.done:
                 return result
             if self.isError():
                 return BlockStatus()
@@ -643,6 +643,9 @@ class AhVisitor(AhVisitorOriginal):
         if ctx.DIV():
             return self.visit(ctx.expr(0)) / self.visit(ctx.expr(1))
 
+        if ctx.PERCENT():
+            return self.visit(ctx.expr(0)) % self.visit(ctx.expr(1))
+
         return self.visitChildren(ctx)
 
     def visitAtom(self, ctx: AhParser.AtomContext):
@@ -680,6 +683,10 @@ class AhVisitor(AhVisitorOriginal):
     def visitTerminated(self, ctx: AhParser.TerminatedContext) -> BlockStatus:
         if ctx.return_statement():
             return BlockStatus(returned=True, result=self.visit(ctx.return_statement()))
+        if ctx.continue_statement():
+            return BlockStatus(continued=True)
+        if ctx.done_statement():
+            return BlockStatus(done=True)
         return BlockStatus(result=self.visitChildren(ctx))
 
     def visitRunnable_statements(self, ctx: AhParser.Runnable_statementsContext) -> BlockStatus:
@@ -778,8 +785,10 @@ class AhVisitor(AhVisitorOriginal):
                 self.set_variable(label=label, value=item)
                 block_status: BlockStatus = self.visit(ctx.block())
                 self.symbol_table.exit_block_scope()
-                if block_status.done or block_status.returned:
+                if block_status.returned:
                     return block_status
+                elif block_status.done:
+                    return BlockStatus()
 
         elif isinstance(clause, float) or isinstance(clause, int):
             self.log('Looping through range with var ' + label)
@@ -791,8 +800,10 @@ class AhVisitor(AhVisitorOriginal):
                 self.set_variable(label=label, value=i)
                 block_status: BlockStatus = self.visit(ctx.block())
                 self.symbol_table.exit_block_scope()
-                if block_status.done or block_status.returned:
+                if block_status.returned:
                     return block_status
+                elif block_status.done:
+                    return BlockStatus()
 
         else:
             self.error('Invalid Loop Type: ' + str(type(clause)))
@@ -802,8 +813,10 @@ class AhVisitor(AhVisitorOriginal):
     def visitWhile_statement(self, ctx: AhParser.While_statementContext) -> BlockStatus:
         while self.visit(ctx.condition()):
             block_status: BlockStatus = self.visit(ctx.block())
-            if block_status.done or block_status.returned:
+            if block_status.returned:
                 return block_status
+            elif block_status.done:
+                return BlockStatus()
         return BlockStatus()
 
     def visitSwitch_statement(self, ctx: AhParser.Switch_statementContext) -> BlockStatus:

@@ -7,3 +7,12 @@ def test_return():
     '''
     block_status, visitor = execute(scriptax)
     assert block_status.result == "test"
+
+
+def test_return_2():
+    scriptax = '''
+    test = "worked";
+    return self.test;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == "worked"

@@ -94,7 +94,7 @@ class SymbolTable(GenericTable):
                 scope = scope.scope_parent
 
             # Goes up the block scope tree. IF's, LOOP's, Methods
-            elif scope.type == SCOPE_BLOCK and scope.scope_parent and scope.scope_parent.type == SCOPE_BLOCK:
+            elif scope.type == SCOPE_BLOCK and scope.scope_parent: #and scope.scope_parent.type == SCOPE_BLOCK:
                 scope = scope.scope_parent
 
             # If type is GLOBAL or invalid, throw exception
