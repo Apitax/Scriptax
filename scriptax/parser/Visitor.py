@@ -56,6 +56,35 @@ from typing import Tuple, Any, List, Union, Dict
 #
 #   Scope ordering: imports, program path
 #
+#
+#
+#
+#
+# test_language.py
+#
+# vahoptions
+#
+# vlog
+#
+# vswitch, case, default
+#
+# vif, else if, else
+#
+# vfor, while, each, done, continue
+#
+# os, commandtax
+#
+# async, await
+#
+# harder tests
+#
+# create_instance
+# extends, with
+# from, import, as
+# dict_signal
+# method_call
+#
+#
 # TODO: Variable access in DOT notation (dict, list, symbol, straight up data)
 # TODO: Variable setting in DOT notation (dict, list, symbol, straight up data)
 # TODO: Async, Await
@@ -406,12 +435,12 @@ class AhVisitor(AhVisitorOriginal):
         self.execute_method("self.construct", parameters=parameters)
         return instance.scope
 
-    def register_method(self, label, method_context, attributes: Attributes):
+    def register_method(self, label, method_context, attributes: Attributes) -> Symbol:
         """
 
         """
         label = self.resolve_label(label)
-        self.symbol_table.register_method(name=label, method_context=method_context, attributes=attributes)
+        return self.symbol_table.register_method(name=label, method_context=method_context, attributes=attributes)
 
     def execute_method(self, label, parameters: List[Parameter]) -> BlockStatus:
         """
@@ -420,11 +449,34 @@ class AhVisitor(AhVisitorOriginal):
         label = self.resolve_label(label)
         method_context: AhParser.Method_def_atomContext = self.symbol_table.execute(name=label, parameters=parameters)
         if not method_context:
-            # TODO: This should throw exception
             self.symbol_table.complete_execution()
-            return BlockStatus()
-        # TODO: Check the passed in list of parameters against method_context.flexible_parameter_block() to ensure it is
-        #          correct.
+            raise Exception(
+                "Cannot execute something which is not a method " + label + ". Scriptax.Visitor@execute_method")
+            # return BlockStatus()
+
+        # Add in optional parameters and verify that the two parameter lists (defined & passed) match
+        parameter_names = []
+        for parameter in parameters:
+            parameter_names.append(parameter.name)
+        defined_parameters = self.visit(method_context.flexible_parameter_block())
+        defined_parameter_names = []
+
+        # Check defined parameters against passed in parameters and add in optional ones
+        for parameter in defined_parameters:
+            if parameter.required and parameter.name not in parameter_names:
+                raise Exception("Required parameter " + parameter.name + " not found in parameter list. Scriptax.Visitor@execute_method")
+            if not parameter.required and parameter.name not in parameter_names:
+                self.symbol_table.current.insert_symbol(Symbol(name=parameter.name, value=parameter.value))
+            defined_parameter_names.append(parameter.name)
+
+        # Check passed in parameters to ensure there aren't extra ones which were not defined
+        for parameter in parameters:
+            if parameter.name not in defined_parameter_names:
+                raise Exception(
+                    "Unexpected parameter " + parameter.name + ". Scriptax.Visitor@execute_method")
+
+
+        # TODO: If async attribute is true, then this needs to be launched in a thread
         result = self.visit(method_context.block())
         self.symbol_table.complete_execution()
         return result
@@ -690,7 +742,7 @@ class AhVisitor(AhVisitorOriginal):
         return BlockStatus(result=self.visitChildren(ctx))
 
     def visitRunnable_statements(self, ctx: AhParser.Runnable_statementsContext) -> BlockStatus:
-        # TODO: Must be changed to execute and await threads
+        # TODO: Must be changed to await threads where necessary
         result = BlockStatus()
         if ctx.method_call_statement():
             result = self.visit(ctx.method_call_statement())
@@ -725,6 +777,7 @@ class AhVisitor(AhVisitorOriginal):
             self.log('Looping through result')
 
             callback = self.visit(ctx.atom_callback())
+            # TODO: Each of these callbacks must be executed in separate threads
             for item in clause:
                 self.log('> Assigning result = ' + str(item))
                 self.execute_callback(callback=callback, parameters=[Parameter(name="result", value=item)])
@@ -740,10 +793,10 @@ class AhVisitor(AhVisitorOriginal):
     def visitCallback_block(self, ctx: AhParser.Callback_blockContext) -> BlockStatus:
         return self.visit(ctx.statements())
 
-    def visitMethod_def_atom(self, ctx: AhParser.Method_def_atomContext):
+    def visitMethod_def_atom(self, ctx: AhParser.Method_def_atomContext) -> Symbol:
         attributes: Attributes = self.visit(ctx.attributes())
         label: str = self.resolve_label(ctx.label())
-        self.register_method(label=label, method_context=ctx, attributes=attributes)
+        return self.register_method(label=label, method_context=ctx, attributes=attributes)
 
     def visitNon_terminated(self, ctx: AhParser.Non_terminatedContext) -> BlockStatus:
         temp = self.visit(ctx.flow())
@@ -946,7 +999,7 @@ class AhVisitor(AhVisitorOriginal):
         return parameters
 
     def visitOptional_parameter(self, ctx: AhParser.Optional_parameterContext) -> Parameter:
-        return Parameter(name=self.visit(ctx.labels()), value=self.visit(ctx.expr()))
+        return Parameter(name=self.visit(ctx.labels()), value=self.visit(ctx.expr()), required=False)
 
     def visitDict_signal(self, ctx: AhParser.Dict_signalContext) -> List[Parameter]:
         data = {}
@@ -1035,6 +1088,10 @@ class AhVisitor(AhVisitorOriginal):
 
         if ctx.expr():
             value = self.visit(ctx.expr())
+
+        if isinstance(value, Symbol) and value.data_type == DATA_METHOD:
+            self.register_method(label, method_context=value.value, attributes=Attributes(**value.attributes))
+            return
 
         if not ctx.EQUAL():
             var = self.get_variable(label=label)
@@ -1158,7 +1215,7 @@ class AhVisitor(AhVisitorOriginal):
 
     def visitRequired_parameter(self, ctx: AhParser.Required_parameterContext) -> Parameter:
         label = self.resolve_label(ctx.labels())
-        return Parameter(name=label)
+        return Parameter(name=label, required=True)
 
     def visitLabels(self, ctx: AhParser.LabelsContext) -> str:
 

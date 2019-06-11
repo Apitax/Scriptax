@@ -279,12 +279,13 @@ class SymbolTable(GenericTable):
         except:
             raise Exception("Removing existing symbol failed. Scriptax.SymbolTable@remove_symbol")
 
-    def register_method(self, name: str, method_context, attributes: Attributes):
+    def register_method(self, name: str, method_context, attributes: Attributes) -> Symbol:
         """
         Registers a method to the symbol table
         """
         symbol: Symbol = Symbol(name=name, data_type=DATA_METHOD, value=method_context, attributes=attributes.dict())
         self.scope().insert_symbol(symbol)
+        return symbol
 
     def execute(self, name: str, parameters: List[Parameter] = None, isolated_scope: bool = False):
         """
@@ -311,8 +312,6 @@ class SymbolTable(GenericTable):
             # Returns the body method such that some parser or compiler can execute its body
             return method.value
 
-
-
         # Ensures that the method symbol exists
         if not self.has_symbol(name) and self.has_symbol(name, SYMBOL_MODULE):
             # TODO we need to handle when its a module
@@ -333,12 +332,16 @@ class SymbolTable(GenericTable):
         # Get the Method name which is just the last component of the name
         method_name = name[-1]
 
+        print("mn:" + str(method_name))
+        print("sn:" + str(scope_name))
+
         # These two lines are not needed, but are left in for readabilities sake
         instance_scope: SymbolScope = None  # This is the scope where the method is defined
         method_scope: SymbolScope = None  # This is the scope which will be used to execute the method
 
         # If there is a scope_name, we must be operating on an instance
         # If there is no scope_name, then we must be trying to call a function on our own instance
+        #    or calling a method stored in a var
         if len(scope_name) > 0:
             # Attempts to find the symbol on instances
             try:
@@ -350,7 +353,17 @@ class SymbolTable(GenericTable):
                 instance_scope = self.get_symbol(name=".".join(scope_name), type=SYMBOL_MODULE)
 
         else:
-            instance_scope = self._get_parent_module()
+            # Perhaps we are trying to call a function stored in a variable
+            instance_scope = self.current
+
+            # Let's see whether the instance_scope contains the method
+            tbl = create_table(instance_scope)
+            try:
+                method: Symbol = tbl.get_symbol(name=method_name, as_value=False)
+            except:
+                # If one doesnt exist, then we must be trying to call a function on our own instance
+                instance_scope = self._get_parent_module()
+
 
         # Gets the method symbol from the scope
         tbl = create_table(instance_scope)
@@ -358,6 +371,11 @@ class SymbolTable(GenericTable):
             method: Symbol = tbl.get_symbol(name=method_name, as_value=False)
         except:
             raise Exception("Method `" + ".".join(name) + "` does not exist. Scriptax.SymbolTable@execute")
+
+        # Used in a weird edge case where we pass a default parameter which is a method atom
+        # TODO: Hopefully in Scriptax 5 this will no longer be required
+        while isinstance(method.value, Symbol) and method.value.data_type == DATA_METHOD:
+            method = method.value
 
         if method.data_type != DATA_METHOD:
             raise Exception(
