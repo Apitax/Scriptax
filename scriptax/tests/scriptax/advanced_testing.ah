@@ -1,0 +1,24 @@
+script construct(param = "worked")
+{
+    worked = "test" + " " + param;
+}
+
+static script get_test_static()
+{
+    return "worked";
+}
+
+script get_test()
+{
+    return test;
+}
+
+script get_advanced_test()
+{
+    return get_test() + " " + self.get_test_static() + " " + test + ".";
+}
+
+
+test = "worked";
+
+worked = null;

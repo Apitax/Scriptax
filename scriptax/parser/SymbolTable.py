@@ -83,7 +83,6 @@ class SymbolTable(GenericTable):
         """
         Traverses through a scope and its appropriate static parents to try and find a symbol
         """
-
         while scope:
             # If symbol is in current scope, then return
             if scope.has_symbol(name, symbol_type=type):

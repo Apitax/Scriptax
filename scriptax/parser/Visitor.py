@@ -31,6 +31,8 @@ import re
 import threading
 import traceback
 
+from antlr4 import InputStream
+
 from typing import Tuple, Any, List, Union, Dict
 
 
@@ -360,7 +362,7 @@ class AhVisitor(AhVisitorOriginal):
             except Exception:
                 raise Exception("Could not find symbol")
 
-    def import_module_file(self, path: str, driver=None, as_label=None):
+    def import_module_file(self, path: str, driver: str = None, as_label: str = None):
         """
 
         :param path:
@@ -371,15 +373,16 @@ class AhVisitor(AhVisitorOriginal):
         # Avoids circular dependencies
         from scriptax.parser.ModuleVisitor import ModuleParser
 
-        driver = self.resolve_label(driver)
-        as_label = self.resolve_label(as_label)
+        if as_label:
+            as_label = self.resolve_label(as_label)
 
         driver_instance: Driver = LoadedDrivers.getPrimaryDriver()
         if driver:
+            driver = self.resolve_label(driver)
             driver_instance = LoadedDrivers.getDriver(driver)
 
-        scriptax = driver_instance.getDriverScript(path)
-        tree = generate_parse_tree(read_string(scriptax))
+        scriptax: InputStream = driver_instance.getDriverScript(path)
+        tree = generate_parse_tree(scriptax)
 
         import_table = SymbolTable(name=as_label + "_import")
         module_parser = ModuleParser(symbol_table=import_table)
@@ -429,11 +432,14 @@ class AhVisitor(AhVisitorOriginal):
         import_name = self.resolve_label(import_name)
         instance: Import = self.symbol_table.new_instance(import_name=import_name)
         instance_table = create_table(instance.scope)
-        customizable_tree_parser(tree=instance.tree, symbol_table=instance_table, options=self.appOptions,
+        returned, visitor = customizable_tree_parser(tree=instance.tree, symbol_table=instance_table, options=self.appOptions,
                                  parameters=parameters)
         # vTODO : Call constructor if it exists
-        self.execute_method("self.construct", parameters=parameters)
-        return instance.scope
+        try:
+            visitor.execute_method("self.construct", parameters=parameters)
+        except Exception:
+            self.log("Didn't call constructor on new instance as it doesn't exist")
+        return visitor.symbol_table.current
 
     def register_method(self, label, method_context, attributes: Attributes) -> Symbol:
         """
@@ -464,7 +470,8 @@ class AhVisitor(AhVisitorOriginal):
         # Check defined parameters against passed in parameters and add in optional ones
         for parameter in defined_parameters:
             if parameter.required and parameter.name not in parameter_names:
-                raise Exception("Required parameter " + parameter.name + " not found in parameter list. Scriptax.Visitor@execute_method")
+                raise Exception(
+                    "Required parameter " + parameter.name + " not found in parameter list. Scriptax.Visitor@execute_method")
             if not parameter.required and parameter.name not in parameter_names:
                 self.symbol_table.current.insert_symbol(Symbol(name=parameter.name, value=parameter.value))
             defined_parameter_names.append(parameter.name)
@@ -474,7 +481,6 @@ class AhVisitor(AhVisitorOriginal):
             if parameter.name not in defined_parameter_names:
                 raise Exception(
                     "Unexpected parameter " + parameter.name + ". Scriptax.Visitor@execute_method")
-
 
         # TODO: If async attribute is true, then this needs to be launched in a thread
         result = self.visit(method_context.block())
@@ -508,7 +514,7 @@ class AhVisitor(AhVisitorOriginal):
 
             self.log_br()
             self.log_br()
-        self.symbol_table.exit_scope()
+        # self.symbol_table.exit_scope()
         return result
 
     # Visit a parse tree produced by Ah4Parser#script_structure.
@@ -931,6 +937,7 @@ class AhVisitor(AhVisitorOriginal):
             return self.visit(ctx.optional_parameter())
 
     def visitImport_statement(self, ctx: AhParser.Import_statementContext):
+
         labelIndex = 0
         driver = None
         if ctx.FROM():

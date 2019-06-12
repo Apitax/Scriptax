@@ -42,8 +42,9 @@ class SymbolScope:
     attributes : dict
         Arbitrary attributes which can be applied to a symbol scope
     """
+
     def __init__(self, scope_parent, type=None, caller=None, name=''):
-        
+
         self.type: str = type
 
         self.name = name
@@ -60,7 +61,6 @@ class SymbolScope:
 
         self.attributes: dict = {}
 
-
     @staticmethod
     def conform_name(name):
         """
@@ -74,7 +74,6 @@ class SymbolScope:
         else:
             return name
 
-
     def get_symbol(self, name, symbol_type=SYMBOL_VAR):
         """
         Gets symbol from this SymbolScope
@@ -86,7 +85,6 @@ class SymbolScope:
                 return symbol
         raise Exception('No symbol called `' + name + '` exists in SymbolScope. Scriptax.SymbolScope@get_symbol')
 
-    
     def has_symbol(self, name, symbol_type=SYMBOL_VAR):
         """
         Checks whether this SymbolScope has a symbol
@@ -97,7 +95,6 @@ class SymbolScope:
         except:
             return False
         return True
-
 
     def insert_symbol(self, symbol: Symbol) -> Symbol:
         """
@@ -110,7 +107,6 @@ class SymbolScope:
                 'SymbolScope already contains symbol `' + symbol.name + '` and cannot insert a new one. Scriptax.SymbolScope@insert_symbol')
         self.symbols.append(symbol)
         return symbol
-
 
     def remove_symbol(self, name=None, symbol_type=SYMBOL_VAR, symbol: Symbol = None):
         """
@@ -130,7 +126,6 @@ class SymbolScope:
             raise Exception(
                 'Unable to remove Symbol called `' + name + '` from this SymbolScope. Scriptax.SymbolScope@remove_symbol')
 
-
     def add_child_scope(self, scope):
         """
         Adds a child scope to this referencing environment
@@ -139,7 +134,6 @@ class SymbolScope:
         """
         self.scope_children.append(scope)
 
-
     def remove_child_scope(self, scope):
         """
         Removes a child scope from this referencing environment
@@ -147,7 +141,6 @@ class SymbolScope:
         This is not relevant if this scope is a module as it would be unlikely that we would want to remove a child scope in that case
         """
         self.scope_children.remove(scope)
-
 
     def disown_scope(self):
         """
@@ -162,7 +155,6 @@ class SymbolScope:
         self.calling = None
         self.symbols = []
 
-
     def called(self, scope):
         """
         Creates the Dynamic Link to the scope which executed a call on this scope
@@ -171,7 +163,6 @@ class SymbolScope:
         To use an anonymous scope, use exit_scope
         """
         self.caller = scope
-
 
     def call(self, scope):
         """
@@ -184,7 +175,6 @@ class SymbolScope:
         self.calling.called(self)
         return self.calling
 
-
     def complete_call(self):
         """
         Signals to the caller that this scope has finished executing its call
@@ -195,14 +185,12 @@ class SymbolScope:
         self.caller = None
         return parent_scope
 
-
     def call_complete(self):
         """
         Cleans up the scope after a call is completed
         In other words, cleans up Reverse Dynamic Link
         """
         self.calling = None
-
 
     def birth_scope(self):
         """
@@ -213,7 +201,6 @@ class SymbolScope:
         self.add_child_scope(scope)
         return scope
 
-
     def enter_scope(self):
         """
         Creates an anonymous scope and calls it
@@ -221,7 +208,6 @@ class SymbolScope:
         """
         scope = self.birth_scope()
         return self.call(scope)
-
 
     def exit_scope(self):
         """
@@ -231,7 +217,6 @@ class SymbolScope:
         parent_scope = self.complete_call()
         self.disown_scope()
         return parent_scope
-
 
     def extends(self, scope):
         """
