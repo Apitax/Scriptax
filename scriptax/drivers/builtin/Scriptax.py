@@ -48,7 +48,7 @@ class Scriptax(Driver):
         response.body.add({'commandtax': command.command[0]})
         response.body.add({'execution-time': executionTime})
 
-        if result[1].isError():
+        if result[1].is_error():
             response.body.add({'error': result[1].message})
             response.status = 500
         else:

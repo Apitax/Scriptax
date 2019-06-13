@@ -1,5 +1,11 @@
 from __future__ import annotations
 
+from scriptax.exceptions.SymbolNotFound import SymbolNotFound
+from scriptax.exceptions.SymbolError import SymbolError
+from scriptax.exceptions.InvalidSymbolAccess import InvalidSymbolAccess
+from scriptax.exceptions.InvalidParameters import InvalidParameters
+from scriptax.exceptions.InvalidExpression import InvalidExpression
+from scriptax.exceptions.InvalidType import InvalidType
 from scriptax.grammar.build.Ah4Parser import Ah4Parser as AhParser, Ah4Parser
 from scriptax.grammar.build.Ah4Visitor import Ah4Visitor as AhVisitorOriginal
 from scriptax.drivers.Driver import Driver
@@ -33,71 +39,8 @@ import traceback
 
 from antlr4 import InputStream
 
-from typing import Tuple, Any, List, Union, Dict
+from typing import Tuple, Any, List, Union
 
-
-# TODO: SCOPE GENERATION:
-#   basic symbol creators:
-#     assignment
-#     sig_statement
-#
-#   symbol value adjusters:
-#     assignment
-#
-#   symbol type adjusters/verifiers:
-#     assignment
-#
-#   scope creators:
-#     method_statement (ADD SYMBOL TO GLOBAL SCOPE & ADD AS CHILD SCOPE OF TYPE METHOD)
-#     block            (ADD AS CHILD SCOPE OF TYPE BLOCK)
-#     callback_block   (ADD AS CHILD SCOPE OF TYPE CALLBACK)
-#
-#     run recursively when encountering and merge into global scope:
-#       extends_statement  (MERGE SCOPES & SYMBOLS INTO GLOBAL OF SUB SCRIPT PRIOR TO CURRENT SCRIPT)
-#       import_statement   (ADD AS SCRIPT SYMBOL TYPE INTO GLOBAL SCOPE)
-#
-#   Scope ordering: imports, program path
-#
-#
-#
-#
-#
-# test_language.py
-#
-# vahoptions
-#
-# vlog
-#
-# vswitch, case, default
-#
-# vif, else if, else
-#
-# vfor, while, each, done, continue
-#
-# os, commandtax
-#
-# async, await
-#
-# harder tests
-#
-# create_instance
-# extends, with
-# from, import, as
-# dict_signal
-# method_call
-#
-#
-# TODO: Variable access in DOT notation (dict, list, symbol, straight up data)
-# TODO: Variable setting in DOT notation (dict, list, symbol, straight up data)
-# TODO: Async, Await
-#
-# TODO: Combine class attributes: parser `state`, `status`, and `message` into a single dict
-# TODO: Parameters must be injected into the symbol scope
-#
-# TODO: Support parameters when creating a new instance. myvar = new strings(param1="val1", param2="val2");
-# TODO: Support builder pattern when creating a new instance. myvar = new strings(param1="val1", param2="val2").doSomeAction().doSomeOtherAction();
-#
-#
 
 class AhVisitor(AhVisitorOriginal):
     """
@@ -122,7 +65,8 @@ class AhVisitor(AhVisitorOriginal):
     options : dict, deprecated
         Holds the options defined by the 'options' code in Scriptax
     status : str
-        The current status of parsing. ok -> running properly, error -> the parsing has error'd, return -> the parser has completed and returned, exit -> unused
+        The current status of parsing. ok -> running properly, error -> the parsing has error'd, return
+            -> the parser has completed and returned, exit -> unused
     message : str
         A message associated with the status. This allows the parser to provide an error message etc.
     symbol_table : SymbolTable
@@ -173,7 +117,8 @@ class AhVisitor(AhVisitorOriginal):
 
         # Used for mustache syntax dynamic replacement
         # self.regexVar = '{{[ ]{0,}[A-z0-9_$.\-]{1,}[ ]{0,}}}'
-        self.regexVar = r"<\|[ ]{0,}[A-z0-9_$.\-]{1,}[ ]{0,}>"  # Needs the r to indicate raw string to avoid escaping errors
+        self.regexVar = r"<\|[ ]{0,}[A-z0-9_$.\-]{1,}[ ]{0,}>"
+        # Needs the r to indicate raw string to avoid escaping errors
 
     # TODO: Find a way to incorporate this into a parser status field
     # Sets the program into error mode
@@ -181,38 +126,49 @@ class AhVisitor(AhVisitorOriginal):
         self.message = message
         self.status = 'error'
 
-    def setStatusReturn(self):
+    def set_status_return(self):
         self.status = 'return'
 
-    def setStatusExit(self):
+    def set_status_exit(self):
         self.status = 'exit'
 
-    def setStatusOk(self):
+    def set_status_ok(self):
         self.status = 'ok'
 
-    def isOk(self):
+    def is_ok(self):
         return self.status == 'ok'
 
-    def isError(self):
+    def is_error(self):
         return self.status == 'error'
 
-    def isExit(self):
+    def is_exit(self):
         return self.status == 'exit'
 
-    def isReturn(self):
+    def is_return(self):
         return self.status == 'return'
 
     def log(self, message: str, no_linebreak: bool = False):
+        """
+        Logs a message to the log file and console
+        Generally will add a line line break after the message, but if no_linebreak is true, it won't
+        :param message:
+        :param no_linebreak:
+        :return:
+        """
         if self.appOptions.debug:
             self.logger.log('> ' + message)
             if not no_linebreak:
                 self.logger.log('')
 
     def log_br(self):
+        """
+        Adds a line break to the log file and the console
+        :return:
+        """
         if self.appOptions.debug:
             self.logger.log('')
 
-    def parseScript(self, scriptax: str, parameters: dict = None) -> Tuple[Any, AhVisitor]:
+    def parse_script(self, scriptax: str, parameters: dict = None) -> Tuple[Any, AhVisitor]:
         """
         Helper method which executes a given scriptax string
 
@@ -230,12 +186,12 @@ class AhVisitor(AhVisitorOriginal):
         """
         from scriptax.parser.utils.BoilerPlate import customizable_parser
         result = customizable_parser(scriptax, parameters=parameters, options=self.appOptions)
-        if result[1].isError():
+        if result[1].is_error():
             self.error(message=result[1].message)
             return None, None
         return result
 
-    def parseScriptCustom(self, context, symbol_table: SymbolTable = None) -> Tuple[Any, AhVisitor]:
+    def parse_script_custom(self, context, symbol_table: SymbolTable = None) -> Tuple[Any, AhVisitor]:
         """
         Helper method which executes on a given context with a given set of symbols
 
@@ -253,7 +209,7 @@ class AhVisitor(AhVisitorOriginal):
         """
         from scriptax.parser.utils.BoilerPlate import customizable_context_parser
         result = customizable_context_parser(context, symbol_table=symbol_table, options=self.appOptions)
-        if result[1].isError():
+        if result[1].is_error():
             self.error(message=result[1].message)
             return None, None
         return result
@@ -343,28 +299,29 @@ class AhVisitor(AhVisitorOriginal):
     # TODO exceptions
     def delete_variable(self, label):
         """
-
+        Deletes a variable from the scope
         """
         label = self.resolve_label(label)
         self.symbol_table.remove_symbol(name=label)
 
     def get_symbol(self, label) -> Symbol:
         """
+        Retrieves a symbol from the scope
         :param label:
         :return:
         """
         label = self.resolve_label(label)
         try:
             return self.symbol_table.get_symbol(name=label, as_value=False)
-        except Exception:
+        except SymbolNotFound:
             try:
                 return self.symbol_table.get_symbol(name=label, type=SYMBOL_MODULE, as_value=False)
-            except Exception:
-                raise Exception("Could not find symbol")
+            except SymbolNotFound:
+                raise SymbolNotFound("Could not find symbol")
 
     def import_module_file(self, path: str, driver: str = None, as_label: str = None):
         """
-
+        Imports a module file from a driver
         :param path:
         :param driver:
         :param as_label:
@@ -392,7 +349,7 @@ class AhVisitor(AhVisitorOriginal):
 
     def import_module_string(self, label, scriptax: str):
         """
-
+        Imports Scriptax via a passed in string
         :param label:
         :param scriptax:
         :return:
@@ -410,28 +367,25 @@ class AhVisitor(AhVisitorOriginal):
 
     def extend(self, import_name):
         """
-
+        Extends the current static scope by another. This will do the linking and the execution of the extended scope.
         """
         import_name = self.resolve_label(import_name)
         module: Import = self.symbol_table.extends(import_name=import_name)
         module_table = create_table(module.scope)
         customizable_tree_parser(tree=module.tree, symbol_table=module_table, options=self.appOptions)
-
-        # print(module_table.root.scope_children[1].symbols[0].name)
-        # module.scope = module_table.root.scope_children[1]
-        # self.symbol_table.print_debug_table()
         # never call the constructor here. never ever ever
+        # Instead the constructor should be called via super() from the child class
 
     def implements(self, label):
         """
-
+        Adds any static methods from an interface into this scope
         """
         label = self.resolve_label(label)
         self.symbol_table.implements(import_name=label)
 
     def new_instance(self, import_name, parameters: List[Parameter] = None) -> SymbolScope:
         """
-
+        Creates a new instance (Executes an import and put its SymbolScope into a symbol inside of the current scope
         """
         import_name = self.resolve_label(import_name)
         instance: Import = self.symbol_table.new_instance(import_name=import_name)
@@ -439,31 +393,30 @@ class AhVisitor(AhVisitorOriginal):
         returned, visitor = customizable_tree_parser(tree=instance.tree, symbol_table=instance_table,
                                                      options=self.appOptions,
                                                      parameters=parameters)
-        # vTODO : Call constructor if it exists
+
         try:
             visitor.execute_method("self.construct", parameters=parameters)
-        except Exception:
+        except SymbolNotFound:
             self.log("Didn't call constructor on new instance as it doesn't exist")
         return visitor.symbol_table.current
 
     def register_method(self, label, method_context, attributes: Attributes) -> Symbol:
         """
-
+        Add a new method into the current scope
         """
         label = self.resolve_label(label)
         return self.symbol_table.register_method(name=label, method_context=method_context, attributes=attributes)
 
     def execute_method(self, label, parameters: List[Parameter]) -> BlockStatus:
         """
-
+        Execute a method found inside of the current scope or any of its static parents going up the interface and inheritance tree
         """
         label = self.resolve_label(label)
         method_context: AhParser.Method_def_atomContext = self.symbol_table.execute(name=label, parameters=parameters)
         if not method_context:
             self.symbol_table.complete_execution()
-            raise Exception(
+            raise InvalidSymbolAccess(
                 "Cannot execute something which is not a method " + label + ". Scriptax.Visitor@execute_method")
-            # return BlockStatus()
 
         # Add in optional parameters and verify that the two parameter lists (defined & passed) match
         parameter_names = []
@@ -475,7 +428,7 @@ class AhVisitor(AhVisitorOriginal):
         # Check defined parameters against passed in parameters and add in optional ones
         for parameter in defined_parameters:
             if parameter.required and parameter.name not in parameter_names:
-                raise Exception(
+                raise InvalidParameters(
                     "Required parameter " + parameter.name + " not found in parameter list. Scriptax.Visitor@execute_method")
             if not parameter.required and parameter.name not in parameter_names:
                 self.symbol_table.current.insert_symbol(Symbol(name=parameter.name, value=parameter.value))
@@ -484,7 +437,7 @@ class AhVisitor(AhVisitorOriginal):
         # Check passed in parameters to ensure there aren't extra ones which were not defined
         for parameter in parameters:
             if parameter.name not in defined_parameter_names:
-                raise Exception(
+                raise InvalidParameters(
                     "Unexpected parameter " + parameter.name + ". Scriptax.Visitor@execute_method")
 
         # TODO: If async attribute is true, then this needs to be launched in a thread
@@ -506,37 +459,31 @@ class AhVisitor(AhVisitorOriginal):
     # TODO: Improve error message format
     def visitProg(self, ctx: AhParser.ProgContext) -> BlockStatus:
         """
-        Visit a parse tree produced by AhParser#prog.
+        Visit a parse tree
         """
-        # self.symbol_table.enter_scope(name='main', type=SCOPE_MODULE)
         self.parser = ctx.parser
         result = self.visit(ctx.script_structure())
 
-        if self.isError():
+        if self.is_error():
             self.logger.error(
                 self.message + ' in ' + str(self.state['file']) + ' @' + str(self.state['line']) + ':' + str(
                     self.state['char']))
 
             self.log_br()
             self.log_br()
-        # self.symbol_table.exit_scope()
         return result
 
-    # Visit a parse tree produced by Ah4Parser#script_structure.
     def visitScript_structure(self, ctx: AhParser.Script_structureContext) -> BlockStatus:
         self.visit(ctx.global_statements())
         self.visit(ctx.root_level_statements())
         return self.visit(ctx.statements())
 
-    # Visit a parse tree produced by Ah4Parser#global_statements.
     def visitGlobal_statements(self, ctx: AhParser.Global_statementsContext):
         return self.visitChildren(ctx)
 
-    # Visit a parse tree produced by Ah4Parser#root_level_statements.
     def visitRoot_level_statements(self, ctx: AhParser.Root_level_statementsContext):
         return self.visitChildren(ctx)
 
-    # Visit a parse tree produced by AhParser#statements.
     def visitStatements(self, ctx: AhParser.StatementsContext) -> BlockStatus:
         i = 0
         while ctx.statement(i):
@@ -544,12 +491,11 @@ class AhVisitor(AhVisitorOriginal):
                 i))
             if result.returned or result.continued or result.done:
                 return result
-            if self.isError():
+            if self.is_error():
                 return BlockStatus()
             i += 1
         return BlockStatus()
 
-    # Visit a parse tree produced by AhParser#statement.
     def visitStatement(self, ctx: AhParser.StatementContext) -> BlockStatus:
         debug_temp = self.appOptions.debug
         sensitive_temp = self.appOptions.sensitive
@@ -640,7 +586,7 @@ class AhVisitor(AhVisitorOriginal):
 
             if ctx.LT():
                 return self.visit(ctx.expr(0)) < self.visit(ctx.expr(1))
-        except:
+        except InvalidExpression:
             stacktrace = traceback.format_exc(limit=0)
             self.error(("While evaluating expression with `" + str(
                 self.visit(ctx.expr(0))) + "` and `" + str(self.visit(ctx.expr(1))) + "`: " + stacktrace).replace('\r',
@@ -754,6 +700,7 @@ class AhVisitor(AhVisitorOriginal):
 
     def visitRunnable_statements(self, ctx: AhParser.Runnable_statementsContext) -> BlockStatus:
         # TODO: Must be changed to await threads where necessary
+        # TODO: Spawn the thread here if saync is set
         result = BlockStatus()
         if ctx.method_call_statement():
             result = self.visit(ctx.method_call_statement())
@@ -943,17 +890,16 @@ class AhVisitor(AhVisitorOriginal):
 
     def visitImport_statement(self, ctx: AhParser.Import_statementContext):
 
-        labelIndex = 0
+        label_index = 0
         driver = None
         if ctx.FROM():
             driver = self.visit(ctx.label(0))
-            labelIndex += 1
+            label_index += 1
 
         path = self.visit(ctx.labels())
 
-        name = None
         if ctx.AS():
-            name = self.visit(ctx.label(labelIndex))
+            name = self.visit(ctx.label(label_index))
         else:
             name = path.split('.')[-1]
 
@@ -1014,14 +960,13 @@ class AhVisitor(AhVisitorOriginal):
         return Parameter(name=self.visit(ctx.labels()), value=self.visit(ctx.expr()), required=False)
 
     def visitDict_signal(self, ctx: AhParser.Dict_signalContext) -> List[Parameter]:
-        data = {}
         if ctx.labels():
             data = self.get_variable(label=ctx.labels())
         else:
             data = self.visit(ctx.atom_obj_dict())
 
         if not isinstance(data, dict):
-            raise Exception("Not a dict")
+            raise InvalidType("Not a dict")
 
         parameters: List[Parameter] = []
         for key, value in data.items():
@@ -1220,9 +1165,11 @@ class AhVisitor(AhVisitorOriginal):
         label = self.resolve_label(ctx.labels())
         try:
             reflection = self.get_symbol(label=label).get_symbol_debug()
-        except Exception:
+        except SymbolNotFound:
             if label in self.symbol_table.up_words:
                 reflection = self.symbol_table.get_nearest_module().get_scope_debug()
+            else:
+                raise SymbolError
         return reflection
 
     def visitRequired_parameter(self, ctx: AhParser.Required_parameterContext) -> Parameter:

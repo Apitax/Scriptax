@@ -8,4 +8,4 @@ def test_error():
     return test;
     '''
     block_status, visitor = execute(scriptax)
-    assert block_status.result == None and visitor.isError() and visitor.message == "worked"
+    assert block_status.result == None and visitor.is_error() and visitor.message == "worked"

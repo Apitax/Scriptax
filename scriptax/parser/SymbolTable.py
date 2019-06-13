@@ -3,11 +3,12 @@ from __future__ import annotations
 import uuid
 
 from typing import List
-from pydantic import BaseModel, PyObject
+from pydantic import BaseModel
 
+from scriptax.exceptions.SymbolNotFound import SymbolNotFound
+from scriptax.exceptions.InvalidSymbolAccess import InvalidSymbolAccess
 from scriptax.models.Parameter import Parameter
 from scriptax.models.Attributes import Attributes
-from scriptax.grammar.build.Ah4Parser import Ah4Parser
 from scriptax.parser.symbols.ARISymbolTable import ARISymbolTable as GenericTable
 from scriptax.parser.symbols.ARISymbolTable import create_table as create_generic_table
 from scriptax.parser.symbols.SymbolScope import SymbolScope, SCOPE_MODULE, SCOPE_BLOCK
@@ -46,7 +47,7 @@ class SymbolTable(GenericTable):
         """
         comps = name.strip().split('.')
         if not self.is_name_valid(comps):
-            raise Exception("Invalid symbol access `" + name + "` Scriptax.SymbolTable@make_and_verify_name")
+            raise InvalidSymbolAccess("Invalid symbol access `" + name + "` Scriptax.SymbolTable@make_and_verify_name")
         return comps
 
     def traverse_up(self, name: list) -> SymbolScope:
@@ -61,7 +62,8 @@ class SymbolTable(GenericTable):
                 scope = scope.scope_parent
                 if not scope:
                     print(old_scope.name)
-                    raise Exception("Invalid symbol access. Too many up traversals. Scriptax.SymbolTable@traverse_up")
+                    raise InvalidSymbolAccess(
+                        "Invalid symbol access. Too many up traversals. Scriptax.SymbolTable@traverse_up")
             name.pop(0)
         return scope
 
@@ -95,12 +97,12 @@ class SymbolTable(GenericTable):
                 scope = scope.scope_parent
 
             # Goes up the block scope tree. IF's, LOOP's, Methods
-            elif scope.type == SCOPE_BLOCK and scope.scope_parent: #and scope.scope_parent.type == SCOPE_BLOCK:
+            elif scope.type == SCOPE_BLOCK and scope.scope_parent:  # and scope.scope_parent.type == SCOPE_BLOCK:
                 scope = scope.scope_parent
 
             # If type is GLOBAL or invalid, throw exception
             else:
-                raise Exception(
+                raise SymbolNotFound(
                     "Cannot find symbol `" + name + "` inside of scope `" + scope.name + "`. Scriptax.SymbolTable@search_scope_for_symbol")
 
     def search_symbol_for_value(self, symbol: Symbol, name: list, type=SYMBOL_VAR):
@@ -119,7 +121,7 @@ class SymbolTable(GenericTable):
                 try:
                     symbol = symbol.value[int(name[0])]
                 except:
-                    raise Exception("Invalid list access `" + name[0] + "` for symbol value `" + str(
+                    raise InvalidSymbolAccess("Invalid list access `" + name[0] + "` for symbol value `" + str(
                         symbol.value) + "`. Scriptax.SymbolTable@search_symbol_for_value")
                 if not isinstance(symbol, Symbol):
                     symbol = Symbol(name=name[0], value=symbol)
@@ -129,7 +131,7 @@ class SymbolTable(GenericTable):
                 try:
                     symbol = symbol.value[str(name[0])]
                 except:
-                    raise Exception("Invalid dict access `" + name[0] + "` for symbol value `" + str(
+                    raise InvalidSymbolAccess("Invalid dict access `" + name[0] + "` for symbol value `" + str(
                         symbol.value) + "`. Scriptax.SymbolTable@search_symbol_for_value")
                 if not isinstance(symbol, Symbol):
                     symbol = Symbol(name=name[0], value=symbol)
@@ -143,7 +145,7 @@ class SymbolTable(GenericTable):
                 symbol = Symbol(name=name[0], value=None)
 
             else:
-                raise Exception("Unsupported symbol access `" + name[0] + "` for symbol value `" + str(
+                raise InvalidSymbolAccess("Unsupported symbol access `" + name[0] + "` for symbol value `" + str(
                     symbol.value) + "`. Scriptax.SymbolTable@search_symbol_for_value")
 
             name.pop(0)
@@ -164,7 +166,7 @@ class SymbolTable(GenericTable):
         except:
             # If we are inserting a new symbol, then the symbol name must only have a single component
             if len(name) > 1:
-                raise Exception(
+                raise InvalidSymbolAccess(
                     "Variable access contains too many components for uninitialized subcomponent `" + "".join(
                         name) + "`. Scriptax.SymbolTable@set_symbol")
             scope.insert_symbol(Symbol(name=name[0], value=value))
@@ -195,13 +197,13 @@ class SymbolTable(GenericTable):
                 # If the symbol is any other type, then we should not be able to apply another name component to it,
                 #   thus it is an error
                 else:
-                    raise Exception("Unsupported symbol access `" + index + "` for symbol value `" + str(
+                    raise InvalidSymbolAccess("Unsupported symbol access `" + index + "` for symbol value `" + str(
                         symbol.value) + "`. Scriptax.SymbolTable@set_symbol")
             else:
                 # If the name has no more components, we have already found the symbol we want to modify
                 symbol.value = value
         except:
-            raise Exception("Altering existing symbol failed. Scriptax.SymbolTable@set_symbol")
+            raise InvalidSymbolAccess("Altering existing symbol failed. Scriptax.SymbolTable@set_symbol")
 
     def has_symbol(self, name: str, type=SYMBOL_VAR) -> bool:
         """
@@ -220,15 +222,18 @@ class SymbolTable(GenericTable):
         Returns symbol or the traversed symbol value
         """
 
-        name: list = self.make_and_verify_name(name)
-        scope: SymbolScope = self.traverse_up(name)
-        # Gets the symbol from the first level name component
-        symbol: Symbol = self.search_scope_for_symbol(scope, name[0], type)
-        name.pop(0)
-        # Gets value out of the symbol if we desire this
-        if as_value:
-            return self.search_symbol_for_value(symbol, name, type)
-        return symbol
+        try:
+            name: list = self.make_and_verify_name(name)
+            scope: SymbolScope = self.traverse_up(name)
+            # Gets the symbol from the first level name component
+            symbol: Symbol = self.search_scope_for_symbol(scope, name[0], type)
+            name.pop(0)
+            # Gets value out of the symbol if we desire this
+            if as_value:
+                return self.search_symbol_for_value(symbol, name, type)
+            return symbol
+        except IndexError:
+            raise SymbolNotFound
 
     def remove_symbol(self, name: str, type=SYMBOL_VAR):
         """
@@ -236,7 +241,7 @@ class SymbolTable(GenericTable):
         """
 
         if not self.has_symbol(name, type):
-            raise Exception(
+            raise InvalidSymbolAccess(
                 "Cannot remove symbol with name `" + name + "` as it does not exist within this scope. Scriptax.SymbolTable@remove_symbol")
 
         name: list = self.make_and_verify_name(name)
@@ -246,7 +251,7 @@ class SymbolTable(GenericTable):
         try:
             symbol: Symbol = self.search_scope_for_symbol(scope, name[0], type)
         except:
-            raise Exception(
+            raise InvalidSymbolAccess(
                 "Cannot remove symbol with name `" + "".join(
                     name) + "` as it does not exist within this scope. Scriptax.SymbolTable@remove_symbol")
 
@@ -272,13 +277,13 @@ class SymbolTable(GenericTable):
                 # If the symbol is any other type, then we should not be able to apply another name component to it,
                 #   thus it is an error
                 else:
-                    raise Exception("Unsupported symbol access `" + index + "` for symbol value `" + str(
+                    raise InvalidSymbolAccess("Unsupported symbol access `" + index + "` for symbol value `" + str(
                         symbol.value) + "`. Scriptax.SymbolTable@remove_symbol")
             else:
                 # If the name has no more components, we have already found the symbol we want to remove
                 scope.remove_symbol(symbol=symbol)
         except:
-            raise Exception("Removing existing symbol failed. Scriptax.SymbolTable@remove_symbol")
+            raise InvalidSymbolAccess("Removing existing symbol failed. Scriptax.SymbolTable@remove_symbol")
 
     def register_method(self, name: str, method_context, attributes: Attributes) -> Symbol:
         """
@@ -288,6 +293,7 @@ class SymbolTable(GenericTable):
         self.scope().insert_symbol(symbol)
         return symbol
 
+    # TODO: This method is nasty, gross, and unwieldly. It needs to be refactored
     def execute(self, name: str, parameters: List[Parameter] = None, isolated_scope: bool = False):
         """
         Executes a method by getting the method body, and its appropriate static parent and birthing a scope for the method to operate within
@@ -315,8 +321,7 @@ class SymbolTable(GenericTable):
 
         # Ensures that the method symbol exists
         if not self.has_symbol(name) and self.has_symbol(name, SYMBOL_MODULE):
-            # TODO we need to handle when its a module
-            raise Exception(
+            raise SymbolNotFound(
                 "Cannot execute `" + name + "` as it does not exist within scope. Scriptax.SymbolTable@execute")
 
         # Breaks apart the name into the scope name and the method name
@@ -365,7 +370,6 @@ class SymbolTable(GenericTable):
                 # If one doesnt exist, then we must be trying to call a function on our own instance
                 instance_scope = self._get_parent_module()
 
-
         # Gets the method symbol from the scope
         tbl = create_table(instance_scope)
         try:
@@ -382,7 +386,7 @@ class SymbolTable(GenericTable):
             #     print(tbl.current.print_scope_debug())
             #     method: Symbol = tbl.get_symbol(name=method_name, as_value=False)
             # except Exception:
-            raise Exception("Method `" + ".".join(name) + "` does not exist. Scriptax.SymbolTable@execute")
+            raise SymbolNotFound("Method `" + ".".join(name) + "` does not exist. Scriptax.SymbolTable@execute")
 
         # Used in a weird edge case where we pass a default parameter which is a method atom
         # TODO: Hopefully in Scriptax 5 this will no longer be required
@@ -390,7 +394,7 @@ class SymbolTable(GenericTable):
             method = method.value
 
         if method.data_type != DATA_METHOD:
-            raise Exception(
+            raise InvalidSymbolAccess(
                 "Cannot execute non executable data type `" + method.data_type + "`. Scriptax.SymbolTable@execute")
 
         # Spawns an anonymous scope if this should be executed in isolation, otherwise use the existing
@@ -414,9 +418,18 @@ class SymbolTable(GenericTable):
         return method.value
 
     def enter_block_scope(self, name: str = 'anonymous') -> SymbolScope:
+        """
+        Enter into a new block scope for methods
+        :param name:
+        :return:
+        """
         return self.enter_scope(name=name + "_method", type=SCOPE_BLOCK)
 
     def exit_block_scope(self):
+        """
+        Alias function for having a consistent API when entering and exiting method scopes
+        :return:
+        """
         self.exit_scope()
 
     def complete_execution(self):
@@ -424,17 +437,6 @@ class SymbolTable(GenericTable):
         Completes execution
         """
         self.exit_scope()
-
-    def new(self, name: str, path: str) -> Symbol:
-        """
-        No parameters on this one as it is handled via the constructor
-        After calling this, use the returned scope symbol to parse the file
-
-        DEPRECATED
-        """
-        import_table = SymbolTable(name=name + "_import")
-        return self.scope().insert_symbol(
-            Symbol(name=name, symbol_type=SYMBOL_MODULE, value=import_table.scope(), attributes={"path": path}))
 
     def import_module(self, name: str, module: Import) -> Symbol:
         """
@@ -458,31 +460,13 @@ class SymbolTable(GenericTable):
             # Perhaps it is in the parent module scope, let's try
             up_name = self.up_words[0] + "." + name
             if not self.has_symbol(up_name, type=SYMBOL_MODULE):
-                raise Exception(
+                raise SymbolNotFound(
                     "Cannot find symbol with name `" + name + "` to create instance from. Scriptax.SymbolTable@copy")
             else:
                 name = up_name
 
         # If we imported module exists, then return the symbol for it
         return self.get_symbol(name, type=SYMBOL_MODULE, as_value=False)
-
-    def copy(self, import_name: str, var_name: str) -> Symbol:
-        """
-        Uses the import to generate a fresh object of that type
-        After calling this, use the returned scope symbol to parse the file and call the constructor
-
-        DEPRECATED
-        """
-
-        # If we imported module exists, then get the symbol for it
-        symbol: Symbol = self._get_import(import_name)
-
-        # Generate a fresh symbol table for the new instance
-        instance_table = SymbolTable(name=var_name + "_instance")
-
-        # Create a symbol for the new instance scope and attach the imported script path so that we re-parse it
-        return self.scope().insert_symbol(
-            Symbol(name=var_name, value=instance_table.scope(), attributes={"path": symbol.attributes['path']}))
 
     def new_instance(self, import_name: str) -> Import:
         """
@@ -534,6 +518,10 @@ class SymbolTable(GenericTable):
 
 
 class CustomType(str):
+    """
+    Used with Pydantic to allow for generic pythonic objects to be used as a type
+    """
+
     @classmethod
     def __get_validators__(cls):
         yield cls.validate
@@ -544,6 +532,10 @@ class CustomType(str):
 
 
 class Import(BaseModel):
+    """
+    tree - This is some antlr4 context we will begin parsing within the Visitor
+    scope - SymbolScope to use when parsing
+    """
     tree: CustomType  # Ah4Parser.ProgContext
     scope: CustomType  # SymbolScope
 
