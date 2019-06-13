@@ -19,5 +19,4 @@ def test_reflection_2():
     block_status, visitor = execute(scriptax)
     print(block_status.result)
     addr_self = block_status.result['scope']['address']
-    addr_program = block_status.result['scope']['static_links']['parent']['address']
-    assert block_status.result == {'scope': {'name': 'main', 'scope-type': 'module', 'address': addr_self, 'attributes': {}, 'symbols': [], 'dynamic_links': {'caller': {'name': 'program', 'address': addr_program}, 'calling': {}}, 'static_links': {'parent': {'name': 'program', 'address': addr_program}, 'children': []}}}
+    assert block_status.result == {'scope': {'name': 'main', 'scope-type': 'module', 'address': addr_self, 'attributes': {}, 'symbols': [], 'dynamic_links': {'caller': {}, 'calling': {}}, 'static_links': {'parent': {}, 'children': []}}}

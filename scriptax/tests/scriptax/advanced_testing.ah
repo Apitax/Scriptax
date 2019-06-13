@@ -3,14 +3,14 @@ script construct(param = "worked")
     worked = "test" + " " + param;
 }
 
-static script get_test_static()
-{
-    return "worked";
-}
-
 script get_test()
 {
     return test;
+}
+
+static script day(param = "good")
+{
+    return param + " " + "night";
 }
 
 script get_advanced_test()

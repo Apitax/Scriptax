@@ -1,0 +1,14 @@
+from scriptax import base;
+extend base;
+
+script up()
+{
+    return "sky";
+}
+
+script big_test()
+{
+    return "worked " + base_method();
+}
+
+test = "worked";

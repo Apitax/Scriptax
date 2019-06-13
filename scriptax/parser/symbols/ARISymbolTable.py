@@ -23,7 +23,7 @@ class ARISymbolTable:
     """
     def __init__(self, name=None, type=SCOPE_MODULE):
         # This is the root of the linked list of scopes
-        self.root: SymbolScope = SymbolScope(scope_parent=None, type=type)
+        self.root: SymbolScope = SymbolScope(name="main", scope_parent=None, type=type)
 
         if name:
             self.root.name = name

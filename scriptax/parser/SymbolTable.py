@@ -57,8 +57,10 @@ class SymbolTable(GenericTable):
         scope = self.scope()
         while len(name) > 0 and self.name_has_up([name[0]]):
             while scope.type != SCOPE_MODULE:
+                old_scope = scope
                 scope = scope.scope_parent
                 if not scope:
+                    print(old_scope.name)
                     raise Exception("Invalid symbol access. Too many up traversals. Scriptax.SymbolTable@traverse_up")
             name.pop(0)
         return scope
@@ -369,6 +371,17 @@ class SymbolTable(GenericTable):
         try:
             method: Symbol = tbl.get_symbol(name=method_name, as_value=False)
         except:
+            # print(instance_scope.scope_parent.scope_children[1].symbols[0].name)
+            # try:
+            #     while tbl.current.scope_parent and tbl.current.scope_parent.scope_children[1] != tbl.current:
+            #         print("WHAT")
+            #         print(tbl.current.scope_parent.scope_children[1].name)
+            #         tbl = create_table(tbl.current.scope_parent.scope_children[1])
+            #     print(tbl.current.symbols[0].name)
+            #     print(method_name)
+            #     print(tbl.current.print_scope_debug())
+            #     method: Symbol = tbl.get_symbol(name=method_name, as_value=False)
+            # except Exception:
             raise Exception("Method `" + ".".join(name) + "` does not exist. Scriptax.SymbolTable@execute")
 
         # Used in a weird edge case where we pass a default parameter which is a method atom
@@ -511,7 +524,7 @@ class SymbolTable(GenericTable):
         symbol: Symbol = self._get_import(import_name)
 
         # Get the symbols inside of the imported module symbol and loop through them
-        for sym in symbol.value.symbols:
+        for sym in symbol.value.scope.symbols:
             # Used for getting type hints in IDE
             sym: Symbol = sym
 

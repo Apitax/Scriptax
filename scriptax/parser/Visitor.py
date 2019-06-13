@@ -167,7 +167,7 @@ class AhVisitor(AhVisitorOriginal):
 
         # Symbol Table
         if not symbol_table:
-            self.symbol_table: SymbolTable = SymbolTable(name="program", type=SCOPE_GLOBAL)
+            self.symbol_table: SymbolTable = SymbolTable(name="main", type=SCOPE_MODULE)
         else:
             self.symbol_table: SymbolTable = symbol_table
 
@@ -416,6 +416,10 @@ class AhVisitor(AhVisitorOriginal):
         module: Import = self.symbol_table.extends(import_name=import_name)
         module_table = create_table(module.scope)
         customizable_tree_parser(tree=module.tree, symbol_table=module_table, options=self.appOptions)
+
+        # print(module_table.root.scope_children[1].symbols[0].name)
+        # module.scope = module_table.root.scope_children[1]
+        # self.symbol_table.print_debug_table()
         # never call the constructor here. never ever ever
 
     def implements(self, label):
@@ -432,8 +436,9 @@ class AhVisitor(AhVisitorOriginal):
         import_name = self.resolve_label(import_name)
         instance: Import = self.symbol_table.new_instance(import_name=import_name)
         instance_table = create_table(instance.scope)
-        returned, visitor = customizable_tree_parser(tree=instance.tree, symbol_table=instance_table, options=self.appOptions,
-                                 parameters=parameters)
+        returned, visitor = customizable_tree_parser(tree=instance.tree, symbol_table=instance_table,
+                                                     options=self.appOptions,
+                                                     parameters=parameters)
         # vTODO : Call constructor if it exists
         try:
             visitor.execute_method("self.construct", parameters=parameters)
@@ -503,7 +508,7 @@ class AhVisitor(AhVisitorOriginal):
         """
         Visit a parse tree produced by AhParser#prog.
         """
-        self.symbol_table.enter_scope(name='main', type=SCOPE_MODULE)
+        # self.symbol_table.enter_scope(name='main', type=SCOPE_MODULE)
         self.parser = ctx.parser
         result = self.visit(ctx.script_structure())
 
@@ -967,13 +972,13 @@ class AhVisitor(AhVisitorOriginal):
             while ctx.label(label_count):
                 label_count += 1
 
-            while ctx.label(comma_count):
+            while ctx.COMMA(comma_count):
                 comma_count += 1
 
             i = 0
             if label_count > (comma_count + 1):
                 # If the first label is for inheritance
-                self.extend(self.resolve_label(ctx.label(0)))
+                self.extend(import_name=self.resolve_label(ctx.label(0)))
                 i = 1
 
             while ctx.label(i):

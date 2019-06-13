@@ -62,6 +62,5 @@ class Scriptax(Driver):
 
     def getDriverScript(self, path: str) -> InputStream:
         path = Path(Path(__file__).resolve().parents[2]).joinpath('tests', 'scriptax', path)
-        print(path)
         return read_file(path)
 

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import List
 from scriptax.parser.symbols.Symbol import Symbol, SYMBOL_VAR
 from scriptax.utilities.Hex import instance_to_hexid
@@ -218,7 +220,7 @@ class SymbolScope:
         self.disown_scope()
         return parent_scope
 
-    def extends(self, scope):
+    def extends(self, scope: SymbolScope):
         """
         Injects a static scope between this scope and its parent
         Handles all of the static linking
@@ -232,6 +234,8 @@ class SymbolScope:
             self.scope_parent.remove_child_scope(self)
             # Links the parent scope to the new scope
             self.scope_parent.add_child_scope(scope)
+            # Links the new scope to the parent scope
+            scope.scope_parent = self.scope_parent
         # Links the new scope to this scope
         scope.add_child_scope(self)
         # Links this scope to the new scope
