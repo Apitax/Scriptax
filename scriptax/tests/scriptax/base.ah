@@ -1,0 +1,17 @@
+static script up()
+{
+    return "down";
+}
+
+script left()
+{
+    return "right";
+}
+
+script base_method()
+{
+    return "worked";
+}
+
+test = null;
+day = null;

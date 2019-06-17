@@ -1,14 +1,14 @@
 # System import
 
 # Application import
-from scriptax.parser.utils.BoilerPlate import customizableParser
+from scriptax.parser.utils.BoilerPlate import customizable_parser
 from apitaxcore.utilities.Files import getPath
 from apitaxcore.flow.LoadedDrivers import LoadedDrivers
 from apitaxcore.models.State import State
 
 
 # Script is used to automate the execution of many commands
-class Scriptax():
+class Scriptax:
     def __init__(self, parameters, options):
         self.options = options
         self.parameters = parameters
@@ -26,6 +26,6 @@ class Scriptax():
 
         scriptax = self.options.driver.getDriverScript(filepath)
 
-        result = customizableParser(scriptax, parameters=self.parameters, options=self.options, file=getPath(filepath))
+        result = customizable_parser(scriptax, parameters=self.parameters, options=self.options, file=getPath(filepath))
 
         return result

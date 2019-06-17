@@ -1,5 +1,5 @@
 # Application import
-from scriptax.parser.utils.BoilerPlate import customizableParser
+from scriptax.parser.utils.BoilerPlate import customizable_parser
 from scriptax.drivers.builtin.Scriptax import Scriptax
 
 from apitaxcore.logs.Log import Log
@@ -39,7 +39,7 @@ scriptax += "log(bob);"
 scriptax += "for meat in bob {log(meat);}"
 
 
-visitor = customizableParser(scriptax, file='inline_program')
+visitor = customizable_parser(scriptax, file='inline_program')
 
 print('Return: ' + str(visitor[0][1]))
 print()

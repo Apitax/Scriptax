@@ -10,9 +10,8 @@ script_structure : global_statements root_level_statements statements ;
 
 global_statements :
       (import_statement TERMINATOR)*
-      (sig_statement TERMINATOR)?
       (extends_statement TERMINATOR)?
-      (options_statement TERMINATOR)?
+      (ahoptions_statement TERMINATOR)?
       ;
 
 root_level_statements : method_def_atom* ;
@@ -32,15 +31,14 @@ expr :
       | <assoc=right> expr POW expr
       | MINUS expr
       | NOT expr
-      | expr (MUL|DIV) expr
+      | expr (MUL|DIV|PERCENT) expr
       | expr (PLUS|MINUS) expr
       | expr (GE | LE | GT | LT) expr
       | expr (EQ | NEQ) expr
       | expr AND expr
       | expr OR expr
       | create_instance
-      | method_call
-      | execute
+      | runnable_statements
       | casting
       | count
       | reflection
@@ -49,6 +47,7 @@ expr :
 atom:
       atom_obj_dict
       | atom_obj_list
+      | atom_obj_enum
       | atom_string
       | atom_number
       | atom_boolean
@@ -59,21 +58,30 @@ atom:
 
 terminated :
       (
-        each_statement
+        log_statement
+        | each_statement
         | return_statement
+        | done_statement
+        | continue_statement
         | error_statement
         | delete_statement
-        | execute_statement
-        | method_call
         | await_statement
-        | assignment
+        | assignment_statement
+        | runnable_statements
       ) TERMINATOR ;
 
-method_call : AWAIT? labels LPAREN optional_parameters_block RPAREN atom_callback? ;
+runnable_statements : AWAIT?
+      (
+        method_call_statement
+        | os_statement
+        | commandtax_statement
+      ) atom_callback? ;
 
-execute_statement : execute ;
+method_call_statement : labels LPAREN optional_parameters_block RPAREN ;
 
-execute : ASYNC? commandtax atom_callback? ;
+commandtax_statement : COMMANDTAX LPAREN expr RPAREN ;
+
+os_statement : OS LPAREN expr RPAREN ;
 
 each_statement : EACH expr atom_callback ;
 
@@ -83,14 +91,15 @@ callback_block : EXECUTEOPEN statements EXECUTECLOSE ;
 
 // seperataition between callback blocks and regular blocks
 
-method_def_atom : attribute+ ASYNC? label LPAREN flexible_parameter_block RPAREN block ;
+method_def_atom : attributes label LPAREN flexible_parameter_block RPAREN block ;
 
 non_terminated : flow ;
 
 flow :
       if_statement
       | while_statement
-      | for_statement ;
+      | for_statement
+      | switch_statement ;
 
 if_statement : IF condition block (ELSE IF condition block)* (ELSE block)? ;
 
@@ -98,29 +107,44 @@ for_statement : FOR labels IN expr block ;
 
 while_statement : WHILE condition block ;
 
+switch_statement : SWITCH BLOCKOPEN case_statement* default_statement? BLOCKCLOSE ;
+
+case_statement : CASE condition block ;
+
+default_statement : DEFAULT block ;
+
 block : BLOCKOPEN statements BLOCKCLOSE | statement ;
+
+done_statement : DONE ;
+
+continue_statement : CONTINUE ;
 
 // statements
 
-sig_statement : SIG LPAREN flexible_parameter_block RPAREN ;
+log_statement : LOG LPAREN expr RPAREN ;
 
 flexible_parameter_block : flexible_parameter? (COMMA flexible_parameter)* ; // used to be sig
 
 flexible_parameter : required_parameter | optional_parameter ;
 
-import_statement : (FROM label)? IMPORT labels (LPAREN optional_parameters_block RPAREN)? (AS label)? ;
+import_statement : (FROM label)? IMPORT labels (AS label)? ;
 
-commandtax : COMMANDTAX LPAREN expr (COMMA atom_obj_dict)? (COMMA optional_parameters_block)? RPAREN ;
-
-extends_statement : EXTENDS LPAREN label (COMMA optional_parameters_block)? RPAREN ;
+extends_statement : EXTEND 
+      (
+        label (WITH label (COMMA label)*) 
+        | label 
+        | (WITH label (COMMA label)*)
+      ) ;
 
 create_instance : NEW label LPAREN optional_parameters_block RPAREN ;
 
-options_statement : OPTIONS LPAREN optional_parameters_block RPAREN;
+ahoptions_statement : AHOPTIONS LPAREN atom_obj_dict RPAREN;
 
-optional_parameters_block : optional_parameter? (COMMA optional_parameter)* ;
+optional_parameters_block : (dict_signal | optional_parameter)? (COMMA (dict_signal | optional_parameter))* ;
 
 optional_parameter : labels EQUAL expr ;
+
+dict_signal : SIGNAL (atom_obj_dict | labels) ;
 
 casting :
       (
@@ -134,7 +158,7 @@ casting :
 
 atom_obj_dict : BLOCKOPEN (expr COLON expr)? (COMMA (expr COLON expr)?)* BLOCKCLOSE ;
 
-assignment :
+assignment_statement :
       labels ((
         (SOPEN SCLOSE)? EQUAL
         | PE
@@ -145,9 +169,11 @@ assignment :
 
 atom_obj_list : SOPEN expr? (COMMA expr?)* SCLOSE ;
 
+atom_obj_enum : LPAREN ((label ARROW expr (COMMA (label ARROW expr)?)*) | (label (COMMA label?)*))? RPAREN ;
+
 error_statement : ERROR LPAREN expr? RPAREN;
 
-inject : MUSTACHEOPEN expr MUSTACHECLOSE ;
+inject : LT BAR expr GT ;
 
 condition : LPAREN expr RPAREN ;
 
@@ -167,11 +193,11 @@ required_parameter : labels ;
 
 labels : label_comp (DOT label_comp)* ;
 
-label_comp : label | inject ;
+label_comp : label (SOPEN (expr COLON | COLON expr | expr COLON expr) SCLOSE)? | inject ;
 
 label : LABEL ;
 
-attribute : SCRIPT ;
+attributes : (SCRIPT | STATIC | ASYNC)+ ;
 
 atom_string : STRING ;
 
@@ -226,6 +252,7 @@ DOT :     '.' ;
 COLON :   ':' ;
 PERCENT : '%' ;
 COMMA :   ',' ;
+BAR :     '|' ;
 
 
 /** TYPES **/
@@ -241,8 +268,6 @@ NONE : N O N E | N U L L ;
 /** BLOCKS AND ENCLOSURES **/
 EXECUTEOPEN : '{%' ;
 EXECUTECLOSE : '%}' ;
-MUSTACHEOPEN : '<' ;
-MUSTACHECLOSE : '>' ;
 BLOCKOPEN : '{';
 BLOCKCLOSE : '}';
 LPAREN : '(';
@@ -257,6 +282,7 @@ TERMINATOR : ';' ;
 HASH : '#' ;
 ARROW : '->' ;
 AT : '@' ;
+SIGNAL : '...' ;
 
 
 /** BLOCK FLOW **/
@@ -266,12 +292,15 @@ FOR : F O R ;
 EACH : E A C H;
 WHILE : W H I L E ;
 UNTIL : U N T I L ;
+SWITCH : S W I T C H ;
+CASE : C A S E ;
 
 
 /** STATEMENT FLOW **/
 RETURNS : R E T U R N ;
 CONTINUE : C O N T I N U E ;
 DONE : D O N E ;
+DEFAULT : D E F A U L T ;
 
 
 /** CASTING **/
@@ -284,17 +313,20 @@ TYPE_BOOL : B O O L ;
 
 
 /** METHODS **/
-SIG : S I G ;
-OPTIONS : O P T I O N S ;
+AHOPTIONS : A H O P T I O N S ;
 IMPORT : I M P O R T ;
+EXTEND : E X T E N D ;
 DEL : D E L ;
-EXTENDS : E X T E N D S ;
+OS : O S ;
 COMMANDTAX : C T ;
+LOG : L O G ;
 ERROR : E R R O R ;
 
 
 /** Attributes **/
 SCRIPT : S C R I P T ;
+STATIC : S T A T I C ;
+ASYNC : A S Y N C ;
 
 
 /** MODIFIERS **/
@@ -302,7 +334,6 @@ IN : I N ;
 AS : A S ;
 FROM : F R O M ;
 WITH: W I T H ;
-ASYNC : A S Y N C ;
 AWAIT : A W A I T ;
 NEW : N E W ;
 

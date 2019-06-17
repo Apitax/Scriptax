@@ -5,6 +5,9 @@ from time import time
 from apitaxcore.utilities.Numbers import round2str
 from scriptax.flow.ScriptaxExecutor import Scriptax as ScriptaxExecutor
 from apitaxcore.models.State import State
+from scriptax.parser.utils.BoilerPlate import read_file
+from pathlib import Path
+from antlr4 import InputStream
 
 
 class Scriptax(Driver):
@@ -36,7 +39,7 @@ class Scriptax(Driver):
 
         executionTime = round2str(time() - t0)
 
-        if (command.options.debug):
+        if command.options.debug:
             State.log.log('>> Script Finished Processing in ' + executionTime + 's')
             State.log.log('')
 
@@ -45,7 +48,7 @@ class Scriptax(Driver):
         response.body.add({'commandtax': command.command[0]})
         response.body.add({'execution-time': executionTime})
 
-        if (result[1].isError()):
+        if result[1].is_error():
             response.body.add({'error': result[1].message})
             response.status = 500
         else:
@@ -54,10 +57,9 @@ class Scriptax(Driver):
         return response
 
     def handleDriverCommand(self, command: Command) -> ApitaxResponse:
-        if(self.isDriverScriptable()):
+        if self.isDriverScriptable():
             return self.handleDriverScript(command)
 
-    def getDriverScript(self, path) -> str:
-        if path == 'bob/bob.ah':
-            return "from scriptax import tester.bobytest(helloo='nope') as Slurp; sig(testingthis='beaut'); extends(Slurp); api getSig() {log(parent.testingthis); Slurp.doSig(); } api doBob() {log('THIS IS THE BOBBY');log(addOne(somenum=6));} api addOne(somenum) {return addOneRecursive(num=somenum);} api addOneRecursive(num) { num += 1; if(num < 10) num = addOneRecursive(num=num); return num;}"
-        return "sig(helloo='yup'); api doSig() {log(parent.helloo);} api addOne(num) { if(num > 5) return num + 1; else return num; } api getPath () {log('method in script with path: ' + parent.path);} api resetPath () {parent.path='RESET';} api setPath(path){parent.path=path;} api test () {log('testing method');} log('Received filepath: " + path + "'); path='" + path + "'; arbVal=42;"
+    def getDriverScript(self, path: str) -> InputStream:
+        path = Path(Path(__file__).resolve().parents[2]).joinpath('tests', 'scriptax', path)
+        return read_file(path)
