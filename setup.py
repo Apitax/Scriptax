@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 setup(
     name='scriptax',
     packages=find_packages(),
-    version='0.0.6',
+    version='4.0.0',
     description='Scriptax is a powerful driver for the Apitax framework which exposes an automation first language used to quickly script together automation.',
     long_description=long_description,
     long_description_content_type="text/markdown",
