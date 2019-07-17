@@ -6,8 +6,8 @@ from scriptax.exceptions.InvalidSymbolAccess import InvalidSymbolAccess
 from scriptax.exceptions.InvalidParameters import InvalidParameters
 from scriptax.exceptions.InvalidExpression import InvalidExpression
 from scriptax.exceptions.InvalidType import InvalidType
-from scriptax.grammar.build.Ah4Parser import Ah4Parser as AhParser, Ah4Parser
-from scriptax.grammar.build.Ah4Visitor import Ah4Visitor as AhVisitorOriginal
+from scriptax.grammar.build.Ah5Parser import Ah5Parser as AhParser, Ah5Parser
+from scriptax.grammar.build.Ah5Visitor import Ah5Visitor as AhVisitorOriginal
 from scriptax.drivers.Driver import Driver
 from scriptax.models.Parameter import Parameter
 from scriptax.models.Attributes import Attributes

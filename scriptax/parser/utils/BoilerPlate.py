@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from scriptax.grammar.build.Ah4Lexer import Ah4Lexer
-from scriptax.grammar.build.Ah4Parser import Ah4Parser
+from scriptax.grammar.build.Ah5Lexer import Ah5Lexer
+from scriptax.grammar.build.Ah5Parser import Ah5Parser
 from apitaxcore.models.Options import Options
 
 from antlr4 import *
@@ -19,10 +19,10 @@ def read_string(scriptax: str) -> InputStream:
     return InputStream(scriptax)
 
 
-def generate_parse_tree(scriptax: InputStream) -> Ah4Parser.ProgContext:
-    lexer = Ah4Lexer(scriptax)
+def generate_parse_tree(scriptax: InputStream) -> Ah5Parser.ProgContext:
+    lexer = Ah5Lexer(scriptax)
     stream = CommonTokenStream(lexer)
-    parser = Ah4Parser(stream)
+    parser = Ah5Parser(stream)
     return parser.prog()
 
 
@@ -131,7 +131,7 @@ def customizable_context_parser(context: ParserRuleContext, symbol_table=None, f
     return result, visitor
 
 
-def standard_tree_parser(tree: Ah4Parser.ProgContext) -> Tuple[Any, AhVisitor]:
+def standard_tree_parser(tree: Ah5Parser.ProgContext) -> Tuple[Any, AhVisitor]:
     """
     Executes a parse tree
     This is just an alias function
@@ -150,7 +150,7 @@ def standard_tree_parser(tree: Ah4Parser.ProgContext) -> Tuple[Any, AhVisitor]:
     return standard_context_parser(tree)
 
 
-def customizable_tree_parser(tree: Ah4Parser.ProgContext, symbol_table=None, file=None, parameters=None,
+def customizable_tree_parser(tree: Ah5Parser.ProgContext, symbol_table=None, file=None, parameters=None,
                              options: Options = None) -> Tuple[Any, AhVisitor]:
     """
     Executes a parse tree

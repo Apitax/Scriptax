@@ -1,6 +1,6 @@
 from apitaxcore.models.Options import Options
 
-from scriptax.grammar.build.Ah4Parser import Ah4Parser as AhParser, Ah4Parser
+from scriptax.grammar.build.Ah5Parser import Ah5Parser as AhParser, Ah5Parser
 from scriptax.parser.SymbolTable import SymbolTable
 from typing import List
 

@@ -1,4 +1,4 @@
-# Generated from src/Ah4.g4 by ANTLR 4.7.2
+# Generated from /home/shawn/Documents/projects/Apitax/Scriptax/scriptax/grammar/src/Ah5.g4 by ANTLR 4.7.2
 # encoding: utf-8
 from antlr4 import *
 from io import StringIO
@@ -301,9 +301,9 @@ def serializedATN():
         return buf.getvalue()
 
 
-class Ah4Parser ( Parser ):
+class Ah5Parser ( Parser ):
 
-    grammarFileName = "Ah4.g4"
+    grammarFileName = "Ah5.g4"
 
     atn = ATNDeserializer().deserialize(serializedATN())
 
@@ -525,14 +525,14 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def script_structure(self):
-            return self.getTypedRuleContext(Ah4Parser.Script_structureContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Script_structureContext,0)
 
 
         def EOF(self):
-            return self.getToken(Ah4Parser.EOF, 0)
+            return self.getToken(Ah5Parser.EOF, 0)
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_prog
+            return Ah5Parser.RULE_prog
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterProg" ):
@@ -553,14 +553,14 @@ class Ah4Parser ( Parser ):
 
     def prog(self):
 
-        localctx = Ah4Parser.ProgContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.ProgContext(self, self._ctx, self.state)
         self.enterRule(localctx, 0, self.RULE_prog)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 122
             self.script_structure()
             self.state = 123
-            self.match(Ah4Parser.EOF)
+            self.match(Ah5Parser.EOF)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -577,19 +577,19 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def global_statements(self):
-            return self.getTypedRuleContext(Ah4Parser.Global_statementsContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Global_statementsContext,0)
 
 
         def root_level_statements(self):
-            return self.getTypedRuleContext(Ah4Parser.Root_level_statementsContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Root_level_statementsContext,0)
 
 
         def statements(self):
-            return self.getTypedRuleContext(Ah4Parser.StatementsContext,0)
+            return self.getTypedRuleContext(Ah5Parser.StatementsContext,0)
 
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_script_structure
+            return Ah5Parser.RULE_script_structure
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterScript_structure" ):
@@ -610,7 +610,7 @@ class Ah4Parser ( Parser ):
 
     def script_structure(self):
 
-        localctx = Ah4Parser.Script_structureContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.Script_structureContext(self, self._ctx, self.state)
         self.enterRule(localctx, 2, self.RULE_script_structure)
         try:
             self.enterOuterAlt(localctx, 1)
@@ -637,27 +637,27 @@ class Ah4Parser ( Parser ):
 
         def import_statement(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(Ah4Parser.Import_statementContext)
+                return self.getTypedRuleContexts(Ah5Parser.Import_statementContext)
             else:
-                return self.getTypedRuleContext(Ah4Parser.Import_statementContext,i)
+                return self.getTypedRuleContext(Ah5Parser.Import_statementContext,i)
 
 
         def TERMINATOR(self, i:int=None):
             if i is None:
-                return self.getTokens(Ah4Parser.TERMINATOR)
+                return self.getTokens(Ah5Parser.TERMINATOR)
             else:
-                return self.getToken(Ah4Parser.TERMINATOR, i)
+                return self.getToken(Ah5Parser.TERMINATOR, i)
 
         def extends_statement(self):
-            return self.getTypedRuleContext(Ah4Parser.Extends_statementContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Extends_statementContext,0)
 
 
         def ahoptions_statement(self):
-            return self.getTypedRuleContext(Ah4Parser.Ahoptions_statementContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Ahoptions_statementContext,0)
 
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_global_statements
+            return Ah5Parser.RULE_global_statements
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterGlobal_statements" ):
@@ -678,7 +678,7 @@ class Ah4Parser ( Parser ):
 
     def global_statements(self):
 
-        localctx = Ah4Parser.Global_statementsContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.Global_statementsContext(self, self._ctx, self.state)
         self.enterRule(localctx, 4, self.RULE_global_statements)
         self._la = 0 # Token type
         try:
@@ -686,11 +686,11 @@ class Ah4Parser ( Parser ):
             self.state = 134
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==Ah4Parser.IMPORT or _la==Ah4Parser.FROM:
+            while _la==Ah5Parser.IMPORT or _la==Ah5Parser.FROM:
                 self.state = 129
                 self.import_statement()
                 self.state = 130
-                self.match(Ah4Parser.TERMINATOR)
+                self.match(Ah5Parser.TERMINATOR)
                 self.state = 136
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
@@ -698,21 +698,21 @@ class Ah4Parser ( Parser ):
             self.state = 140
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==Ah4Parser.EXTEND:
+            if _la==Ah5Parser.EXTEND:
                 self.state = 137
                 self.extends_statement()
                 self.state = 138
-                self.match(Ah4Parser.TERMINATOR)
+                self.match(Ah5Parser.TERMINATOR)
 
 
             self.state = 145
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==Ah4Parser.AHOPTIONS:
+            if _la==Ah5Parser.AHOPTIONS:
                 self.state = 142
                 self.ahoptions_statement()
                 self.state = 143
-                self.match(Ah4Parser.TERMINATOR)
+                self.match(Ah5Parser.TERMINATOR)
 
 
         except RecognitionException as re:
@@ -732,13 +732,13 @@ class Ah4Parser ( Parser ):
 
         def method_def_atom(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(Ah4Parser.Method_def_atomContext)
+                return self.getTypedRuleContexts(Ah5Parser.Method_def_atomContext)
             else:
-                return self.getTypedRuleContext(Ah4Parser.Method_def_atomContext,i)
+                return self.getTypedRuleContext(Ah5Parser.Method_def_atomContext,i)
 
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_root_level_statements
+            return Ah5Parser.RULE_root_level_statements
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterRoot_level_statements" ):
@@ -759,7 +759,7 @@ class Ah4Parser ( Parser ):
 
     def root_level_statements(self):
 
-        localctx = Ah4Parser.Root_level_statementsContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.Root_level_statementsContext(self, self._ctx, self.state)
         self.enterRule(localctx, 6, self.RULE_root_level_statements)
         self._la = 0 # Token type
         try:
@@ -767,7 +767,7 @@ class Ah4Parser ( Parser ):
             self.state = 150
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while ((((_la - 77)) & ~0x3f) == 0 and ((1 << (_la - 77)) & ((1 << (Ah4Parser.SCRIPT - 77)) | (1 << (Ah4Parser.STATIC - 77)) | (1 << (Ah4Parser.ASYNC - 77)))) != 0):
+            while ((((_la - 77)) & ~0x3f) == 0 and ((1 << (_la - 77)) & ((1 << (Ah5Parser.SCRIPT - 77)) | (1 << (Ah5Parser.STATIC - 77)) | (1 << (Ah5Parser.ASYNC - 77)))) != 0):
                 self.state = 147
                 self.method_def_atom()
                 self.state = 152
@@ -791,13 +791,13 @@ class Ah4Parser ( Parser ):
 
         def statement(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(Ah4Parser.StatementContext)
+                return self.getTypedRuleContexts(Ah5Parser.StatementContext)
             else:
-                return self.getTypedRuleContext(Ah4Parser.StatementContext,i)
+                return self.getTypedRuleContext(Ah5Parser.StatementContext,i)
 
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_statements
+            return Ah5Parser.RULE_statements
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterStatements" ):
@@ -818,7 +818,7 @@ class Ah4Parser ( Parser ):
 
     def statements(self):
 
-        localctx = Ah4Parser.StatementsContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.StatementsContext(self, self._ctx, self.state)
         self.enterRule(localctx, 8, self.RULE_statements)
         self._la = 0 # Token type
         try:
@@ -826,7 +826,7 @@ class Ah4Parser ( Parser ):
             self.state = 156
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << Ah4Parser.LT) | (1 << Ah4Parser.NOT) | (1 << Ah4Parser.IF) | (1 << Ah4Parser.FOR) | (1 << Ah4Parser.EACH) | (1 << Ah4Parser.WHILE) | (1 << Ah4Parser.SWITCH) | (1 << Ah4Parser.RETURNS) | (1 << Ah4Parser.CONTINUE) | (1 << Ah4Parser.DONE))) != 0) or ((((_la - 72)) & ~0x3f) == 0 and ((1 << (_la - 72)) & ((1 << (Ah4Parser.DEL - 72)) | (1 << (Ah4Parser.OS - 72)) | (1 << (Ah4Parser.COMMANDTAX - 72)) | (1 << (Ah4Parser.LOG - 72)) | (1 << (Ah4Parser.ERROR - 72)) | (1 << (Ah4Parser.AWAIT - 72)) | (1 << (Ah4Parser.LABEL - 72)))) != 0):
+            while (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << Ah5Parser.LT) | (1 << Ah5Parser.NOT) | (1 << Ah5Parser.IF) | (1 << Ah5Parser.FOR) | (1 << Ah5Parser.EACH) | (1 << Ah5Parser.WHILE) | (1 << Ah5Parser.SWITCH) | (1 << Ah5Parser.RETURNS) | (1 << Ah5Parser.CONTINUE) | (1 << Ah5Parser.DONE))) != 0) or ((((_la - 72)) & ~0x3f) == 0 and ((1 << (_la - 72)) & ((1 << (Ah5Parser.DEL - 72)) | (1 << (Ah5Parser.OS - 72)) | (1 << (Ah5Parser.COMMANDTAX - 72)) | (1 << (Ah5Parser.LOG - 72)) | (1 << (Ah5Parser.ERROR - 72)) | (1 << (Ah5Parser.AWAIT - 72)) | (1 << (Ah5Parser.LABEL - 72)))) != 0):
                 self.state = 153
                 self.statement()
                 self.state = 158
@@ -849,18 +849,18 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def terminated(self):
-            return self.getTypedRuleContext(Ah4Parser.TerminatedContext,0)
+            return self.getTypedRuleContext(Ah5Parser.TerminatedContext,0)
 
 
         def non_terminated(self):
-            return self.getTypedRuleContext(Ah4Parser.Non_terminatedContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Non_terminatedContext,0)
 
 
         def NOT(self):
-            return self.getToken(Ah4Parser.NOT, 0)
+            return self.getToken(Ah5Parser.NOT, 0)
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_statement
+            return Ah5Parser.RULE_statement
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterStatement" ):
@@ -881,7 +881,7 @@ class Ah4Parser ( Parser ):
 
     def statement(self):
 
-        localctx = Ah4Parser.StatementContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.StatementContext(self, self._ctx, self.state)
         self.enterRule(localctx, 10, self.RULE_statement)
         self._la = 0 # Token type
         try:
@@ -889,19 +889,19 @@ class Ah4Parser ( Parser ):
             self.state = 160
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==Ah4Parser.NOT:
+            if _la==Ah5Parser.NOT:
                 self.state = 159
-                self.match(Ah4Parser.NOT)
+                self.match(Ah5Parser.NOT)
 
 
             self.state = 164
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [Ah4Parser.LT, Ah4Parser.EACH, Ah4Parser.RETURNS, Ah4Parser.CONTINUE, Ah4Parser.DONE, Ah4Parser.DEL, Ah4Parser.OS, Ah4Parser.COMMANDTAX, Ah4Parser.LOG, Ah4Parser.ERROR, Ah4Parser.AWAIT, Ah4Parser.LABEL]:
+            if token in [Ah5Parser.LT, Ah5Parser.EACH, Ah5Parser.RETURNS, Ah5Parser.CONTINUE, Ah5Parser.DONE, Ah5Parser.DEL, Ah5Parser.OS, Ah5Parser.COMMANDTAX, Ah5Parser.LOG, Ah5Parser.ERROR, Ah5Parser.AWAIT, Ah5Parser.LABEL]:
                 self.state = 162
                 self.terminated()
                 pass
-            elif token in [Ah4Parser.IF, Ah4Parser.FOR, Ah4Parser.WHILE, Ah4Parser.SWITCH]:
+            elif token in [Ah5Parser.IF, Ah5Parser.FOR, Ah5Parser.WHILE, Ah5Parser.SWITCH]:
                 self.state = 163
                 self.non_terminated()
                 pass
@@ -924,97 +924,97 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def labels(self):
-            return self.getTypedRuleContext(Ah4Parser.LabelsContext,0)
+            return self.getTypedRuleContext(Ah5Parser.LabelsContext,0)
 
 
         def inject(self):
-            return self.getTypedRuleContext(Ah4Parser.InjectContext,0)
+            return self.getTypedRuleContext(Ah5Parser.InjectContext,0)
 
 
         def LPAREN(self):
-            return self.getToken(Ah4Parser.LPAREN, 0)
+            return self.getToken(Ah5Parser.LPAREN, 0)
 
         def expr(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(Ah4Parser.ExprContext)
+                return self.getTypedRuleContexts(Ah5Parser.ExprContext)
             else:
-                return self.getTypedRuleContext(Ah4Parser.ExprContext,i)
+                return self.getTypedRuleContext(Ah5Parser.ExprContext,i)
 
 
         def RPAREN(self):
-            return self.getToken(Ah4Parser.RPAREN, 0)
+            return self.getToken(Ah5Parser.RPAREN, 0)
 
         def MINUS(self):
-            return self.getToken(Ah4Parser.MINUS, 0)
+            return self.getToken(Ah5Parser.MINUS, 0)
 
         def NOT(self):
-            return self.getToken(Ah4Parser.NOT, 0)
+            return self.getToken(Ah5Parser.NOT, 0)
 
         def create_instance(self):
-            return self.getTypedRuleContext(Ah4Parser.Create_instanceContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Create_instanceContext,0)
 
 
         def runnable_statements(self):
-            return self.getTypedRuleContext(Ah4Parser.Runnable_statementsContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Runnable_statementsContext,0)
 
 
         def casting(self):
-            return self.getTypedRuleContext(Ah4Parser.CastingContext,0)
+            return self.getTypedRuleContext(Ah5Parser.CastingContext,0)
 
 
         def count(self):
-            return self.getTypedRuleContext(Ah4Parser.CountContext,0)
+            return self.getTypedRuleContext(Ah5Parser.CountContext,0)
 
 
         def reflection(self):
-            return self.getTypedRuleContext(Ah4Parser.ReflectionContext,0)
+            return self.getTypedRuleContext(Ah5Parser.ReflectionContext,0)
 
 
         def atom(self):
-            return self.getTypedRuleContext(Ah4Parser.AtomContext,0)
+            return self.getTypedRuleContext(Ah5Parser.AtomContext,0)
 
 
         def POW(self):
-            return self.getToken(Ah4Parser.POW, 0)
+            return self.getToken(Ah5Parser.POW, 0)
 
         def MUL(self):
-            return self.getToken(Ah4Parser.MUL, 0)
+            return self.getToken(Ah5Parser.MUL, 0)
 
         def DIV(self):
-            return self.getToken(Ah4Parser.DIV, 0)
+            return self.getToken(Ah5Parser.DIV, 0)
 
         def PERCENT(self):
-            return self.getToken(Ah4Parser.PERCENT, 0)
+            return self.getToken(Ah5Parser.PERCENT, 0)
 
         def PLUS(self):
-            return self.getToken(Ah4Parser.PLUS, 0)
+            return self.getToken(Ah5Parser.PLUS, 0)
 
         def GE(self):
-            return self.getToken(Ah4Parser.GE, 0)
+            return self.getToken(Ah5Parser.GE, 0)
 
         def LE(self):
-            return self.getToken(Ah4Parser.LE, 0)
+            return self.getToken(Ah5Parser.LE, 0)
 
         def GT(self):
-            return self.getToken(Ah4Parser.GT, 0)
+            return self.getToken(Ah5Parser.GT, 0)
 
         def LT(self):
-            return self.getToken(Ah4Parser.LT, 0)
+            return self.getToken(Ah5Parser.LT, 0)
 
         def EQ(self):
-            return self.getToken(Ah4Parser.EQ, 0)
+            return self.getToken(Ah5Parser.EQ, 0)
 
         def NEQ(self):
-            return self.getToken(Ah4Parser.NEQ, 0)
+            return self.getToken(Ah5Parser.NEQ, 0)
 
         def AND(self):
-            return self.getToken(Ah4Parser.AND, 0)
+            return self.getToken(Ah5Parser.AND, 0)
 
         def OR(self):
-            return self.getToken(Ah4Parser.OR, 0)
+            return self.getToken(Ah5Parser.OR, 0)
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_expr
+            return Ah5Parser.RULE_expr
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterExpr" ):
@@ -1035,7 +1035,7 @@ class Ah4Parser ( Parser ):
     def expr(self, _p:int=0):
         _parentctx = self._ctx
         _parentState = self.state
-        localctx = Ah4Parser.ExprContext(self, self._ctx, _parentState)
+        localctx = Ah5Parser.ExprContext(self, self._ctx, _parentState)
         _prevctx = localctx
         _startState = 12
         self.enterRecursionRule(localctx, 12, self.RULE_expr, _p)
@@ -1057,23 +1057,23 @@ class Ah4Parser ( Parser ):
 
             elif la_ == 3:
                 self.state = 169
-                self.match(Ah4Parser.LPAREN)
+                self.match(Ah5Parser.LPAREN)
                 self.state = 170
                 self.expr(0)
                 self.state = 171
-                self.match(Ah4Parser.RPAREN)
+                self.match(Ah5Parser.RPAREN)
                 pass
 
             elif la_ == 4:
                 self.state = 173
-                self.match(Ah4Parser.MINUS)
+                self.match(Ah5Parser.MINUS)
                 self.state = 174
                 self.expr(14)
                 pass
 
             elif la_ == 5:
                 self.state = 175
-                self.match(Ah4Parser.NOT)
+                self.match(Ah5Parser.NOT)
                 self.state = 176
                 self.expr(13)
                 pass
@@ -1122,20 +1122,20 @@ class Ah4Parser ( Parser ):
                     self._errHandler.sync(self)
                     la_ = self._interp.adaptivePredict(self._input,8,self._ctx)
                     if la_ == 1:
-                        localctx = Ah4Parser.ExprContext(self, _parentctx, _parentState)
+                        localctx = Ah5Parser.ExprContext(self, _parentctx, _parentState)
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
                         self.state = 185
                         if not self.precpred(self._ctx, 15):
                             from antlr4.error.Errors import FailedPredicateException
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 15)")
                         self.state = 186
-                        self.match(Ah4Parser.POW)
+                        self.match(Ah5Parser.POW)
                         self.state = 187
                         self.expr(15)
                         pass
 
                     elif la_ == 2:
-                        localctx = Ah4Parser.ExprContext(self, _parentctx, _parentState)
+                        localctx = Ah5Parser.ExprContext(self, _parentctx, _parentState)
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
                         self.state = 188
                         if not self.precpred(self._ctx, 12):
@@ -1143,7 +1143,7 @@ class Ah4Parser ( Parser ):
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 12)")
                         self.state = 189
                         _la = self._input.LA(1)
-                        if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << Ah4Parser.MUL) | (1 << Ah4Parser.DIV) | (1 << Ah4Parser.PERCENT))) != 0)):
+                        if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << Ah5Parser.MUL) | (1 << Ah5Parser.DIV) | (1 << Ah5Parser.PERCENT))) != 0)):
                             self._errHandler.recoverInline(self)
                         else:
                             self._errHandler.reportMatch(self)
@@ -1153,7 +1153,7 @@ class Ah4Parser ( Parser ):
                         pass
 
                     elif la_ == 3:
-                        localctx = Ah4Parser.ExprContext(self, _parentctx, _parentState)
+                        localctx = Ah5Parser.ExprContext(self, _parentctx, _parentState)
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
                         self.state = 191
                         if not self.precpred(self._ctx, 11):
@@ -1161,7 +1161,7 @@ class Ah4Parser ( Parser ):
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 11)")
                         self.state = 192
                         _la = self._input.LA(1)
-                        if not(_la==Ah4Parser.PLUS or _la==Ah4Parser.MINUS):
+                        if not(_la==Ah5Parser.PLUS or _la==Ah5Parser.MINUS):
                             self._errHandler.recoverInline(self)
                         else:
                             self._errHandler.reportMatch(self)
@@ -1171,7 +1171,7 @@ class Ah4Parser ( Parser ):
                         pass
 
                     elif la_ == 4:
-                        localctx = Ah4Parser.ExprContext(self, _parentctx, _parentState)
+                        localctx = Ah5Parser.ExprContext(self, _parentctx, _parentState)
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
                         self.state = 194
                         if not self.precpred(self._ctx, 10):
@@ -1179,7 +1179,7 @@ class Ah4Parser ( Parser ):
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 10)")
                         self.state = 195
                         _la = self._input.LA(1)
-                        if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << Ah4Parser.GT) | (1 << Ah4Parser.LT) | (1 << Ah4Parser.GE) | (1 << Ah4Parser.LE))) != 0)):
+                        if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << Ah5Parser.GT) | (1 << Ah5Parser.LT) | (1 << Ah5Parser.GE) | (1 << Ah5Parser.LE))) != 0)):
                             self._errHandler.recoverInline(self)
                         else:
                             self._errHandler.reportMatch(self)
@@ -1189,7 +1189,7 @@ class Ah4Parser ( Parser ):
                         pass
 
                     elif la_ == 5:
-                        localctx = Ah4Parser.ExprContext(self, _parentctx, _parentState)
+                        localctx = Ah5Parser.ExprContext(self, _parentctx, _parentState)
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
                         self.state = 197
                         if not self.precpred(self._ctx, 9):
@@ -1197,7 +1197,7 @@ class Ah4Parser ( Parser ):
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 9)")
                         self.state = 198
                         _la = self._input.LA(1)
-                        if not(_la==Ah4Parser.EQ or _la==Ah4Parser.NEQ):
+                        if not(_la==Ah5Parser.EQ or _la==Ah5Parser.NEQ):
                             self._errHandler.recoverInline(self)
                         else:
                             self._errHandler.reportMatch(self)
@@ -1207,27 +1207,27 @@ class Ah4Parser ( Parser ):
                         pass
 
                     elif la_ == 6:
-                        localctx = Ah4Parser.ExprContext(self, _parentctx, _parentState)
+                        localctx = Ah5Parser.ExprContext(self, _parentctx, _parentState)
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
                         self.state = 200
                         if not self.precpred(self._ctx, 8):
                             from antlr4.error.Errors import FailedPredicateException
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 8)")
                         self.state = 201
-                        self.match(Ah4Parser.AND)
+                        self.match(Ah5Parser.AND)
                         self.state = 202
                         self.expr(9)
                         pass
 
                     elif la_ == 7:
-                        localctx = Ah4Parser.ExprContext(self, _parentctx, _parentState)
+                        localctx = Ah5Parser.ExprContext(self, _parentctx, _parentState)
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
                         self.state = 203
                         if not self.precpred(self._ctx, 7):
                             from antlr4.error.Errors import FailedPredicateException
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 7)")
                         self.state = 204
-                        self.match(Ah4Parser.OR)
+                        self.match(Ah5Parser.OR)
                         self.state = 205
                         self.expr(8)
                         pass
@@ -1253,47 +1253,47 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def atom_obj_dict(self):
-            return self.getTypedRuleContext(Ah4Parser.Atom_obj_dictContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Atom_obj_dictContext,0)
 
 
         def atom_obj_list(self):
-            return self.getTypedRuleContext(Ah4Parser.Atom_obj_listContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Atom_obj_listContext,0)
 
 
         def atom_obj_enum(self):
-            return self.getTypedRuleContext(Ah4Parser.Atom_obj_enumContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Atom_obj_enumContext,0)
 
 
         def atom_string(self):
-            return self.getTypedRuleContext(Ah4Parser.Atom_stringContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Atom_stringContext,0)
 
 
         def atom_number(self):
-            return self.getTypedRuleContext(Ah4Parser.Atom_numberContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Atom_numberContext,0)
 
 
         def atom_boolean(self):
-            return self.getTypedRuleContext(Ah4Parser.Atom_booleanContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Atom_booleanContext,0)
 
 
         def atom_hex(self):
-            return self.getTypedRuleContext(Ah4Parser.Atom_hexContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Atom_hexContext,0)
 
 
         def atom_none(self):
-            return self.getTypedRuleContext(Ah4Parser.Atom_noneContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Atom_noneContext,0)
 
 
         def atom_callback(self):
-            return self.getTypedRuleContext(Ah4Parser.Atom_callbackContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Atom_callbackContext,0)
 
 
         def method_def_atom(self):
-            return self.getTypedRuleContext(Ah4Parser.Method_def_atomContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Method_def_atomContext,0)
 
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_atom
+            return Ah5Parser.RULE_atom
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterAtom" ):
@@ -1314,7 +1314,7 @@ class Ah4Parser ( Parser ):
 
     def atom(self):
 
-        localctx = Ah4Parser.AtomContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.AtomContext(self, self._ctx, self.state)
         self.enterRule(localctx, 14, self.RULE_atom)
         try:
             self.state = 221
@@ -1397,50 +1397,50 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def TERMINATOR(self):
-            return self.getToken(Ah4Parser.TERMINATOR, 0)
+            return self.getToken(Ah5Parser.TERMINATOR, 0)
 
         def log_statement(self):
-            return self.getTypedRuleContext(Ah4Parser.Log_statementContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Log_statementContext,0)
 
 
         def each_statement(self):
-            return self.getTypedRuleContext(Ah4Parser.Each_statementContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Each_statementContext,0)
 
 
         def return_statement(self):
-            return self.getTypedRuleContext(Ah4Parser.Return_statementContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Return_statementContext,0)
 
 
         def done_statement(self):
-            return self.getTypedRuleContext(Ah4Parser.Done_statementContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Done_statementContext,0)
 
 
         def continue_statement(self):
-            return self.getTypedRuleContext(Ah4Parser.Continue_statementContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Continue_statementContext,0)
 
 
         def error_statement(self):
-            return self.getTypedRuleContext(Ah4Parser.Error_statementContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Error_statementContext,0)
 
 
         def delete_statement(self):
-            return self.getTypedRuleContext(Ah4Parser.Delete_statementContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Delete_statementContext,0)
 
 
         def await_statement(self):
-            return self.getTypedRuleContext(Ah4Parser.Await_statementContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Await_statementContext,0)
 
 
         def assignment_statement(self):
-            return self.getTypedRuleContext(Ah4Parser.Assignment_statementContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Assignment_statementContext,0)
 
 
         def runnable_statements(self):
-            return self.getTypedRuleContext(Ah4Parser.Runnable_statementsContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Runnable_statementsContext,0)
 
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_terminated
+            return Ah5Parser.RULE_terminated
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterTerminated" ):
@@ -1461,7 +1461,7 @@ class Ah4Parser ( Parser ):
 
     def terminated(self):
 
-        localctx = Ah4Parser.TerminatedContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.TerminatedContext(self, self._ctx, self.state)
         self.enterRule(localctx, 16, self.RULE_terminated)
         try:
             self.enterOuterAlt(localctx, 1)
@@ -1520,7 +1520,7 @@ class Ah4Parser ( Parser ):
 
 
             self.state = 235
-            self.match(Ah4Parser.TERMINATOR)
+            self.match(Ah5Parser.TERMINATOR)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -1537,26 +1537,26 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def method_call_statement(self):
-            return self.getTypedRuleContext(Ah4Parser.Method_call_statementContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Method_call_statementContext,0)
 
 
         def os_statement(self):
-            return self.getTypedRuleContext(Ah4Parser.Os_statementContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Os_statementContext,0)
 
 
         def commandtax_statement(self):
-            return self.getTypedRuleContext(Ah4Parser.Commandtax_statementContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Commandtax_statementContext,0)
 
 
         def AWAIT(self):
-            return self.getToken(Ah4Parser.AWAIT, 0)
+            return self.getToken(Ah5Parser.AWAIT, 0)
 
         def atom_callback(self):
-            return self.getTypedRuleContext(Ah4Parser.Atom_callbackContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Atom_callbackContext,0)
 
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_runnable_statements
+            return Ah5Parser.RULE_runnable_statements
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterRunnable_statements" ):
@@ -1577,7 +1577,7 @@ class Ah4Parser ( Parser ):
 
     def runnable_statements(self):
 
-        localctx = Ah4Parser.Runnable_statementsContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.Runnable_statementsContext(self, self._ctx, self.state)
         self.enterRule(localctx, 18, self.RULE_runnable_statements)
         self._la = 0 # Token type
         try:
@@ -1585,23 +1585,23 @@ class Ah4Parser ( Parser ):
             self.state = 238
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==Ah4Parser.AWAIT:
+            if _la==Ah5Parser.AWAIT:
                 self.state = 237
-                self.match(Ah4Parser.AWAIT)
+                self.match(Ah5Parser.AWAIT)
 
 
             self.state = 243
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [Ah4Parser.LT, Ah4Parser.LABEL]:
+            if token in [Ah5Parser.LT, Ah5Parser.LABEL]:
                 self.state = 240
                 self.method_call_statement()
                 pass
-            elif token in [Ah4Parser.OS]:
+            elif token in [Ah5Parser.OS]:
                 self.state = 241
                 self.os_statement()
                 pass
-            elif token in [Ah4Parser.COMMANDTAX]:
+            elif token in [Ah5Parser.COMMANDTAX]:
                 self.state = 242
                 self.commandtax_statement()
                 pass
@@ -1632,21 +1632,21 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def labels(self):
-            return self.getTypedRuleContext(Ah4Parser.LabelsContext,0)
+            return self.getTypedRuleContext(Ah5Parser.LabelsContext,0)
 
 
         def LPAREN(self):
-            return self.getToken(Ah4Parser.LPAREN, 0)
+            return self.getToken(Ah5Parser.LPAREN, 0)
 
         def optional_parameters_block(self):
-            return self.getTypedRuleContext(Ah4Parser.Optional_parameters_blockContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Optional_parameters_blockContext,0)
 
 
         def RPAREN(self):
-            return self.getToken(Ah4Parser.RPAREN, 0)
+            return self.getToken(Ah5Parser.RPAREN, 0)
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_method_call_statement
+            return Ah5Parser.RULE_method_call_statement
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterMethod_call_statement" ):
@@ -1667,18 +1667,18 @@ class Ah4Parser ( Parser ):
 
     def method_call_statement(self):
 
-        localctx = Ah4Parser.Method_call_statementContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.Method_call_statementContext(self, self._ctx, self.state)
         self.enterRule(localctx, 20, self.RULE_method_call_statement)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 248
             self.labels()
             self.state = 249
-            self.match(Ah4Parser.LPAREN)
+            self.match(Ah5Parser.LPAREN)
             self.state = 250
             self.optional_parameters_block()
             self.state = 251
-            self.match(Ah4Parser.RPAREN)
+            self.match(Ah5Parser.RPAREN)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -1695,20 +1695,20 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def COMMANDTAX(self):
-            return self.getToken(Ah4Parser.COMMANDTAX, 0)
+            return self.getToken(Ah5Parser.COMMANDTAX, 0)
 
         def LPAREN(self):
-            return self.getToken(Ah4Parser.LPAREN, 0)
+            return self.getToken(Ah5Parser.LPAREN, 0)
 
         def expr(self):
-            return self.getTypedRuleContext(Ah4Parser.ExprContext,0)
+            return self.getTypedRuleContext(Ah5Parser.ExprContext,0)
 
 
         def RPAREN(self):
-            return self.getToken(Ah4Parser.RPAREN, 0)
+            return self.getToken(Ah5Parser.RPAREN, 0)
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_commandtax_statement
+            return Ah5Parser.RULE_commandtax_statement
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterCommandtax_statement" ):
@@ -1729,18 +1729,18 @@ class Ah4Parser ( Parser ):
 
     def commandtax_statement(self):
 
-        localctx = Ah4Parser.Commandtax_statementContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.Commandtax_statementContext(self, self._ctx, self.state)
         self.enterRule(localctx, 22, self.RULE_commandtax_statement)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 253
-            self.match(Ah4Parser.COMMANDTAX)
+            self.match(Ah5Parser.COMMANDTAX)
             self.state = 254
-            self.match(Ah4Parser.LPAREN)
+            self.match(Ah5Parser.LPAREN)
             self.state = 255
             self.expr(0)
             self.state = 256
-            self.match(Ah4Parser.RPAREN)
+            self.match(Ah5Parser.RPAREN)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -1757,20 +1757,20 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def OS(self):
-            return self.getToken(Ah4Parser.OS, 0)
+            return self.getToken(Ah5Parser.OS, 0)
 
         def LPAREN(self):
-            return self.getToken(Ah4Parser.LPAREN, 0)
+            return self.getToken(Ah5Parser.LPAREN, 0)
 
         def expr(self):
-            return self.getTypedRuleContext(Ah4Parser.ExprContext,0)
+            return self.getTypedRuleContext(Ah5Parser.ExprContext,0)
 
 
         def RPAREN(self):
-            return self.getToken(Ah4Parser.RPAREN, 0)
+            return self.getToken(Ah5Parser.RPAREN, 0)
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_os_statement
+            return Ah5Parser.RULE_os_statement
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterOs_statement" ):
@@ -1791,18 +1791,18 @@ class Ah4Parser ( Parser ):
 
     def os_statement(self):
 
-        localctx = Ah4Parser.Os_statementContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.Os_statementContext(self, self._ctx, self.state)
         self.enterRule(localctx, 24, self.RULE_os_statement)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 258
-            self.match(Ah4Parser.OS)
+            self.match(Ah5Parser.OS)
             self.state = 259
-            self.match(Ah4Parser.LPAREN)
+            self.match(Ah5Parser.LPAREN)
             self.state = 260
             self.expr(0)
             self.state = 261
-            self.match(Ah4Parser.RPAREN)
+            self.match(Ah5Parser.RPAREN)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -1819,18 +1819,18 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def EACH(self):
-            return self.getToken(Ah4Parser.EACH, 0)
+            return self.getToken(Ah5Parser.EACH, 0)
 
         def expr(self):
-            return self.getTypedRuleContext(Ah4Parser.ExprContext,0)
+            return self.getTypedRuleContext(Ah5Parser.ExprContext,0)
 
 
         def atom_callback(self):
-            return self.getTypedRuleContext(Ah4Parser.Atom_callbackContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Atom_callbackContext,0)
 
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_each_statement
+            return Ah5Parser.RULE_each_statement
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterEach_statement" ):
@@ -1851,12 +1851,12 @@ class Ah4Parser ( Parser ):
 
     def each_statement(self):
 
-        localctx = Ah4Parser.Each_statementContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.Each_statementContext(self, self._ctx, self.state)
         self.enterRule(localctx, 26, self.RULE_each_statement)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 263
-            self.match(Ah4Parser.EACH)
+            self.match(Ah5Parser.EACH)
             self.state = 264
             self.expr(0)
             self.state = 265
@@ -1877,24 +1877,24 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def callback_block(self):
-            return self.getTypedRuleContext(Ah4Parser.Callback_blockContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Callback_blockContext,0)
 
 
         def LPAREN(self):
-            return self.getToken(Ah4Parser.LPAREN, 0)
+            return self.getToken(Ah5Parser.LPAREN, 0)
 
         def optional_parameters_block(self):
-            return self.getTypedRuleContext(Ah4Parser.Optional_parameters_blockContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Optional_parameters_blockContext,0)
 
 
         def RPAREN(self):
-            return self.getToken(Ah4Parser.RPAREN, 0)
+            return self.getToken(Ah5Parser.RPAREN, 0)
 
         def ARROW(self):
-            return self.getToken(Ah4Parser.ARROW, 0)
+            return self.getToken(Ah5Parser.ARROW, 0)
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_atom_callback
+            return Ah5Parser.RULE_atom_callback
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterAtom_callback" ):
@@ -1915,7 +1915,7 @@ class Ah4Parser ( Parser ):
 
     def atom_callback(self):
 
-        localctx = Ah4Parser.Atom_callbackContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.Atom_callbackContext(self, self._ctx, self.state)
         self.enterRule(localctx, 28, self.RULE_atom_callback)
         self._la = 0 # Token type
         try:
@@ -1923,15 +1923,15 @@ class Ah4Parser ( Parser ):
             self.state = 272
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==Ah4Parser.LPAREN:
+            if _la==Ah5Parser.LPAREN:
                 self.state = 267
-                self.match(Ah4Parser.LPAREN)
+                self.match(Ah5Parser.LPAREN)
                 self.state = 268
                 self.optional_parameters_block()
                 self.state = 269
-                self.match(Ah4Parser.RPAREN)
+                self.match(Ah5Parser.RPAREN)
                 self.state = 270
-                self.match(Ah4Parser.ARROW)
+                self.match(Ah5Parser.ARROW)
 
 
             self.state = 274
@@ -1952,17 +1952,17 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def EXECUTEOPEN(self):
-            return self.getToken(Ah4Parser.EXECUTEOPEN, 0)
+            return self.getToken(Ah5Parser.EXECUTEOPEN, 0)
 
         def statements(self):
-            return self.getTypedRuleContext(Ah4Parser.StatementsContext,0)
+            return self.getTypedRuleContext(Ah5Parser.StatementsContext,0)
 
 
         def EXECUTECLOSE(self):
-            return self.getToken(Ah4Parser.EXECUTECLOSE, 0)
+            return self.getToken(Ah5Parser.EXECUTECLOSE, 0)
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_callback_block
+            return Ah5Parser.RULE_callback_block
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterCallback_block" ):
@@ -1983,16 +1983,16 @@ class Ah4Parser ( Parser ):
 
     def callback_block(self):
 
-        localctx = Ah4Parser.Callback_blockContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.Callback_blockContext(self, self._ctx, self.state)
         self.enterRule(localctx, 30, self.RULE_callback_block)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 276
-            self.match(Ah4Parser.EXECUTEOPEN)
+            self.match(Ah5Parser.EXECUTEOPEN)
             self.state = 277
             self.statements()
             self.state = 278
-            self.match(Ah4Parser.EXECUTECLOSE)
+            self.match(Ah5Parser.EXECUTECLOSE)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -2009,29 +2009,29 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def attributes(self):
-            return self.getTypedRuleContext(Ah4Parser.AttributesContext,0)
+            return self.getTypedRuleContext(Ah5Parser.AttributesContext,0)
 
 
         def label(self):
-            return self.getTypedRuleContext(Ah4Parser.LabelContext,0)
+            return self.getTypedRuleContext(Ah5Parser.LabelContext,0)
 
 
         def LPAREN(self):
-            return self.getToken(Ah4Parser.LPAREN, 0)
+            return self.getToken(Ah5Parser.LPAREN, 0)
 
         def flexible_parameter_block(self):
-            return self.getTypedRuleContext(Ah4Parser.Flexible_parameter_blockContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Flexible_parameter_blockContext,0)
 
 
         def RPAREN(self):
-            return self.getToken(Ah4Parser.RPAREN, 0)
+            return self.getToken(Ah5Parser.RPAREN, 0)
 
         def block(self):
-            return self.getTypedRuleContext(Ah4Parser.BlockContext,0)
+            return self.getTypedRuleContext(Ah5Parser.BlockContext,0)
 
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_method_def_atom
+            return Ah5Parser.RULE_method_def_atom
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterMethod_def_atom" ):
@@ -2052,7 +2052,7 @@ class Ah4Parser ( Parser ):
 
     def method_def_atom(self):
 
-        localctx = Ah4Parser.Method_def_atomContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.Method_def_atomContext(self, self._ctx, self.state)
         self.enterRule(localctx, 32, self.RULE_method_def_atom)
         try:
             self.enterOuterAlt(localctx, 1)
@@ -2061,11 +2061,11 @@ class Ah4Parser ( Parser ):
             self.state = 281
             self.label()
             self.state = 282
-            self.match(Ah4Parser.LPAREN)
+            self.match(Ah5Parser.LPAREN)
             self.state = 283
             self.flexible_parameter_block()
             self.state = 284
-            self.match(Ah4Parser.RPAREN)
+            self.match(Ah5Parser.RPAREN)
             self.state = 285
             self.block()
         except RecognitionException as re:
@@ -2084,11 +2084,11 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def flow(self):
-            return self.getTypedRuleContext(Ah4Parser.FlowContext,0)
+            return self.getTypedRuleContext(Ah5Parser.FlowContext,0)
 
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_non_terminated
+            return Ah5Parser.RULE_non_terminated
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterNon_terminated" ):
@@ -2109,7 +2109,7 @@ class Ah4Parser ( Parser ):
 
     def non_terminated(self):
 
-        localctx = Ah4Parser.Non_terminatedContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.Non_terminatedContext(self, self._ctx, self.state)
         self.enterRule(localctx, 34, self.RULE_non_terminated)
         try:
             self.enterOuterAlt(localctx, 1)
@@ -2131,23 +2131,23 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def if_statement(self):
-            return self.getTypedRuleContext(Ah4Parser.If_statementContext,0)
+            return self.getTypedRuleContext(Ah5Parser.If_statementContext,0)
 
 
         def while_statement(self):
-            return self.getTypedRuleContext(Ah4Parser.While_statementContext,0)
+            return self.getTypedRuleContext(Ah5Parser.While_statementContext,0)
 
 
         def for_statement(self):
-            return self.getTypedRuleContext(Ah4Parser.For_statementContext,0)
+            return self.getTypedRuleContext(Ah5Parser.For_statementContext,0)
 
 
         def switch_statement(self):
-            return self.getTypedRuleContext(Ah4Parser.Switch_statementContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Switch_statementContext,0)
 
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_flow
+            return Ah5Parser.RULE_flow
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterFlow" ):
@@ -2168,28 +2168,28 @@ class Ah4Parser ( Parser ):
 
     def flow(self):
 
-        localctx = Ah4Parser.FlowContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.FlowContext(self, self._ctx, self.state)
         self.enterRule(localctx, 36, self.RULE_flow)
         try:
             self.state = 293
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [Ah4Parser.IF]:
+            if token in [Ah5Parser.IF]:
                 self.enterOuterAlt(localctx, 1)
                 self.state = 289
                 self.if_statement()
                 pass
-            elif token in [Ah4Parser.WHILE]:
+            elif token in [Ah5Parser.WHILE]:
                 self.enterOuterAlt(localctx, 2)
                 self.state = 290
                 self.while_statement()
                 pass
-            elif token in [Ah4Parser.FOR]:
+            elif token in [Ah5Parser.FOR]:
                 self.enterOuterAlt(localctx, 3)
                 self.state = 291
                 self.for_statement()
                 pass
-            elif token in [Ah4Parser.SWITCH]:
+            elif token in [Ah5Parser.SWITCH]:
                 self.enterOuterAlt(localctx, 4)
                 self.state = 292
                 self.switch_statement()
@@ -2214,32 +2214,32 @@ class Ah4Parser ( Parser ):
 
         def IF(self, i:int=None):
             if i is None:
-                return self.getTokens(Ah4Parser.IF)
+                return self.getTokens(Ah5Parser.IF)
             else:
-                return self.getToken(Ah4Parser.IF, i)
+                return self.getToken(Ah5Parser.IF, i)
 
         def condition(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(Ah4Parser.ConditionContext)
+                return self.getTypedRuleContexts(Ah5Parser.ConditionContext)
             else:
-                return self.getTypedRuleContext(Ah4Parser.ConditionContext,i)
+                return self.getTypedRuleContext(Ah5Parser.ConditionContext,i)
 
 
         def block(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(Ah4Parser.BlockContext)
+                return self.getTypedRuleContexts(Ah5Parser.BlockContext)
             else:
-                return self.getTypedRuleContext(Ah4Parser.BlockContext,i)
+                return self.getTypedRuleContext(Ah5Parser.BlockContext,i)
 
 
         def ELSE(self, i:int=None):
             if i is None:
-                return self.getTokens(Ah4Parser.ELSE)
+                return self.getTokens(Ah5Parser.ELSE)
             else:
-                return self.getToken(Ah4Parser.ELSE, i)
+                return self.getToken(Ah5Parser.ELSE, i)
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_if_statement
+            return Ah5Parser.RULE_if_statement
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterIf_statement" ):
@@ -2260,12 +2260,12 @@ class Ah4Parser ( Parser ):
 
     def if_statement(self):
 
-        localctx = Ah4Parser.If_statementContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.If_statementContext(self, self._ctx, self.state)
         self.enterRule(localctx, 38, self.RULE_if_statement)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 295
-            self.match(Ah4Parser.IF)
+            self.match(Ah5Parser.IF)
             self.state = 296
             self.condition()
             self.state = 297
@@ -2276,9 +2276,9 @@ class Ah4Parser ( Parser ):
             while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
                 if _alt==1:
                     self.state = 298
-                    self.match(Ah4Parser.ELSE)
+                    self.match(Ah5Parser.ELSE)
                     self.state = 299
-                    self.match(Ah4Parser.IF)
+                    self.match(Ah5Parser.IF)
                     self.state = 300
                     self.condition()
                     self.state = 301
@@ -2292,7 +2292,7 @@ class Ah4Parser ( Parser ):
             la_ = self._interp.adaptivePredict(self._input,18,self._ctx)
             if la_ == 1:
                 self.state = 308
-                self.match(Ah4Parser.ELSE)
+                self.match(Ah5Parser.ELSE)
                 self.state = 309
                 self.block()
 
@@ -2313,25 +2313,25 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def FOR(self):
-            return self.getToken(Ah4Parser.FOR, 0)
+            return self.getToken(Ah5Parser.FOR, 0)
 
         def labels(self):
-            return self.getTypedRuleContext(Ah4Parser.LabelsContext,0)
+            return self.getTypedRuleContext(Ah5Parser.LabelsContext,0)
 
 
         def IN(self):
-            return self.getToken(Ah4Parser.IN, 0)
+            return self.getToken(Ah5Parser.IN, 0)
 
         def expr(self):
-            return self.getTypedRuleContext(Ah4Parser.ExprContext,0)
+            return self.getTypedRuleContext(Ah5Parser.ExprContext,0)
 
 
         def block(self):
-            return self.getTypedRuleContext(Ah4Parser.BlockContext,0)
+            return self.getTypedRuleContext(Ah5Parser.BlockContext,0)
 
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_for_statement
+            return Ah5Parser.RULE_for_statement
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterFor_statement" ):
@@ -2352,16 +2352,16 @@ class Ah4Parser ( Parser ):
 
     def for_statement(self):
 
-        localctx = Ah4Parser.For_statementContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.For_statementContext(self, self._ctx, self.state)
         self.enterRule(localctx, 40, self.RULE_for_statement)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 312
-            self.match(Ah4Parser.FOR)
+            self.match(Ah5Parser.FOR)
             self.state = 313
             self.labels()
             self.state = 314
-            self.match(Ah4Parser.IN)
+            self.match(Ah5Parser.IN)
             self.state = 315
             self.expr(0)
             self.state = 316
@@ -2382,18 +2382,18 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def WHILE(self):
-            return self.getToken(Ah4Parser.WHILE, 0)
+            return self.getToken(Ah5Parser.WHILE, 0)
 
         def condition(self):
-            return self.getTypedRuleContext(Ah4Parser.ConditionContext,0)
+            return self.getTypedRuleContext(Ah5Parser.ConditionContext,0)
 
 
         def block(self):
-            return self.getTypedRuleContext(Ah4Parser.BlockContext,0)
+            return self.getTypedRuleContext(Ah5Parser.BlockContext,0)
 
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_while_statement
+            return Ah5Parser.RULE_while_statement
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterWhile_statement" ):
@@ -2414,12 +2414,12 @@ class Ah4Parser ( Parser ):
 
     def while_statement(self):
 
-        localctx = Ah4Parser.While_statementContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.While_statementContext(self, self._ctx, self.state)
         self.enterRule(localctx, 42, self.RULE_while_statement)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 318
-            self.match(Ah4Parser.WHILE)
+            self.match(Ah5Parser.WHILE)
             self.state = 319
             self.condition()
             self.state = 320
@@ -2440,27 +2440,27 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def SWITCH(self):
-            return self.getToken(Ah4Parser.SWITCH, 0)
+            return self.getToken(Ah5Parser.SWITCH, 0)
 
         def BLOCKOPEN(self):
-            return self.getToken(Ah4Parser.BLOCKOPEN, 0)
+            return self.getToken(Ah5Parser.BLOCKOPEN, 0)
 
         def BLOCKCLOSE(self):
-            return self.getToken(Ah4Parser.BLOCKCLOSE, 0)
+            return self.getToken(Ah5Parser.BLOCKCLOSE, 0)
 
         def case_statement(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(Ah4Parser.Case_statementContext)
+                return self.getTypedRuleContexts(Ah5Parser.Case_statementContext)
             else:
-                return self.getTypedRuleContext(Ah4Parser.Case_statementContext,i)
+                return self.getTypedRuleContext(Ah5Parser.Case_statementContext,i)
 
 
         def default_statement(self):
-            return self.getTypedRuleContext(Ah4Parser.Default_statementContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Default_statementContext,0)
 
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_switch_statement
+            return Ah5Parser.RULE_switch_statement
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterSwitch_statement" ):
@@ -2481,19 +2481,19 @@ class Ah4Parser ( Parser ):
 
     def switch_statement(self):
 
-        localctx = Ah4Parser.Switch_statementContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.Switch_statementContext(self, self._ctx, self.state)
         self.enterRule(localctx, 44, self.RULE_switch_statement)
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 322
-            self.match(Ah4Parser.SWITCH)
+            self.match(Ah5Parser.SWITCH)
             self.state = 323
-            self.match(Ah4Parser.BLOCKOPEN)
+            self.match(Ah5Parser.BLOCKOPEN)
             self.state = 327
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==Ah4Parser.CASE:
+            while _la==Ah5Parser.CASE:
                 self.state = 324
                 self.case_statement()
                 self.state = 329
@@ -2503,13 +2503,13 @@ class Ah4Parser ( Parser ):
             self.state = 331
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==Ah4Parser.DEFAULT:
+            if _la==Ah5Parser.DEFAULT:
                 self.state = 330
                 self.default_statement()
 
 
             self.state = 333
-            self.match(Ah4Parser.BLOCKCLOSE)
+            self.match(Ah5Parser.BLOCKCLOSE)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -2526,18 +2526,18 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def CASE(self):
-            return self.getToken(Ah4Parser.CASE, 0)
+            return self.getToken(Ah5Parser.CASE, 0)
 
         def condition(self):
-            return self.getTypedRuleContext(Ah4Parser.ConditionContext,0)
+            return self.getTypedRuleContext(Ah5Parser.ConditionContext,0)
 
 
         def block(self):
-            return self.getTypedRuleContext(Ah4Parser.BlockContext,0)
+            return self.getTypedRuleContext(Ah5Parser.BlockContext,0)
 
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_case_statement
+            return Ah5Parser.RULE_case_statement
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterCase_statement" ):
@@ -2558,12 +2558,12 @@ class Ah4Parser ( Parser ):
 
     def case_statement(self):
 
-        localctx = Ah4Parser.Case_statementContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.Case_statementContext(self, self._ctx, self.state)
         self.enterRule(localctx, 46, self.RULE_case_statement)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 335
-            self.match(Ah4Parser.CASE)
+            self.match(Ah5Parser.CASE)
             self.state = 336
             self.condition()
             self.state = 337
@@ -2584,14 +2584,14 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def DEFAULT(self):
-            return self.getToken(Ah4Parser.DEFAULT, 0)
+            return self.getToken(Ah5Parser.DEFAULT, 0)
 
         def block(self):
-            return self.getTypedRuleContext(Ah4Parser.BlockContext,0)
+            return self.getTypedRuleContext(Ah5Parser.BlockContext,0)
 
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_default_statement
+            return Ah5Parser.RULE_default_statement
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterDefault_statement" ):
@@ -2612,12 +2612,12 @@ class Ah4Parser ( Parser ):
 
     def default_statement(self):
 
-        localctx = Ah4Parser.Default_statementContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.Default_statementContext(self, self._ctx, self.state)
         self.enterRule(localctx, 48, self.RULE_default_statement)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 339
-            self.match(Ah4Parser.DEFAULT)
+            self.match(Ah5Parser.DEFAULT)
             self.state = 340
             self.block()
         except RecognitionException as re:
@@ -2636,21 +2636,21 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def BLOCKOPEN(self):
-            return self.getToken(Ah4Parser.BLOCKOPEN, 0)
+            return self.getToken(Ah5Parser.BLOCKOPEN, 0)
 
         def statements(self):
-            return self.getTypedRuleContext(Ah4Parser.StatementsContext,0)
+            return self.getTypedRuleContext(Ah5Parser.StatementsContext,0)
 
 
         def BLOCKCLOSE(self):
-            return self.getToken(Ah4Parser.BLOCKCLOSE, 0)
+            return self.getToken(Ah5Parser.BLOCKCLOSE, 0)
 
         def statement(self):
-            return self.getTypedRuleContext(Ah4Parser.StatementContext,0)
+            return self.getTypedRuleContext(Ah5Parser.StatementContext,0)
 
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_block
+            return Ah5Parser.RULE_block
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterBlock" ):
@@ -2671,22 +2671,22 @@ class Ah4Parser ( Parser ):
 
     def block(self):
 
-        localctx = Ah4Parser.BlockContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.BlockContext(self, self._ctx, self.state)
         self.enterRule(localctx, 50, self.RULE_block)
         try:
             self.state = 347
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [Ah4Parser.BLOCKOPEN]:
+            if token in [Ah5Parser.BLOCKOPEN]:
                 self.enterOuterAlt(localctx, 1)
                 self.state = 342
-                self.match(Ah4Parser.BLOCKOPEN)
+                self.match(Ah5Parser.BLOCKOPEN)
                 self.state = 343
                 self.statements()
                 self.state = 344
-                self.match(Ah4Parser.BLOCKCLOSE)
+                self.match(Ah5Parser.BLOCKCLOSE)
                 pass
-            elif token in [Ah4Parser.LT, Ah4Parser.NOT, Ah4Parser.IF, Ah4Parser.FOR, Ah4Parser.EACH, Ah4Parser.WHILE, Ah4Parser.SWITCH, Ah4Parser.RETURNS, Ah4Parser.CONTINUE, Ah4Parser.DONE, Ah4Parser.DEL, Ah4Parser.OS, Ah4Parser.COMMANDTAX, Ah4Parser.LOG, Ah4Parser.ERROR, Ah4Parser.AWAIT, Ah4Parser.LABEL]:
+            elif token in [Ah5Parser.LT, Ah5Parser.NOT, Ah5Parser.IF, Ah5Parser.FOR, Ah5Parser.EACH, Ah5Parser.WHILE, Ah5Parser.SWITCH, Ah5Parser.RETURNS, Ah5Parser.CONTINUE, Ah5Parser.DONE, Ah5Parser.DEL, Ah5Parser.OS, Ah5Parser.COMMANDTAX, Ah5Parser.LOG, Ah5Parser.ERROR, Ah5Parser.AWAIT, Ah5Parser.LABEL]:
                 self.enterOuterAlt(localctx, 2)
                 self.state = 346
                 self.statement()
@@ -2710,10 +2710,10 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def DONE(self):
-            return self.getToken(Ah4Parser.DONE, 0)
+            return self.getToken(Ah5Parser.DONE, 0)
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_done_statement
+            return Ah5Parser.RULE_done_statement
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterDone_statement" ):
@@ -2734,12 +2734,12 @@ class Ah4Parser ( Parser ):
 
     def done_statement(self):
 
-        localctx = Ah4Parser.Done_statementContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.Done_statementContext(self, self._ctx, self.state)
         self.enterRule(localctx, 52, self.RULE_done_statement)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 349
-            self.match(Ah4Parser.DONE)
+            self.match(Ah5Parser.DONE)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -2756,10 +2756,10 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def CONTINUE(self):
-            return self.getToken(Ah4Parser.CONTINUE, 0)
+            return self.getToken(Ah5Parser.CONTINUE, 0)
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_continue_statement
+            return Ah5Parser.RULE_continue_statement
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterContinue_statement" ):
@@ -2780,12 +2780,12 @@ class Ah4Parser ( Parser ):
 
     def continue_statement(self):
 
-        localctx = Ah4Parser.Continue_statementContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.Continue_statementContext(self, self._ctx, self.state)
         self.enterRule(localctx, 54, self.RULE_continue_statement)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 351
-            self.match(Ah4Parser.CONTINUE)
+            self.match(Ah5Parser.CONTINUE)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -2802,20 +2802,20 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def LOG(self):
-            return self.getToken(Ah4Parser.LOG, 0)
+            return self.getToken(Ah5Parser.LOG, 0)
 
         def LPAREN(self):
-            return self.getToken(Ah4Parser.LPAREN, 0)
+            return self.getToken(Ah5Parser.LPAREN, 0)
 
         def expr(self):
-            return self.getTypedRuleContext(Ah4Parser.ExprContext,0)
+            return self.getTypedRuleContext(Ah5Parser.ExprContext,0)
 
 
         def RPAREN(self):
-            return self.getToken(Ah4Parser.RPAREN, 0)
+            return self.getToken(Ah5Parser.RPAREN, 0)
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_log_statement
+            return Ah5Parser.RULE_log_statement
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterLog_statement" ):
@@ -2836,18 +2836,18 @@ class Ah4Parser ( Parser ):
 
     def log_statement(self):
 
-        localctx = Ah4Parser.Log_statementContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.Log_statementContext(self, self._ctx, self.state)
         self.enterRule(localctx, 56, self.RULE_log_statement)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 353
-            self.match(Ah4Parser.LOG)
+            self.match(Ah5Parser.LOG)
             self.state = 354
-            self.match(Ah4Parser.LPAREN)
+            self.match(Ah5Parser.LPAREN)
             self.state = 355
             self.expr(0)
             self.state = 356
-            self.match(Ah4Parser.RPAREN)
+            self.match(Ah5Parser.RPAREN)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -2865,19 +2865,19 @@ class Ah4Parser ( Parser ):
 
         def flexible_parameter(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(Ah4Parser.Flexible_parameterContext)
+                return self.getTypedRuleContexts(Ah5Parser.Flexible_parameterContext)
             else:
-                return self.getTypedRuleContext(Ah4Parser.Flexible_parameterContext,i)
+                return self.getTypedRuleContext(Ah5Parser.Flexible_parameterContext,i)
 
 
         def COMMA(self, i:int=None):
             if i is None:
-                return self.getTokens(Ah4Parser.COMMA)
+                return self.getTokens(Ah5Parser.COMMA)
             else:
-                return self.getToken(Ah4Parser.COMMA, i)
+                return self.getToken(Ah5Parser.COMMA, i)
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_flexible_parameter_block
+            return Ah5Parser.RULE_flexible_parameter_block
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterFlexible_parameter_block" ):
@@ -2898,7 +2898,7 @@ class Ah4Parser ( Parser ):
 
     def flexible_parameter_block(self):
 
-        localctx = Ah4Parser.Flexible_parameter_blockContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.Flexible_parameter_blockContext(self, self._ctx, self.state)
         self.enterRule(localctx, 58, self.RULE_flexible_parameter_block)
         self._la = 0 # Token type
         try:
@@ -2906,7 +2906,7 @@ class Ah4Parser ( Parser ):
             self.state = 359
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==Ah4Parser.LT or _la==Ah4Parser.LABEL:
+            if _la==Ah5Parser.LT or _la==Ah5Parser.LABEL:
                 self.state = 358
                 self.flexible_parameter()
 
@@ -2914,9 +2914,9 @@ class Ah4Parser ( Parser ):
             self.state = 365
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==Ah4Parser.COMMA:
+            while _la==Ah5Parser.COMMA:
                 self.state = 361
-                self.match(Ah4Parser.COMMA)
+                self.match(Ah5Parser.COMMA)
                 self.state = 362
                 self.flexible_parameter()
                 self.state = 367
@@ -2939,15 +2939,15 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def required_parameter(self):
-            return self.getTypedRuleContext(Ah4Parser.Required_parameterContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Required_parameterContext,0)
 
 
         def optional_parameter(self):
-            return self.getTypedRuleContext(Ah4Parser.Optional_parameterContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Optional_parameterContext,0)
 
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_flexible_parameter
+            return Ah5Parser.RULE_flexible_parameter
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterFlexible_parameter" ):
@@ -2968,7 +2968,7 @@ class Ah4Parser ( Parser ):
 
     def flexible_parameter(self):
 
-        localctx = Ah4Parser.Flexible_parameterContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.Flexible_parameterContext(self, self._ctx, self.state)
         self.enterRule(localctx, 60, self.RULE_flexible_parameter)
         try:
             self.state = 370
@@ -3003,27 +3003,27 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def IMPORT(self):
-            return self.getToken(Ah4Parser.IMPORT, 0)
+            return self.getToken(Ah5Parser.IMPORT, 0)
 
         def labels(self):
-            return self.getTypedRuleContext(Ah4Parser.LabelsContext,0)
+            return self.getTypedRuleContext(Ah5Parser.LabelsContext,0)
 
 
         def FROM(self):
-            return self.getToken(Ah4Parser.FROM, 0)
+            return self.getToken(Ah5Parser.FROM, 0)
 
         def label(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(Ah4Parser.LabelContext)
+                return self.getTypedRuleContexts(Ah5Parser.LabelContext)
             else:
-                return self.getTypedRuleContext(Ah4Parser.LabelContext,i)
+                return self.getTypedRuleContext(Ah5Parser.LabelContext,i)
 
 
         def AS(self):
-            return self.getToken(Ah4Parser.AS, 0)
+            return self.getToken(Ah5Parser.AS, 0)
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_import_statement
+            return Ah5Parser.RULE_import_statement
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterImport_statement" ):
@@ -3044,7 +3044,7 @@ class Ah4Parser ( Parser ):
 
     def import_statement(self):
 
-        localctx = Ah4Parser.Import_statementContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.Import_statementContext(self, self._ctx, self.state)
         self.enterRule(localctx, 62, self.RULE_import_statement)
         self._la = 0 # Token type
         try:
@@ -3052,23 +3052,23 @@ class Ah4Parser ( Parser ):
             self.state = 374
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==Ah4Parser.FROM:
+            if _la==Ah5Parser.FROM:
                 self.state = 372
-                self.match(Ah4Parser.FROM)
+                self.match(Ah5Parser.FROM)
                 self.state = 373
                 self.label()
 
 
             self.state = 376
-            self.match(Ah4Parser.IMPORT)
+            self.match(Ah5Parser.IMPORT)
             self.state = 377
             self.labels()
             self.state = 380
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==Ah4Parser.AS:
+            if _la==Ah5Parser.AS:
                 self.state = 378
-                self.match(Ah4Parser.AS)
+                self.match(Ah5Parser.AS)
                 self.state = 379
                 self.label()
 
@@ -3089,26 +3089,26 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def EXTEND(self):
-            return self.getToken(Ah4Parser.EXTEND, 0)
+            return self.getToken(Ah5Parser.EXTEND, 0)
 
         def label(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(Ah4Parser.LabelContext)
+                return self.getTypedRuleContexts(Ah5Parser.LabelContext)
             else:
-                return self.getTypedRuleContext(Ah4Parser.LabelContext,i)
+                return self.getTypedRuleContext(Ah5Parser.LabelContext,i)
 
 
         def WITH(self):
-            return self.getToken(Ah4Parser.WITH, 0)
+            return self.getToken(Ah5Parser.WITH, 0)
 
         def COMMA(self, i:int=None):
             if i is None:
-                return self.getTokens(Ah4Parser.COMMA)
+                return self.getTokens(Ah5Parser.COMMA)
             else:
-                return self.getToken(Ah4Parser.COMMA, i)
+                return self.getToken(Ah5Parser.COMMA, i)
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_extends_statement
+            return Ah5Parser.RULE_extends_statement
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterExtends_statement" ):
@@ -3129,13 +3129,13 @@ class Ah4Parser ( Parser ):
 
     def extends_statement(self):
 
-        localctx = Ah4Parser.Extends_statementContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.Extends_statementContext(self, self._ctx, self.state)
         self.enterRule(localctx, 64, self.RULE_extends_statement)
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 382
-            self.match(Ah4Parser.EXTEND)
+            self.match(Ah5Parser.EXTEND)
             self.state = 403
             self._errHandler.sync(self)
             la_ = self._interp.adaptivePredict(self._input,29,self._ctx)
@@ -3144,15 +3144,15 @@ class Ah4Parser ( Parser ):
                 self.label()
 
                 self.state = 384
-                self.match(Ah4Parser.WITH)
+                self.match(Ah5Parser.WITH)
                 self.state = 385
                 self.label()
                 self.state = 390
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                while _la==Ah4Parser.COMMA:
+                while _la==Ah5Parser.COMMA:
                     self.state = 386
-                    self.match(Ah4Parser.COMMA)
+                    self.match(Ah5Parser.COMMA)
                     self.state = 387
                     self.label()
                     self.state = 392
@@ -3168,15 +3168,15 @@ class Ah4Parser ( Parser ):
 
             elif la_ == 3:
                 self.state = 394
-                self.match(Ah4Parser.WITH)
+                self.match(Ah5Parser.WITH)
                 self.state = 395
                 self.label()
                 self.state = 400
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                while _la==Ah4Parser.COMMA:
+                while _la==Ah5Parser.COMMA:
                     self.state = 396
-                    self.match(Ah4Parser.COMMA)
+                    self.match(Ah5Parser.COMMA)
                     self.state = 397
                     self.label()
                     self.state = 402
@@ -3202,24 +3202,24 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def NEW(self):
-            return self.getToken(Ah4Parser.NEW, 0)
+            return self.getToken(Ah5Parser.NEW, 0)
 
         def label(self):
-            return self.getTypedRuleContext(Ah4Parser.LabelContext,0)
+            return self.getTypedRuleContext(Ah5Parser.LabelContext,0)
 
 
         def LPAREN(self):
-            return self.getToken(Ah4Parser.LPAREN, 0)
+            return self.getToken(Ah5Parser.LPAREN, 0)
 
         def optional_parameters_block(self):
-            return self.getTypedRuleContext(Ah4Parser.Optional_parameters_blockContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Optional_parameters_blockContext,0)
 
 
         def RPAREN(self):
-            return self.getToken(Ah4Parser.RPAREN, 0)
+            return self.getToken(Ah5Parser.RPAREN, 0)
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_create_instance
+            return Ah5Parser.RULE_create_instance
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterCreate_instance" ):
@@ -3240,20 +3240,20 @@ class Ah4Parser ( Parser ):
 
     def create_instance(self):
 
-        localctx = Ah4Parser.Create_instanceContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.Create_instanceContext(self, self._ctx, self.state)
         self.enterRule(localctx, 66, self.RULE_create_instance)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 405
-            self.match(Ah4Parser.NEW)
+            self.match(Ah5Parser.NEW)
             self.state = 406
             self.label()
             self.state = 407
-            self.match(Ah4Parser.LPAREN)
+            self.match(Ah5Parser.LPAREN)
             self.state = 408
             self.optional_parameters_block()
             self.state = 409
-            self.match(Ah4Parser.RPAREN)
+            self.match(Ah5Parser.RPAREN)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -3270,20 +3270,20 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def AHOPTIONS(self):
-            return self.getToken(Ah4Parser.AHOPTIONS, 0)
+            return self.getToken(Ah5Parser.AHOPTIONS, 0)
 
         def LPAREN(self):
-            return self.getToken(Ah4Parser.LPAREN, 0)
+            return self.getToken(Ah5Parser.LPAREN, 0)
 
         def atom_obj_dict(self):
-            return self.getTypedRuleContext(Ah4Parser.Atom_obj_dictContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Atom_obj_dictContext,0)
 
 
         def RPAREN(self):
-            return self.getToken(Ah4Parser.RPAREN, 0)
+            return self.getToken(Ah5Parser.RPAREN, 0)
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_ahoptions_statement
+            return Ah5Parser.RULE_ahoptions_statement
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterAhoptions_statement" ):
@@ -3304,18 +3304,18 @@ class Ah4Parser ( Parser ):
 
     def ahoptions_statement(self):
 
-        localctx = Ah4Parser.Ahoptions_statementContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.Ahoptions_statementContext(self, self._ctx, self.state)
         self.enterRule(localctx, 68, self.RULE_ahoptions_statement)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 411
-            self.match(Ah4Parser.AHOPTIONS)
+            self.match(Ah5Parser.AHOPTIONS)
             self.state = 412
-            self.match(Ah4Parser.LPAREN)
+            self.match(Ah5Parser.LPAREN)
             self.state = 413
             self.atom_obj_dict()
             self.state = 414
-            self.match(Ah4Parser.RPAREN)
+            self.match(Ah5Parser.RPAREN)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -3333,26 +3333,26 @@ class Ah4Parser ( Parser ):
 
         def dict_signal(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(Ah4Parser.Dict_signalContext)
+                return self.getTypedRuleContexts(Ah5Parser.Dict_signalContext)
             else:
-                return self.getTypedRuleContext(Ah4Parser.Dict_signalContext,i)
+                return self.getTypedRuleContext(Ah5Parser.Dict_signalContext,i)
 
 
         def optional_parameter(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(Ah4Parser.Optional_parameterContext)
+                return self.getTypedRuleContexts(Ah5Parser.Optional_parameterContext)
             else:
-                return self.getTypedRuleContext(Ah4Parser.Optional_parameterContext,i)
+                return self.getTypedRuleContext(Ah5Parser.Optional_parameterContext,i)
 
 
         def COMMA(self, i:int=None):
             if i is None:
-                return self.getTokens(Ah4Parser.COMMA)
+                return self.getTokens(Ah5Parser.COMMA)
             else:
-                return self.getToken(Ah4Parser.COMMA, i)
+                return self.getToken(Ah5Parser.COMMA, i)
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_optional_parameters_block
+            return Ah5Parser.RULE_optional_parameters_block
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterOptional_parameters_block" ):
@@ -3373,7 +3373,7 @@ class Ah4Parser ( Parser ):
 
     def optional_parameters_block(self):
 
-        localctx = Ah4Parser.Optional_parameters_blockContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.Optional_parameters_blockContext(self, self._ctx, self.state)
         self.enterRule(localctx, 70, self.RULE_optional_parameters_block)
         self._la = 0 # Token type
         try:
@@ -3381,32 +3381,32 @@ class Ah4Parser ( Parser ):
             self.state = 418
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [Ah4Parser.SIGNAL]:
+            if token in [Ah5Parser.SIGNAL]:
                 self.state = 416
                 self.dict_signal()
                 pass
-            elif token in [Ah4Parser.LT, Ah4Parser.LABEL]:
+            elif token in [Ah5Parser.LT, Ah5Parser.LABEL]:
                 self.state = 417
                 self.optional_parameter()
                 pass
-            elif token in [Ah4Parser.COMMA, Ah4Parser.RPAREN]:
+            elif token in [Ah5Parser.COMMA, Ah5Parser.RPAREN]:
                 pass
             else:
                 pass
             self.state = 427
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==Ah4Parser.COMMA:
+            while _la==Ah5Parser.COMMA:
                 self.state = 420
-                self.match(Ah4Parser.COMMA)
+                self.match(Ah5Parser.COMMA)
                 self.state = 423
                 self._errHandler.sync(self)
                 token = self._input.LA(1)
-                if token in [Ah4Parser.SIGNAL]:
+                if token in [Ah5Parser.SIGNAL]:
                     self.state = 421
                     self.dict_signal()
                     pass
-                elif token in [Ah4Parser.LT, Ah4Parser.LABEL]:
+                elif token in [Ah5Parser.LT, Ah5Parser.LABEL]:
                     self.state = 422
                     self.optional_parameter()
                     pass
@@ -3433,18 +3433,18 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def labels(self):
-            return self.getTypedRuleContext(Ah4Parser.LabelsContext,0)
+            return self.getTypedRuleContext(Ah5Parser.LabelsContext,0)
 
 
         def EQUAL(self):
-            return self.getToken(Ah4Parser.EQUAL, 0)
+            return self.getToken(Ah5Parser.EQUAL, 0)
 
         def expr(self):
-            return self.getTypedRuleContext(Ah4Parser.ExprContext,0)
+            return self.getTypedRuleContext(Ah5Parser.ExprContext,0)
 
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_optional_parameter
+            return Ah5Parser.RULE_optional_parameter
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterOptional_parameter" ):
@@ -3465,14 +3465,14 @@ class Ah4Parser ( Parser ):
 
     def optional_parameter(self):
 
-        localctx = Ah4Parser.Optional_parameterContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.Optional_parameterContext(self, self._ctx, self.state)
         self.enterRule(localctx, 72, self.RULE_optional_parameter)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 430
             self.labels()
             self.state = 431
-            self.match(Ah4Parser.EQUAL)
+            self.match(Ah5Parser.EQUAL)
             self.state = 432
             self.expr(0)
         except RecognitionException as re:
@@ -3491,18 +3491,18 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def SIGNAL(self):
-            return self.getToken(Ah4Parser.SIGNAL, 0)
+            return self.getToken(Ah5Parser.SIGNAL, 0)
 
         def atom_obj_dict(self):
-            return self.getTypedRuleContext(Ah4Parser.Atom_obj_dictContext,0)
+            return self.getTypedRuleContext(Ah5Parser.Atom_obj_dictContext,0)
 
 
         def labels(self):
-            return self.getTypedRuleContext(Ah4Parser.LabelsContext,0)
+            return self.getTypedRuleContext(Ah5Parser.LabelsContext,0)
 
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_dict_signal
+            return Ah5Parser.RULE_dict_signal
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterDict_signal" ):
@@ -3523,20 +3523,20 @@ class Ah4Parser ( Parser ):
 
     def dict_signal(self):
 
-        localctx = Ah4Parser.Dict_signalContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.Dict_signalContext(self, self._ctx, self.state)
         self.enterRule(localctx, 74, self.RULE_dict_signal)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 434
-            self.match(Ah4Parser.SIGNAL)
+            self.match(Ah5Parser.SIGNAL)
             self.state = 437
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [Ah4Parser.BLOCKOPEN]:
+            if token in [Ah5Parser.BLOCKOPEN]:
                 self.state = 435
                 self.atom_obj_dict()
                 pass
-            elif token in [Ah4Parser.LT, Ah4Parser.LABEL]:
+            elif token in [Ah5Parser.LT, Ah5Parser.LABEL]:
                 self.state = 436
                 self.labels()
                 pass
@@ -3559,35 +3559,35 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def LPAREN(self):
-            return self.getToken(Ah4Parser.LPAREN, 0)
+            return self.getToken(Ah5Parser.LPAREN, 0)
 
         def expr(self):
-            return self.getTypedRuleContext(Ah4Parser.ExprContext,0)
+            return self.getTypedRuleContext(Ah5Parser.ExprContext,0)
 
 
         def RPAREN(self):
-            return self.getToken(Ah4Parser.RPAREN, 0)
+            return self.getToken(Ah5Parser.RPAREN, 0)
 
         def TYPE_INT(self):
-            return self.getToken(Ah4Parser.TYPE_INT, 0)
+            return self.getToken(Ah5Parser.TYPE_INT, 0)
 
         def TYPE_DEC(self):
-            return self.getToken(Ah4Parser.TYPE_DEC, 0)
+            return self.getToken(Ah5Parser.TYPE_DEC, 0)
 
         def TYPE_BOOL(self):
-            return self.getToken(Ah4Parser.TYPE_BOOL, 0)
+            return self.getToken(Ah5Parser.TYPE_BOOL, 0)
 
         def TYPE_STR(self):
-            return self.getToken(Ah4Parser.TYPE_STR, 0)
+            return self.getToken(Ah5Parser.TYPE_STR, 0)
 
         def TYPE_LIST(self):
-            return self.getToken(Ah4Parser.TYPE_LIST, 0)
+            return self.getToken(Ah5Parser.TYPE_LIST, 0)
 
         def TYPE_DICT(self):
-            return self.getToken(Ah4Parser.TYPE_DICT, 0)
+            return self.getToken(Ah5Parser.TYPE_DICT, 0)
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_casting
+            return Ah5Parser.RULE_casting
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterCasting" ):
@@ -3608,24 +3608,24 @@ class Ah4Parser ( Parser ):
 
     def casting(self):
 
-        localctx = Ah4Parser.CastingContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.CastingContext(self, self._ctx, self.state)
         self.enterRule(localctx, 76, self.RULE_casting)
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 439
             _la = self._input.LA(1)
-            if not(((((_la - 63)) & ~0x3f) == 0 and ((1 << (_la - 63)) & ((1 << (Ah4Parser.TYPE_INT - 63)) | (1 << (Ah4Parser.TYPE_DICT - 63)) | (1 << (Ah4Parser.TYPE_LIST - 63)) | (1 << (Ah4Parser.TYPE_DEC - 63)) | (1 << (Ah4Parser.TYPE_STR - 63)) | (1 << (Ah4Parser.TYPE_BOOL - 63)))) != 0)):
+            if not(((((_la - 63)) & ~0x3f) == 0 and ((1 << (_la - 63)) & ((1 << (Ah5Parser.TYPE_INT - 63)) | (1 << (Ah5Parser.TYPE_DICT - 63)) | (1 << (Ah5Parser.TYPE_LIST - 63)) | (1 << (Ah5Parser.TYPE_DEC - 63)) | (1 << (Ah5Parser.TYPE_STR - 63)) | (1 << (Ah5Parser.TYPE_BOOL - 63)))) != 0)):
                 self._errHandler.recoverInline(self)
             else:
                 self._errHandler.reportMatch(self)
                 self.consume()
             self.state = 440
-            self.match(Ah4Parser.LPAREN)
+            self.match(Ah5Parser.LPAREN)
             self.state = 441
             self.expr(0)
             self.state = 442
-            self.match(Ah4Parser.RPAREN)
+            self.match(Ah5Parser.RPAREN)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -3642,32 +3642,32 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def BLOCKOPEN(self):
-            return self.getToken(Ah4Parser.BLOCKOPEN, 0)
+            return self.getToken(Ah5Parser.BLOCKOPEN, 0)
 
         def BLOCKCLOSE(self):
-            return self.getToken(Ah4Parser.BLOCKCLOSE, 0)
+            return self.getToken(Ah5Parser.BLOCKCLOSE, 0)
 
         def expr(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(Ah4Parser.ExprContext)
+                return self.getTypedRuleContexts(Ah5Parser.ExprContext)
             else:
-                return self.getTypedRuleContext(Ah4Parser.ExprContext,i)
+                return self.getTypedRuleContext(Ah5Parser.ExprContext,i)
 
 
         def COLON(self, i:int=None):
             if i is None:
-                return self.getTokens(Ah4Parser.COLON)
+                return self.getTokens(Ah5Parser.COLON)
             else:
-                return self.getToken(Ah4Parser.COLON, i)
+                return self.getToken(Ah5Parser.COLON, i)
 
         def COMMA(self, i:int=None):
             if i is None:
-                return self.getTokens(Ah4Parser.COMMA)
+                return self.getTokens(Ah5Parser.COMMA)
             else:
-                return self.getToken(Ah4Parser.COMMA, i)
+                return self.getToken(Ah5Parser.COMMA, i)
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_atom_obj_dict
+            return Ah5Parser.RULE_atom_obj_dict
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterAtom_obj_dict" ):
@@ -3688,21 +3688,21 @@ class Ah4Parser ( Parser ):
 
     def atom_obj_dict(self):
 
-        localctx = Ah4Parser.Atom_obj_dictContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.Atom_obj_dictContext(self, self._ctx, self.state)
         self.enterRule(localctx, 78, self.RULE_atom_obj_dict)
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 444
-            self.match(Ah4Parser.BLOCKOPEN)
+            self.match(Ah5Parser.BLOCKOPEN)
             self.state = 449
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << Ah4Parser.LT) | (1 << Ah4Parser.MINUS) | (1 << Ah4Parser.NOT) | (1 << Ah4Parser.INT) | (1 << Ah4Parser.FLOAT) | (1 << Ah4Parser.FALSE) | (1 << Ah4Parser.TRUE) | (1 << Ah4Parser.STRING) | (1 << Ah4Parser.HEX) | (1 << Ah4Parser.NONE) | (1 << Ah4Parser.EXECUTEOPEN) | (1 << Ah4Parser.BLOCKOPEN) | (1 << Ah4Parser.LPAREN) | (1 << Ah4Parser.SOPEN) | (1 << Ah4Parser.HASH) | (1 << Ah4Parser.AT) | (1 << Ah4Parser.TYPE_INT))) != 0) or ((((_la - 64)) & ~0x3f) == 0 and ((1 << (_la - 64)) & ((1 << (Ah4Parser.TYPE_DICT - 64)) | (1 << (Ah4Parser.TYPE_LIST - 64)) | (1 << (Ah4Parser.TYPE_DEC - 64)) | (1 << (Ah4Parser.TYPE_STR - 64)) | (1 << (Ah4Parser.TYPE_BOOL - 64)) | (1 << (Ah4Parser.OS - 64)) | (1 << (Ah4Parser.COMMANDTAX - 64)) | (1 << (Ah4Parser.SCRIPT - 64)) | (1 << (Ah4Parser.STATIC - 64)) | (1 << (Ah4Parser.ASYNC - 64)) | (1 << (Ah4Parser.AWAIT - 64)) | (1 << (Ah4Parser.NEW - 64)) | (1 << (Ah4Parser.LABEL - 64)))) != 0):
+            if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << Ah5Parser.LT) | (1 << Ah5Parser.MINUS) | (1 << Ah5Parser.NOT) | (1 << Ah5Parser.INT) | (1 << Ah5Parser.FLOAT) | (1 << Ah5Parser.FALSE) | (1 << Ah5Parser.TRUE) | (1 << Ah5Parser.STRING) | (1 << Ah5Parser.HEX) | (1 << Ah5Parser.NONE) | (1 << Ah5Parser.EXECUTEOPEN) | (1 << Ah5Parser.BLOCKOPEN) | (1 << Ah5Parser.LPAREN) | (1 << Ah5Parser.SOPEN) | (1 << Ah5Parser.HASH) | (1 << Ah5Parser.AT) | (1 << Ah5Parser.TYPE_INT))) != 0) or ((((_la - 64)) & ~0x3f) == 0 and ((1 << (_la - 64)) & ((1 << (Ah5Parser.TYPE_DICT - 64)) | (1 << (Ah5Parser.TYPE_LIST - 64)) | (1 << (Ah5Parser.TYPE_DEC - 64)) | (1 << (Ah5Parser.TYPE_STR - 64)) | (1 << (Ah5Parser.TYPE_BOOL - 64)) | (1 << (Ah5Parser.OS - 64)) | (1 << (Ah5Parser.COMMANDTAX - 64)) | (1 << (Ah5Parser.SCRIPT - 64)) | (1 << (Ah5Parser.STATIC - 64)) | (1 << (Ah5Parser.ASYNC - 64)) | (1 << (Ah5Parser.AWAIT - 64)) | (1 << (Ah5Parser.NEW - 64)) | (1 << (Ah5Parser.LABEL - 64)))) != 0):
                 self.state = 445
                 self.expr(0)
                 self.state = 446
-                self.match(Ah4Parser.COLON)
+                self.match(Ah5Parser.COLON)
                 self.state = 447
                 self.expr(0)
 
@@ -3710,17 +3710,17 @@ class Ah4Parser ( Parser ):
             self.state = 460
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==Ah4Parser.COMMA:
+            while _la==Ah5Parser.COMMA:
                 self.state = 451
-                self.match(Ah4Parser.COMMA)
+                self.match(Ah5Parser.COMMA)
                 self.state = 456
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << Ah4Parser.LT) | (1 << Ah4Parser.MINUS) | (1 << Ah4Parser.NOT) | (1 << Ah4Parser.INT) | (1 << Ah4Parser.FLOAT) | (1 << Ah4Parser.FALSE) | (1 << Ah4Parser.TRUE) | (1 << Ah4Parser.STRING) | (1 << Ah4Parser.HEX) | (1 << Ah4Parser.NONE) | (1 << Ah4Parser.EXECUTEOPEN) | (1 << Ah4Parser.BLOCKOPEN) | (1 << Ah4Parser.LPAREN) | (1 << Ah4Parser.SOPEN) | (1 << Ah4Parser.HASH) | (1 << Ah4Parser.AT) | (1 << Ah4Parser.TYPE_INT))) != 0) or ((((_la - 64)) & ~0x3f) == 0 and ((1 << (_la - 64)) & ((1 << (Ah4Parser.TYPE_DICT - 64)) | (1 << (Ah4Parser.TYPE_LIST - 64)) | (1 << (Ah4Parser.TYPE_DEC - 64)) | (1 << (Ah4Parser.TYPE_STR - 64)) | (1 << (Ah4Parser.TYPE_BOOL - 64)) | (1 << (Ah4Parser.OS - 64)) | (1 << (Ah4Parser.COMMANDTAX - 64)) | (1 << (Ah4Parser.SCRIPT - 64)) | (1 << (Ah4Parser.STATIC - 64)) | (1 << (Ah4Parser.ASYNC - 64)) | (1 << (Ah4Parser.AWAIT - 64)) | (1 << (Ah4Parser.NEW - 64)) | (1 << (Ah4Parser.LABEL - 64)))) != 0):
+                if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << Ah5Parser.LT) | (1 << Ah5Parser.MINUS) | (1 << Ah5Parser.NOT) | (1 << Ah5Parser.INT) | (1 << Ah5Parser.FLOAT) | (1 << Ah5Parser.FALSE) | (1 << Ah5Parser.TRUE) | (1 << Ah5Parser.STRING) | (1 << Ah5Parser.HEX) | (1 << Ah5Parser.NONE) | (1 << Ah5Parser.EXECUTEOPEN) | (1 << Ah5Parser.BLOCKOPEN) | (1 << Ah5Parser.LPAREN) | (1 << Ah5Parser.SOPEN) | (1 << Ah5Parser.HASH) | (1 << Ah5Parser.AT) | (1 << Ah5Parser.TYPE_INT))) != 0) or ((((_la - 64)) & ~0x3f) == 0 and ((1 << (_la - 64)) & ((1 << (Ah5Parser.TYPE_DICT - 64)) | (1 << (Ah5Parser.TYPE_LIST - 64)) | (1 << (Ah5Parser.TYPE_DEC - 64)) | (1 << (Ah5Parser.TYPE_STR - 64)) | (1 << (Ah5Parser.TYPE_BOOL - 64)) | (1 << (Ah5Parser.OS - 64)) | (1 << (Ah5Parser.COMMANDTAX - 64)) | (1 << (Ah5Parser.SCRIPT - 64)) | (1 << (Ah5Parser.STATIC - 64)) | (1 << (Ah5Parser.ASYNC - 64)) | (1 << (Ah5Parser.AWAIT - 64)) | (1 << (Ah5Parser.NEW - 64)) | (1 << (Ah5Parser.LABEL - 64)))) != 0):
                     self.state = 452
                     self.expr(0)
                     self.state = 453
-                    self.match(Ah4Parser.COLON)
+                    self.match(Ah5Parser.COLON)
                     self.state = 454
                     self.expr(0)
 
@@ -3730,7 +3730,7 @@ class Ah4Parser ( Parser ):
                 _la = self._input.LA(1)
 
             self.state = 463
-            self.match(Ah4Parser.BLOCKCLOSE)
+            self.match(Ah5Parser.BLOCKCLOSE)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -3747,42 +3747,42 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def labels(self):
-            return self.getTypedRuleContext(Ah4Parser.LabelsContext,0)
+            return self.getTypedRuleContext(Ah5Parser.LabelsContext,0)
 
 
         def expr(self):
-            return self.getTypedRuleContext(Ah4Parser.ExprContext,0)
+            return self.getTypedRuleContext(Ah5Parser.ExprContext,0)
 
 
         def D_PLUS(self):
-            return self.getToken(Ah4Parser.D_PLUS, 0)
+            return self.getToken(Ah5Parser.D_PLUS, 0)
 
         def D_MINUS(self):
-            return self.getToken(Ah4Parser.D_MINUS, 0)
+            return self.getToken(Ah5Parser.D_MINUS, 0)
 
         def EQUAL(self):
-            return self.getToken(Ah4Parser.EQUAL, 0)
+            return self.getToken(Ah5Parser.EQUAL, 0)
 
         def PE(self):
-            return self.getToken(Ah4Parser.PE, 0)
+            return self.getToken(Ah5Parser.PE, 0)
 
         def ME(self):
-            return self.getToken(Ah4Parser.ME, 0)
+            return self.getToken(Ah5Parser.ME, 0)
 
         def MUE(self):
-            return self.getToken(Ah4Parser.MUE, 0)
+            return self.getToken(Ah5Parser.MUE, 0)
 
         def DE(self):
-            return self.getToken(Ah4Parser.DE, 0)
+            return self.getToken(Ah5Parser.DE, 0)
 
         def SOPEN(self):
-            return self.getToken(Ah4Parser.SOPEN, 0)
+            return self.getToken(Ah5Parser.SOPEN, 0)
 
         def SCLOSE(self):
-            return self.getToken(Ah4Parser.SCLOSE, 0)
+            return self.getToken(Ah5Parser.SCLOSE, 0)
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_assignment_statement
+            return Ah5Parser.RULE_assignment_statement
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterAssignment_statement" ):
@@ -3803,7 +3803,7 @@ class Ah4Parser ( Parser ):
 
     def assignment_statement(self):
 
-        localctx = Ah4Parser.Assignment_statementContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.Assignment_statementContext(self, self._ctx, self.state)
         self.enterRule(localctx, 80, self.RULE_assignment_statement)
         self._la = 0 # Token type
         try:
@@ -3813,39 +3813,39 @@ class Ah4Parser ( Parser ):
             self.state = 480
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [Ah4Parser.PE, Ah4Parser.ME, Ah4Parser.MUE, Ah4Parser.DE, Ah4Parser.EQUAL, Ah4Parser.SOPEN]:
+            if token in [Ah5Parser.PE, Ah5Parser.ME, Ah5Parser.MUE, Ah5Parser.DE, Ah5Parser.EQUAL, Ah5Parser.SOPEN]:
                 self.state = 475
                 self._errHandler.sync(self)
                 token = self._input.LA(1)
-                if token in [Ah4Parser.EQUAL, Ah4Parser.SOPEN]:
+                if token in [Ah5Parser.EQUAL, Ah5Parser.SOPEN]:
                     self.state = 468
                     self._errHandler.sync(self)
                     _la = self._input.LA(1)
-                    if _la==Ah4Parser.SOPEN:
+                    if _la==Ah5Parser.SOPEN:
                         self.state = 466
-                        self.match(Ah4Parser.SOPEN)
+                        self.match(Ah5Parser.SOPEN)
                         self.state = 467
-                        self.match(Ah4Parser.SCLOSE)
+                        self.match(Ah5Parser.SCLOSE)
 
 
                     self.state = 470
-                    self.match(Ah4Parser.EQUAL)
+                    self.match(Ah5Parser.EQUAL)
                     pass
-                elif token in [Ah4Parser.PE]:
+                elif token in [Ah5Parser.PE]:
                     self.state = 471
-                    self.match(Ah4Parser.PE)
+                    self.match(Ah5Parser.PE)
                     pass
-                elif token in [Ah4Parser.ME]:
+                elif token in [Ah5Parser.ME]:
                     self.state = 472
-                    self.match(Ah4Parser.ME)
+                    self.match(Ah5Parser.ME)
                     pass
-                elif token in [Ah4Parser.MUE]:
+                elif token in [Ah5Parser.MUE]:
                     self.state = 473
-                    self.match(Ah4Parser.MUE)
+                    self.match(Ah5Parser.MUE)
                     pass
-                elif token in [Ah4Parser.DE]:
+                elif token in [Ah5Parser.DE]:
                     self.state = 474
-                    self.match(Ah4Parser.DE)
+                    self.match(Ah5Parser.DE)
                     pass
                 else:
                     raise NoViableAltException(self)
@@ -3853,13 +3853,13 @@ class Ah4Parser ( Parser ):
                 self.state = 477
                 self.expr(0)
                 pass
-            elif token in [Ah4Parser.D_PLUS]:
+            elif token in [Ah5Parser.D_PLUS]:
                 self.state = 478
-                self.match(Ah4Parser.D_PLUS)
+                self.match(Ah5Parser.D_PLUS)
                 pass
-            elif token in [Ah4Parser.D_MINUS]:
+            elif token in [Ah5Parser.D_MINUS]:
                 self.state = 479
-                self.match(Ah4Parser.D_MINUS)
+                self.match(Ah5Parser.D_MINUS)
                 pass
             else:
                 raise NoViableAltException(self)
@@ -3880,26 +3880,26 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def SOPEN(self):
-            return self.getToken(Ah4Parser.SOPEN, 0)
+            return self.getToken(Ah5Parser.SOPEN, 0)
 
         def SCLOSE(self):
-            return self.getToken(Ah4Parser.SCLOSE, 0)
+            return self.getToken(Ah5Parser.SCLOSE, 0)
 
         def expr(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(Ah4Parser.ExprContext)
+                return self.getTypedRuleContexts(Ah5Parser.ExprContext)
             else:
-                return self.getTypedRuleContext(Ah4Parser.ExprContext,i)
+                return self.getTypedRuleContext(Ah5Parser.ExprContext,i)
 
 
         def COMMA(self, i:int=None):
             if i is None:
-                return self.getTokens(Ah4Parser.COMMA)
+                return self.getTokens(Ah5Parser.COMMA)
             else:
-                return self.getToken(Ah4Parser.COMMA, i)
+                return self.getToken(Ah5Parser.COMMA, i)
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_atom_obj_list
+            return Ah5Parser.RULE_atom_obj_list
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterAtom_obj_list" ):
@@ -3920,17 +3920,17 @@ class Ah4Parser ( Parser ):
 
     def atom_obj_list(self):
 
-        localctx = Ah4Parser.Atom_obj_listContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.Atom_obj_listContext(self, self._ctx, self.state)
         self.enterRule(localctx, 82, self.RULE_atom_obj_list)
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 482
-            self.match(Ah4Parser.SOPEN)
+            self.match(Ah5Parser.SOPEN)
             self.state = 484
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << Ah4Parser.LT) | (1 << Ah4Parser.MINUS) | (1 << Ah4Parser.NOT) | (1 << Ah4Parser.INT) | (1 << Ah4Parser.FLOAT) | (1 << Ah4Parser.FALSE) | (1 << Ah4Parser.TRUE) | (1 << Ah4Parser.STRING) | (1 << Ah4Parser.HEX) | (1 << Ah4Parser.NONE) | (1 << Ah4Parser.EXECUTEOPEN) | (1 << Ah4Parser.BLOCKOPEN) | (1 << Ah4Parser.LPAREN) | (1 << Ah4Parser.SOPEN) | (1 << Ah4Parser.HASH) | (1 << Ah4Parser.AT) | (1 << Ah4Parser.TYPE_INT))) != 0) or ((((_la - 64)) & ~0x3f) == 0 and ((1 << (_la - 64)) & ((1 << (Ah4Parser.TYPE_DICT - 64)) | (1 << (Ah4Parser.TYPE_LIST - 64)) | (1 << (Ah4Parser.TYPE_DEC - 64)) | (1 << (Ah4Parser.TYPE_STR - 64)) | (1 << (Ah4Parser.TYPE_BOOL - 64)) | (1 << (Ah4Parser.OS - 64)) | (1 << (Ah4Parser.COMMANDTAX - 64)) | (1 << (Ah4Parser.SCRIPT - 64)) | (1 << (Ah4Parser.STATIC - 64)) | (1 << (Ah4Parser.ASYNC - 64)) | (1 << (Ah4Parser.AWAIT - 64)) | (1 << (Ah4Parser.NEW - 64)) | (1 << (Ah4Parser.LABEL - 64)))) != 0):
+            if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << Ah5Parser.LT) | (1 << Ah5Parser.MINUS) | (1 << Ah5Parser.NOT) | (1 << Ah5Parser.INT) | (1 << Ah5Parser.FLOAT) | (1 << Ah5Parser.FALSE) | (1 << Ah5Parser.TRUE) | (1 << Ah5Parser.STRING) | (1 << Ah5Parser.HEX) | (1 << Ah5Parser.NONE) | (1 << Ah5Parser.EXECUTEOPEN) | (1 << Ah5Parser.BLOCKOPEN) | (1 << Ah5Parser.LPAREN) | (1 << Ah5Parser.SOPEN) | (1 << Ah5Parser.HASH) | (1 << Ah5Parser.AT) | (1 << Ah5Parser.TYPE_INT))) != 0) or ((((_la - 64)) & ~0x3f) == 0 and ((1 << (_la - 64)) & ((1 << (Ah5Parser.TYPE_DICT - 64)) | (1 << (Ah5Parser.TYPE_LIST - 64)) | (1 << (Ah5Parser.TYPE_DEC - 64)) | (1 << (Ah5Parser.TYPE_STR - 64)) | (1 << (Ah5Parser.TYPE_BOOL - 64)) | (1 << (Ah5Parser.OS - 64)) | (1 << (Ah5Parser.COMMANDTAX - 64)) | (1 << (Ah5Parser.SCRIPT - 64)) | (1 << (Ah5Parser.STATIC - 64)) | (1 << (Ah5Parser.ASYNC - 64)) | (1 << (Ah5Parser.AWAIT - 64)) | (1 << (Ah5Parser.NEW - 64)) | (1 << (Ah5Parser.LABEL - 64)))) != 0):
                 self.state = 483
                 self.expr(0)
 
@@ -3938,13 +3938,13 @@ class Ah4Parser ( Parser ):
             self.state = 492
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==Ah4Parser.COMMA:
+            while _la==Ah5Parser.COMMA:
                 self.state = 486
-                self.match(Ah4Parser.COMMA)
+                self.match(Ah5Parser.COMMA)
                 self.state = 488
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << Ah4Parser.LT) | (1 << Ah4Parser.MINUS) | (1 << Ah4Parser.NOT) | (1 << Ah4Parser.INT) | (1 << Ah4Parser.FLOAT) | (1 << Ah4Parser.FALSE) | (1 << Ah4Parser.TRUE) | (1 << Ah4Parser.STRING) | (1 << Ah4Parser.HEX) | (1 << Ah4Parser.NONE) | (1 << Ah4Parser.EXECUTEOPEN) | (1 << Ah4Parser.BLOCKOPEN) | (1 << Ah4Parser.LPAREN) | (1 << Ah4Parser.SOPEN) | (1 << Ah4Parser.HASH) | (1 << Ah4Parser.AT) | (1 << Ah4Parser.TYPE_INT))) != 0) or ((((_la - 64)) & ~0x3f) == 0 and ((1 << (_la - 64)) & ((1 << (Ah4Parser.TYPE_DICT - 64)) | (1 << (Ah4Parser.TYPE_LIST - 64)) | (1 << (Ah4Parser.TYPE_DEC - 64)) | (1 << (Ah4Parser.TYPE_STR - 64)) | (1 << (Ah4Parser.TYPE_BOOL - 64)) | (1 << (Ah4Parser.OS - 64)) | (1 << (Ah4Parser.COMMANDTAX - 64)) | (1 << (Ah4Parser.SCRIPT - 64)) | (1 << (Ah4Parser.STATIC - 64)) | (1 << (Ah4Parser.ASYNC - 64)) | (1 << (Ah4Parser.AWAIT - 64)) | (1 << (Ah4Parser.NEW - 64)) | (1 << (Ah4Parser.LABEL - 64)))) != 0):
+                if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << Ah5Parser.LT) | (1 << Ah5Parser.MINUS) | (1 << Ah5Parser.NOT) | (1 << Ah5Parser.INT) | (1 << Ah5Parser.FLOAT) | (1 << Ah5Parser.FALSE) | (1 << Ah5Parser.TRUE) | (1 << Ah5Parser.STRING) | (1 << Ah5Parser.HEX) | (1 << Ah5Parser.NONE) | (1 << Ah5Parser.EXECUTEOPEN) | (1 << Ah5Parser.BLOCKOPEN) | (1 << Ah5Parser.LPAREN) | (1 << Ah5Parser.SOPEN) | (1 << Ah5Parser.HASH) | (1 << Ah5Parser.AT) | (1 << Ah5Parser.TYPE_INT))) != 0) or ((((_la - 64)) & ~0x3f) == 0 and ((1 << (_la - 64)) & ((1 << (Ah5Parser.TYPE_DICT - 64)) | (1 << (Ah5Parser.TYPE_LIST - 64)) | (1 << (Ah5Parser.TYPE_DEC - 64)) | (1 << (Ah5Parser.TYPE_STR - 64)) | (1 << (Ah5Parser.TYPE_BOOL - 64)) | (1 << (Ah5Parser.OS - 64)) | (1 << (Ah5Parser.COMMANDTAX - 64)) | (1 << (Ah5Parser.SCRIPT - 64)) | (1 << (Ah5Parser.STATIC - 64)) | (1 << (Ah5Parser.ASYNC - 64)) | (1 << (Ah5Parser.AWAIT - 64)) | (1 << (Ah5Parser.NEW - 64)) | (1 << (Ah5Parser.LABEL - 64)))) != 0):
                     self.state = 487
                     self.expr(0)
 
@@ -3954,7 +3954,7 @@ class Ah4Parser ( Parser ):
                 _la = self._input.LA(1)
 
             self.state = 495
-            self.match(Ah4Parser.SCLOSE)
+            self.match(Ah5Parser.SCLOSE)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -3971,39 +3971,39 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def LPAREN(self):
-            return self.getToken(Ah4Parser.LPAREN, 0)
+            return self.getToken(Ah5Parser.LPAREN, 0)
 
         def RPAREN(self):
-            return self.getToken(Ah4Parser.RPAREN, 0)
+            return self.getToken(Ah5Parser.RPAREN, 0)
 
         def label(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(Ah4Parser.LabelContext)
+                return self.getTypedRuleContexts(Ah5Parser.LabelContext)
             else:
-                return self.getTypedRuleContext(Ah4Parser.LabelContext,i)
+                return self.getTypedRuleContext(Ah5Parser.LabelContext,i)
 
 
         def ARROW(self, i:int=None):
             if i is None:
-                return self.getTokens(Ah4Parser.ARROW)
+                return self.getTokens(Ah5Parser.ARROW)
             else:
-                return self.getToken(Ah4Parser.ARROW, i)
+                return self.getToken(Ah5Parser.ARROW, i)
 
         def expr(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(Ah4Parser.ExprContext)
+                return self.getTypedRuleContexts(Ah5Parser.ExprContext)
             else:
-                return self.getTypedRuleContext(Ah4Parser.ExprContext,i)
+                return self.getTypedRuleContext(Ah5Parser.ExprContext,i)
 
 
         def COMMA(self, i:int=None):
             if i is None:
-                return self.getTokens(Ah4Parser.COMMA)
+                return self.getTokens(Ah5Parser.COMMA)
             else:
-                return self.getToken(Ah4Parser.COMMA, i)
+                return self.getToken(Ah5Parser.COMMA, i)
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_atom_obj_enum
+            return Ah5Parser.RULE_atom_obj_enum
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterAtom_obj_enum" ):
@@ -4024,13 +4024,13 @@ class Ah4Parser ( Parser ):
 
     def atom_obj_enum(self):
 
-        localctx = Ah4Parser.Atom_obj_enumContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.Atom_obj_enumContext(self, self._ctx, self.state)
         self.enterRule(localctx, 84, self.RULE_atom_obj_enum)
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 497
-            self.match(Ah4Parser.LPAREN)
+            self.match(Ah5Parser.LPAREN)
             self.state = 523
             self._errHandler.sync(self)
             la_ = self._interp.adaptivePredict(self._input,47,self._ctx)
@@ -4038,23 +4038,23 @@ class Ah4Parser ( Parser ):
                 self.state = 498
                 self.label()
                 self.state = 499
-                self.match(Ah4Parser.ARROW)
+                self.match(Ah5Parser.ARROW)
                 self.state = 500
                 self.expr(0)
                 self.state = 510
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                while _la==Ah4Parser.COMMA:
+                while _la==Ah5Parser.COMMA:
                     self.state = 501
-                    self.match(Ah4Parser.COMMA)
+                    self.match(Ah5Parser.COMMA)
                     self.state = 506
                     self._errHandler.sync(self)
                     _la = self._input.LA(1)
-                    if _la==Ah4Parser.LABEL:
+                    if _la==Ah5Parser.LABEL:
                         self.state = 502
                         self.label()
                         self.state = 503
-                        self.match(Ah4Parser.ARROW)
+                        self.match(Ah5Parser.ARROW)
                         self.state = 504
                         self.expr(0)
 
@@ -4070,13 +4070,13 @@ class Ah4Parser ( Parser ):
                 self.state = 520
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                while _la==Ah4Parser.COMMA:
+                while _la==Ah5Parser.COMMA:
                     self.state = 514
-                    self.match(Ah4Parser.COMMA)
+                    self.match(Ah5Parser.COMMA)
                     self.state = 516
                     self._errHandler.sync(self)
                     _la = self._input.LA(1)
-                    if _la==Ah4Parser.LABEL:
+                    if _la==Ah5Parser.LABEL:
                         self.state = 515
                         self.label()
 
@@ -4088,7 +4088,7 @@ class Ah4Parser ( Parser ):
 
 
             self.state = 525
-            self.match(Ah4Parser.RPAREN)
+            self.match(Ah5Parser.RPAREN)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -4105,20 +4105,20 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def ERROR(self):
-            return self.getToken(Ah4Parser.ERROR, 0)
+            return self.getToken(Ah5Parser.ERROR, 0)
 
         def LPAREN(self):
-            return self.getToken(Ah4Parser.LPAREN, 0)
+            return self.getToken(Ah5Parser.LPAREN, 0)
 
         def RPAREN(self):
-            return self.getToken(Ah4Parser.RPAREN, 0)
+            return self.getToken(Ah5Parser.RPAREN, 0)
 
         def expr(self):
-            return self.getTypedRuleContext(Ah4Parser.ExprContext,0)
+            return self.getTypedRuleContext(Ah5Parser.ExprContext,0)
 
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_error_statement
+            return Ah5Parser.RULE_error_statement
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterError_statement" ):
@@ -4139,25 +4139,25 @@ class Ah4Parser ( Parser ):
 
     def error_statement(self):
 
-        localctx = Ah4Parser.Error_statementContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.Error_statementContext(self, self._ctx, self.state)
         self.enterRule(localctx, 86, self.RULE_error_statement)
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 527
-            self.match(Ah4Parser.ERROR)
+            self.match(Ah5Parser.ERROR)
             self.state = 528
-            self.match(Ah4Parser.LPAREN)
+            self.match(Ah5Parser.LPAREN)
             self.state = 530
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << Ah4Parser.LT) | (1 << Ah4Parser.MINUS) | (1 << Ah4Parser.NOT) | (1 << Ah4Parser.INT) | (1 << Ah4Parser.FLOAT) | (1 << Ah4Parser.FALSE) | (1 << Ah4Parser.TRUE) | (1 << Ah4Parser.STRING) | (1 << Ah4Parser.HEX) | (1 << Ah4Parser.NONE) | (1 << Ah4Parser.EXECUTEOPEN) | (1 << Ah4Parser.BLOCKOPEN) | (1 << Ah4Parser.LPAREN) | (1 << Ah4Parser.SOPEN) | (1 << Ah4Parser.HASH) | (1 << Ah4Parser.AT) | (1 << Ah4Parser.TYPE_INT))) != 0) or ((((_la - 64)) & ~0x3f) == 0 and ((1 << (_la - 64)) & ((1 << (Ah4Parser.TYPE_DICT - 64)) | (1 << (Ah4Parser.TYPE_LIST - 64)) | (1 << (Ah4Parser.TYPE_DEC - 64)) | (1 << (Ah4Parser.TYPE_STR - 64)) | (1 << (Ah4Parser.TYPE_BOOL - 64)) | (1 << (Ah4Parser.OS - 64)) | (1 << (Ah4Parser.COMMANDTAX - 64)) | (1 << (Ah4Parser.SCRIPT - 64)) | (1 << (Ah4Parser.STATIC - 64)) | (1 << (Ah4Parser.ASYNC - 64)) | (1 << (Ah4Parser.AWAIT - 64)) | (1 << (Ah4Parser.NEW - 64)) | (1 << (Ah4Parser.LABEL - 64)))) != 0):
+            if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << Ah5Parser.LT) | (1 << Ah5Parser.MINUS) | (1 << Ah5Parser.NOT) | (1 << Ah5Parser.INT) | (1 << Ah5Parser.FLOAT) | (1 << Ah5Parser.FALSE) | (1 << Ah5Parser.TRUE) | (1 << Ah5Parser.STRING) | (1 << Ah5Parser.HEX) | (1 << Ah5Parser.NONE) | (1 << Ah5Parser.EXECUTEOPEN) | (1 << Ah5Parser.BLOCKOPEN) | (1 << Ah5Parser.LPAREN) | (1 << Ah5Parser.SOPEN) | (1 << Ah5Parser.HASH) | (1 << Ah5Parser.AT) | (1 << Ah5Parser.TYPE_INT))) != 0) or ((((_la - 64)) & ~0x3f) == 0 and ((1 << (_la - 64)) & ((1 << (Ah5Parser.TYPE_DICT - 64)) | (1 << (Ah5Parser.TYPE_LIST - 64)) | (1 << (Ah5Parser.TYPE_DEC - 64)) | (1 << (Ah5Parser.TYPE_STR - 64)) | (1 << (Ah5Parser.TYPE_BOOL - 64)) | (1 << (Ah5Parser.OS - 64)) | (1 << (Ah5Parser.COMMANDTAX - 64)) | (1 << (Ah5Parser.SCRIPT - 64)) | (1 << (Ah5Parser.STATIC - 64)) | (1 << (Ah5Parser.ASYNC - 64)) | (1 << (Ah5Parser.AWAIT - 64)) | (1 << (Ah5Parser.NEW - 64)) | (1 << (Ah5Parser.LABEL - 64)))) != 0):
                 self.state = 529
                 self.expr(0)
 
 
             self.state = 532
-            self.match(Ah4Parser.RPAREN)
+            self.match(Ah5Parser.RPAREN)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -4174,20 +4174,20 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def LT(self):
-            return self.getToken(Ah4Parser.LT, 0)
+            return self.getToken(Ah5Parser.LT, 0)
 
         def BAR(self):
-            return self.getToken(Ah4Parser.BAR, 0)
+            return self.getToken(Ah5Parser.BAR, 0)
 
         def expr(self):
-            return self.getTypedRuleContext(Ah4Parser.ExprContext,0)
+            return self.getTypedRuleContext(Ah5Parser.ExprContext,0)
 
 
         def GT(self):
-            return self.getToken(Ah4Parser.GT, 0)
+            return self.getToken(Ah5Parser.GT, 0)
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_inject
+            return Ah5Parser.RULE_inject
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterInject" ):
@@ -4208,18 +4208,18 @@ class Ah4Parser ( Parser ):
 
     def inject(self):
 
-        localctx = Ah4Parser.InjectContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.InjectContext(self, self._ctx, self.state)
         self.enterRule(localctx, 88, self.RULE_inject)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 534
-            self.match(Ah4Parser.LT)
+            self.match(Ah5Parser.LT)
             self.state = 535
-            self.match(Ah4Parser.BAR)
+            self.match(Ah5Parser.BAR)
             self.state = 536
             self.expr(0)
             self.state = 537
-            self.match(Ah4Parser.GT)
+            self.match(Ah5Parser.GT)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -4236,17 +4236,17 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def LPAREN(self):
-            return self.getToken(Ah4Parser.LPAREN, 0)
+            return self.getToken(Ah5Parser.LPAREN, 0)
 
         def expr(self):
-            return self.getTypedRuleContext(Ah4Parser.ExprContext,0)
+            return self.getTypedRuleContext(Ah5Parser.ExprContext,0)
 
 
         def RPAREN(self):
-            return self.getToken(Ah4Parser.RPAREN, 0)
+            return self.getToken(Ah5Parser.RPAREN, 0)
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_condition
+            return Ah5Parser.RULE_condition
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterCondition" ):
@@ -4267,16 +4267,16 @@ class Ah4Parser ( Parser ):
 
     def condition(self):
 
-        localctx = Ah4Parser.ConditionContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.ConditionContext(self, self._ctx, self.state)
         self.enterRule(localctx, 90, self.RULE_condition)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 539
-            self.match(Ah4Parser.LPAREN)
+            self.match(Ah5Parser.LPAREN)
             self.state = 540
             self.expr(0)
             self.state = 541
-            self.match(Ah4Parser.RPAREN)
+            self.match(Ah5Parser.RPAREN)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -4293,14 +4293,14 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def RETURNS(self):
-            return self.getToken(Ah4Parser.RETURNS, 0)
+            return self.getToken(Ah5Parser.RETURNS, 0)
 
         def expr(self):
-            return self.getTypedRuleContext(Ah4Parser.ExprContext,0)
+            return self.getTypedRuleContext(Ah5Parser.ExprContext,0)
 
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_return_statement
+            return Ah5Parser.RULE_return_statement
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterReturn_statement" ):
@@ -4321,17 +4321,17 @@ class Ah4Parser ( Parser ):
 
     def return_statement(self):
 
-        localctx = Ah4Parser.Return_statementContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.Return_statementContext(self, self._ctx, self.state)
         self.enterRule(localctx, 92, self.RULE_return_statement)
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 543
-            self.match(Ah4Parser.RETURNS)
+            self.match(Ah5Parser.RETURNS)
             self.state = 545
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << Ah4Parser.LT) | (1 << Ah4Parser.MINUS) | (1 << Ah4Parser.NOT) | (1 << Ah4Parser.INT) | (1 << Ah4Parser.FLOAT) | (1 << Ah4Parser.FALSE) | (1 << Ah4Parser.TRUE) | (1 << Ah4Parser.STRING) | (1 << Ah4Parser.HEX) | (1 << Ah4Parser.NONE) | (1 << Ah4Parser.EXECUTEOPEN) | (1 << Ah4Parser.BLOCKOPEN) | (1 << Ah4Parser.LPAREN) | (1 << Ah4Parser.SOPEN) | (1 << Ah4Parser.HASH) | (1 << Ah4Parser.AT) | (1 << Ah4Parser.TYPE_INT))) != 0) or ((((_la - 64)) & ~0x3f) == 0 and ((1 << (_la - 64)) & ((1 << (Ah4Parser.TYPE_DICT - 64)) | (1 << (Ah4Parser.TYPE_LIST - 64)) | (1 << (Ah4Parser.TYPE_DEC - 64)) | (1 << (Ah4Parser.TYPE_STR - 64)) | (1 << (Ah4Parser.TYPE_BOOL - 64)) | (1 << (Ah4Parser.OS - 64)) | (1 << (Ah4Parser.COMMANDTAX - 64)) | (1 << (Ah4Parser.SCRIPT - 64)) | (1 << (Ah4Parser.STATIC - 64)) | (1 << (Ah4Parser.ASYNC - 64)) | (1 << (Ah4Parser.AWAIT - 64)) | (1 << (Ah4Parser.NEW - 64)) | (1 << (Ah4Parser.LABEL - 64)))) != 0):
+            if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << Ah5Parser.LT) | (1 << Ah5Parser.MINUS) | (1 << Ah5Parser.NOT) | (1 << Ah5Parser.INT) | (1 << Ah5Parser.FLOAT) | (1 << Ah5Parser.FALSE) | (1 << Ah5Parser.TRUE) | (1 << Ah5Parser.STRING) | (1 << Ah5Parser.HEX) | (1 << Ah5Parser.NONE) | (1 << Ah5Parser.EXECUTEOPEN) | (1 << Ah5Parser.BLOCKOPEN) | (1 << Ah5Parser.LPAREN) | (1 << Ah5Parser.SOPEN) | (1 << Ah5Parser.HASH) | (1 << Ah5Parser.AT) | (1 << Ah5Parser.TYPE_INT))) != 0) or ((((_la - 64)) & ~0x3f) == 0 and ((1 << (_la - 64)) & ((1 << (Ah5Parser.TYPE_DICT - 64)) | (1 << (Ah5Parser.TYPE_LIST - 64)) | (1 << (Ah5Parser.TYPE_DEC - 64)) | (1 << (Ah5Parser.TYPE_STR - 64)) | (1 << (Ah5Parser.TYPE_BOOL - 64)) | (1 << (Ah5Parser.OS - 64)) | (1 << (Ah5Parser.COMMANDTAX - 64)) | (1 << (Ah5Parser.SCRIPT - 64)) | (1 << (Ah5Parser.STATIC - 64)) | (1 << (Ah5Parser.ASYNC - 64)) | (1 << (Ah5Parser.AWAIT - 64)) | (1 << (Ah5Parser.NEW - 64)) | (1 << (Ah5Parser.LABEL - 64)))) != 0):
                 self.state = 544
                 self.expr(0)
 
@@ -4352,14 +4352,14 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def HASH(self):
-            return self.getToken(Ah4Parser.HASH, 0)
+            return self.getToken(Ah5Parser.HASH, 0)
 
         def expr(self):
-            return self.getTypedRuleContext(Ah4Parser.ExprContext,0)
+            return self.getTypedRuleContext(Ah5Parser.ExprContext,0)
 
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_count
+            return Ah5Parser.RULE_count
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterCount" ):
@@ -4380,12 +4380,12 @@ class Ah4Parser ( Parser ):
 
     def count(self):
 
-        localctx = Ah4Parser.CountContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.CountContext(self, self._ctx, self.state)
         self.enterRule(localctx, 94, self.RULE_count)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 547
-            self.match(Ah4Parser.HASH)
+            self.match(Ah5Parser.HASH)
             self.state = 548
             self.expr(0)
         except RecognitionException as re:
@@ -4404,20 +4404,20 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def DEL(self):
-            return self.getToken(Ah4Parser.DEL, 0)
+            return self.getToken(Ah5Parser.DEL, 0)
 
         def LPAREN(self):
-            return self.getToken(Ah4Parser.LPAREN, 0)
+            return self.getToken(Ah5Parser.LPAREN, 0)
 
         def labels(self):
-            return self.getTypedRuleContext(Ah4Parser.LabelsContext,0)
+            return self.getTypedRuleContext(Ah5Parser.LabelsContext,0)
 
 
         def RPAREN(self):
-            return self.getToken(Ah4Parser.RPAREN, 0)
+            return self.getToken(Ah5Parser.RPAREN, 0)
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_delete_statement
+            return Ah5Parser.RULE_delete_statement
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterDelete_statement" ):
@@ -4438,18 +4438,18 @@ class Ah4Parser ( Parser ):
 
     def delete_statement(self):
 
-        localctx = Ah4Parser.Delete_statementContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.Delete_statementContext(self, self._ctx, self.state)
         self.enterRule(localctx, 96, self.RULE_delete_statement)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 550
-            self.match(Ah4Parser.DEL)
+            self.match(Ah5Parser.DEL)
             self.state = 551
-            self.match(Ah4Parser.LPAREN)
+            self.match(Ah5Parser.LPAREN)
             self.state = 552
             self.labels()
             self.state = 553
-            self.match(Ah4Parser.RPAREN)
+            self.match(Ah5Parser.RPAREN)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -4466,14 +4466,14 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def AWAIT(self):
-            return self.getToken(Ah4Parser.AWAIT, 0)
+            return self.getToken(Ah5Parser.AWAIT, 0)
 
         def labels(self):
-            return self.getTypedRuleContext(Ah4Parser.LabelsContext,0)
+            return self.getTypedRuleContext(Ah5Parser.LabelsContext,0)
 
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_await_statement
+            return Ah5Parser.RULE_await_statement
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterAwait_statement" ):
@@ -4494,17 +4494,17 @@ class Ah4Parser ( Parser ):
 
     def await_statement(self):
 
-        localctx = Ah4Parser.Await_statementContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.Await_statementContext(self, self._ctx, self.state)
         self.enterRule(localctx, 98, self.RULE_await_statement)
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 555
-            self.match(Ah4Parser.AWAIT)
+            self.match(Ah5Parser.AWAIT)
             self.state = 557
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==Ah4Parser.LT or _la==Ah4Parser.LABEL:
+            if _la==Ah5Parser.LT or _la==Ah5Parser.LABEL:
                 self.state = 556
                 self.labels()
 
@@ -4525,14 +4525,14 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def AT(self):
-            return self.getToken(Ah4Parser.AT, 0)
+            return self.getToken(Ah5Parser.AT, 0)
 
         def labels(self):
-            return self.getTypedRuleContext(Ah4Parser.LabelsContext,0)
+            return self.getTypedRuleContext(Ah5Parser.LabelsContext,0)
 
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_reflection
+            return Ah5Parser.RULE_reflection
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterReflection" ):
@@ -4553,12 +4553,12 @@ class Ah4Parser ( Parser ):
 
     def reflection(self):
 
-        localctx = Ah4Parser.ReflectionContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.ReflectionContext(self, self._ctx, self.state)
         self.enterRule(localctx, 100, self.RULE_reflection)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 559
-            self.match(Ah4Parser.AT)
+            self.match(Ah5Parser.AT)
             self.state = 560
             self.labels()
         except RecognitionException as re:
@@ -4577,11 +4577,11 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def labels(self):
-            return self.getTypedRuleContext(Ah4Parser.LabelsContext,0)
+            return self.getTypedRuleContext(Ah5Parser.LabelsContext,0)
 
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_required_parameter
+            return Ah5Parser.RULE_required_parameter
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterRequired_parameter" ):
@@ -4602,7 +4602,7 @@ class Ah4Parser ( Parser ):
 
     def required_parameter(self):
 
-        localctx = Ah4Parser.Required_parameterContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.Required_parameterContext(self, self._ctx, self.state)
         self.enterRule(localctx, 102, self.RULE_required_parameter)
         try:
             self.enterOuterAlt(localctx, 1)
@@ -4625,19 +4625,19 @@ class Ah4Parser ( Parser ):
 
         def label_comp(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(Ah4Parser.Label_compContext)
+                return self.getTypedRuleContexts(Ah5Parser.Label_compContext)
             else:
-                return self.getTypedRuleContext(Ah4Parser.Label_compContext,i)
+                return self.getTypedRuleContext(Ah5Parser.Label_compContext,i)
 
 
         def DOT(self, i:int=None):
             if i is None:
-                return self.getTokens(Ah4Parser.DOT)
+                return self.getTokens(Ah5Parser.DOT)
             else:
-                return self.getToken(Ah4Parser.DOT, i)
+                return self.getToken(Ah5Parser.DOT, i)
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_labels
+            return Ah5Parser.RULE_labels
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterLabels" ):
@@ -4658,7 +4658,7 @@ class Ah4Parser ( Parser ):
 
     def labels(self):
 
-        localctx = Ah4Parser.LabelsContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.LabelsContext(self, self._ctx, self.state)
         self.enterRule(localctx, 104, self.RULE_labels)
         try:
             self.enterOuterAlt(localctx, 1)
@@ -4670,7 +4670,7 @@ class Ah4Parser ( Parser ):
             while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
                 if _alt==1:
                     self.state = 565
-                    self.match(Ah4Parser.DOT)
+                    self.match(Ah5Parser.DOT)
                     self.state = 566
                     self.label_comp() 
                 self.state = 571
@@ -4693,31 +4693,31 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def label(self):
-            return self.getTypedRuleContext(Ah4Parser.LabelContext,0)
+            return self.getTypedRuleContext(Ah5Parser.LabelContext,0)
 
 
         def SOPEN(self):
-            return self.getToken(Ah4Parser.SOPEN, 0)
+            return self.getToken(Ah5Parser.SOPEN, 0)
 
         def SCLOSE(self):
-            return self.getToken(Ah4Parser.SCLOSE, 0)
+            return self.getToken(Ah5Parser.SCLOSE, 0)
 
         def expr(self, i:int=None):
             if i is None:
-                return self.getTypedRuleContexts(Ah4Parser.ExprContext)
+                return self.getTypedRuleContexts(Ah5Parser.ExprContext)
             else:
-                return self.getTypedRuleContext(Ah4Parser.ExprContext,i)
+                return self.getTypedRuleContext(Ah5Parser.ExprContext,i)
 
 
         def COLON(self):
-            return self.getToken(Ah4Parser.COLON, 0)
+            return self.getToken(Ah5Parser.COLON, 0)
 
         def inject(self):
-            return self.getTypedRuleContext(Ah4Parser.InjectContext,0)
+            return self.getTypedRuleContext(Ah5Parser.InjectContext,0)
 
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_label_comp
+            return Ah5Parser.RULE_label_comp
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterLabel_comp" ):
@@ -4738,13 +4738,13 @@ class Ah4Parser ( Parser ):
 
     def label_comp(self):
 
-        localctx = Ah4Parser.Label_compContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.Label_compContext(self, self._ctx, self.state)
         self.enterRule(localctx, 106, self.RULE_label_comp)
         try:
             self.state = 590
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [Ah4Parser.LABEL]:
+            if token in [Ah5Parser.LABEL]:
                 self.enterOuterAlt(localctx, 1)
                 self.state = 572
                 self.label()
@@ -4753,7 +4753,7 @@ class Ah4Parser ( Parser ):
                 la_ = self._interp.adaptivePredict(self._input,53,self._ctx)
                 if la_ == 1:
                     self.state = 573
-                    self.match(Ah4Parser.SOPEN)
+                    self.match(Ah5Parser.SOPEN)
                     self.state = 583
                     self._errHandler.sync(self)
                     la_ = self._interp.adaptivePredict(self._input,52,self._ctx)
@@ -4761,12 +4761,12 @@ class Ah4Parser ( Parser ):
                         self.state = 574
                         self.expr(0)
                         self.state = 575
-                        self.match(Ah4Parser.COLON)
+                        self.match(Ah5Parser.COLON)
                         pass
 
                     elif la_ == 2:
                         self.state = 577
-                        self.match(Ah4Parser.COLON)
+                        self.match(Ah5Parser.COLON)
                         self.state = 578
                         self.expr(0)
                         pass
@@ -4775,18 +4775,18 @@ class Ah4Parser ( Parser ):
                         self.state = 579
                         self.expr(0)
                         self.state = 580
-                        self.match(Ah4Parser.COLON)
+                        self.match(Ah5Parser.COLON)
                         self.state = 581
                         self.expr(0)
                         pass
 
 
                     self.state = 585
-                    self.match(Ah4Parser.SCLOSE)
+                    self.match(Ah5Parser.SCLOSE)
 
 
                 pass
-            elif token in [Ah4Parser.LT]:
+            elif token in [Ah5Parser.LT]:
                 self.enterOuterAlt(localctx, 2)
                 self.state = 589
                 self.inject()
@@ -4810,10 +4810,10 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def LABEL(self):
-            return self.getToken(Ah4Parser.LABEL, 0)
+            return self.getToken(Ah5Parser.LABEL, 0)
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_label
+            return Ah5Parser.RULE_label
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterLabel" ):
@@ -4834,12 +4834,12 @@ class Ah4Parser ( Parser ):
 
     def label(self):
 
-        localctx = Ah4Parser.LabelContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.LabelContext(self, self._ctx, self.state)
         self.enterRule(localctx, 108, self.RULE_label)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 592
-            self.match(Ah4Parser.LABEL)
+            self.match(Ah5Parser.LABEL)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -4857,24 +4857,24 @@ class Ah4Parser ( Parser ):
 
         def SCRIPT(self, i:int=None):
             if i is None:
-                return self.getTokens(Ah4Parser.SCRIPT)
+                return self.getTokens(Ah5Parser.SCRIPT)
             else:
-                return self.getToken(Ah4Parser.SCRIPT, i)
+                return self.getToken(Ah5Parser.SCRIPT, i)
 
         def STATIC(self, i:int=None):
             if i is None:
-                return self.getTokens(Ah4Parser.STATIC)
+                return self.getTokens(Ah5Parser.STATIC)
             else:
-                return self.getToken(Ah4Parser.STATIC, i)
+                return self.getToken(Ah5Parser.STATIC, i)
 
         def ASYNC(self, i:int=None):
             if i is None:
-                return self.getTokens(Ah4Parser.ASYNC)
+                return self.getTokens(Ah5Parser.ASYNC)
             else:
-                return self.getToken(Ah4Parser.ASYNC, i)
+                return self.getToken(Ah5Parser.ASYNC, i)
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_attributes
+            return Ah5Parser.RULE_attributes
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterAttributes" ):
@@ -4895,7 +4895,7 @@ class Ah4Parser ( Parser ):
 
     def attributes(self):
 
-        localctx = Ah4Parser.AttributesContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.AttributesContext(self, self._ctx, self.state)
         self.enterRule(localctx, 110, self.RULE_attributes)
         self._la = 0 # Token type
         try:
@@ -4906,7 +4906,7 @@ class Ah4Parser ( Parser ):
             while True:
                 self.state = 594
                 _la = self._input.LA(1)
-                if not(((((_la - 77)) & ~0x3f) == 0 and ((1 << (_la - 77)) & ((1 << (Ah4Parser.SCRIPT - 77)) | (1 << (Ah4Parser.STATIC - 77)) | (1 << (Ah4Parser.ASYNC - 77)))) != 0)):
+                if not(((((_la - 77)) & ~0x3f) == 0 and ((1 << (_la - 77)) & ((1 << (Ah5Parser.SCRIPT - 77)) | (1 << (Ah5Parser.STATIC - 77)) | (1 << (Ah5Parser.ASYNC - 77)))) != 0)):
                     self._errHandler.recoverInline(self)
                 else:
                     self._errHandler.reportMatch(self)
@@ -4914,7 +4914,7 @@ class Ah4Parser ( Parser ):
                 self.state = 597 
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if not (((((_la - 77)) & ~0x3f) == 0 and ((1 << (_la - 77)) & ((1 << (Ah4Parser.SCRIPT - 77)) | (1 << (Ah4Parser.STATIC - 77)) | (1 << (Ah4Parser.ASYNC - 77)))) != 0)):
+                if not (((((_la - 77)) & ~0x3f) == 0 and ((1 << (_la - 77)) & ((1 << (Ah5Parser.SCRIPT - 77)) | (1 << (Ah5Parser.STATIC - 77)) | (1 << (Ah5Parser.ASYNC - 77)))) != 0)):
                     break
 
         except RecognitionException as re:
@@ -4933,10 +4933,10 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def STRING(self):
-            return self.getToken(Ah4Parser.STRING, 0)
+            return self.getToken(Ah5Parser.STRING, 0)
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_atom_string
+            return Ah5Parser.RULE_atom_string
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterAtom_string" ):
@@ -4957,12 +4957,12 @@ class Ah4Parser ( Parser ):
 
     def atom_string(self):
 
-        localctx = Ah4Parser.Atom_stringContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.Atom_stringContext(self, self._ctx, self.state)
         self.enterRule(localctx, 112, self.RULE_atom_string)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 599
-            self.match(Ah4Parser.STRING)
+            self.match(Ah5Parser.STRING)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -4979,13 +4979,13 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def INT(self):
-            return self.getToken(Ah4Parser.INT, 0)
+            return self.getToken(Ah5Parser.INT, 0)
 
         def FLOAT(self):
-            return self.getToken(Ah4Parser.FLOAT, 0)
+            return self.getToken(Ah5Parser.FLOAT, 0)
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_atom_number
+            return Ah5Parser.RULE_atom_number
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterAtom_number" ):
@@ -5006,14 +5006,14 @@ class Ah4Parser ( Parser ):
 
     def atom_number(self):
 
-        localctx = Ah4Parser.Atom_numberContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.Atom_numberContext(self, self._ctx, self.state)
         self.enterRule(localctx, 114, self.RULE_atom_number)
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 601
             _la = self._input.LA(1)
-            if not(_la==Ah4Parser.INT or _la==Ah4Parser.FLOAT):
+            if not(_la==Ah5Parser.INT or _la==Ah5Parser.FLOAT):
                 self._errHandler.recoverInline(self)
             else:
                 self._errHandler.reportMatch(self)
@@ -5034,13 +5034,13 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def TRUE(self):
-            return self.getToken(Ah4Parser.TRUE, 0)
+            return self.getToken(Ah5Parser.TRUE, 0)
 
         def FALSE(self):
-            return self.getToken(Ah4Parser.FALSE, 0)
+            return self.getToken(Ah5Parser.FALSE, 0)
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_atom_boolean
+            return Ah5Parser.RULE_atom_boolean
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterAtom_boolean" ):
@@ -5061,14 +5061,14 @@ class Ah4Parser ( Parser ):
 
     def atom_boolean(self):
 
-        localctx = Ah4Parser.Atom_booleanContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.Atom_booleanContext(self, self._ctx, self.state)
         self.enterRule(localctx, 116, self.RULE_atom_boolean)
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 603
             _la = self._input.LA(1)
-            if not(_la==Ah4Parser.FALSE or _la==Ah4Parser.TRUE):
+            if not(_la==Ah5Parser.FALSE or _la==Ah5Parser.TRUE):
                 self._errHandler.recoverInline(self)
             else:
                 self._errHandler.reportMatch(self)
@@ -5089,10 +5089,10 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def HEX(self):
-            return self.getToken(Ah4Parser.HEX, 0)
+            return self.getToken(Ah5Parser.HEX, 0)
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_atom_hex
+            return Ah5Parser.RULE_atom_hex
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterAtom_hex" ):
@@ -5113,12 +5113,12 @@ class Ah4Parser ( Parser ):
 
     def atom_hex(self):
 
-        localctx = Ah4Parser.Atom_hexContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.Atom_hexContext(self, self._ctx, self.state)
         self.enterRule(localctx, 118, self.RULE_atom_hex)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 605
-            self.match(Ah4Parser.HEX)
+            self.match(Ah5Parser.HEX)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -5135,10 +5135,10 @@ class Ah4Parser ( Parser ):
             self.parser = parser
 
         def NONE(self):
-            return self.getToken(Ah4Parser.NONE, 0)
+            return self.getToken(Ah5Parser.NONE, 0)
 
         def getRuleIndex(self):
-            return Ah4Parser.RULE_atom_none
+            return Ah5Parser.RULE_atom_none
 
         def enterRule(self, listener:ParseTreeListener):
             if hasattr( listener, "enterAtom_none" ):
@@ -5159,12 +5159,12 @@ class Ah4Parser ( Parser ):
 
     def atom_none(self):
 
-        localctx = Ah4Parser.Atom_noneContext(self, self._ctx, self.state)
+        localctx = Ah5Parser.Atom_noneContext(self, self._ctx, self.state)
         self.enterRule(localctx, 120, self.RULE_atom_none)
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 607
-            self.match(Ah4Parser.NONE)
+            self.match(Ah5Parser.NONE)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)

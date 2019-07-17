@@ -1,4 +1,4 @@
-# Generated from src/Ah4.g4 by ANTLR 4.7.2
+# Generated from /home/shawn/Documents/projects/Apitax/Scriptax/scriptax/grammar/src/Ah5.g4 by ANTLR 4.7.2
 from antlr4 import *
 from io import StringIO
 from typing.io import TextIO
@@ -371,7 +371,7 @@ def serializedATN():
         return buf.getvalue()
 
 
-class Ah4Lexer(Lexer):
+class Ah5Lexer(Lexer):
 
     atn = ATNDeserializer().deserialize(serializedATN())
 
@@ -513,7 +513,7 @@ class Ah4Lexer(Lexer):
                   "S", "T", "U", "V", "W", "X", "Y", "Z", "LOWERCASE", "UPPERCASE", 
                   "DIGIT", "QUOTE", "SQUOTE" ]
 
-    grammarFileName = "Ah4.g4"
+    grammarFileName = "Ah5.g4"
 
     def __init__(self, input=None, output:TextIO = sys.stdout):
         super().__init__(input, output)
