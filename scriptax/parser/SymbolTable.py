@@ -338,8 +338,8 @@ class SymbolTable(GenericTable):
         # Get the Method name which is just the last component of the name
         method_name = name[-1]
 
-        print("mn:" + str(method_name))
-        print("sn:" + str(scope_name))
+        # print("mn:" + str(method_name))
+        # print("sn:" + str(scope_name))
 
         # These two lines are not needed, but are left in for readabilities sake
         instance_scope: SymbolScope = None  # This is the scope where the method is defined
