@@ -24,11 +24,6 @@ class Ah5Visitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by Ah5Parser#root_level_statements.
-    def visitRoot_level_statements(self, ctx:Ah5Parser.Root_level_statementsContext):
-        return self.visitChildren(ctx)
-
-
     # Visit a parse tree produced by Ah5Parser#statements.
     def visitStatements(self, ctx:Ah5Parser.StatementsContext):
         return self.visitChildren(ctx)
@@ -59,18 +54,13 @@ class Ah5Visitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by Ah5Parser#non_terminated.
+    def visitNon_terminated(self, ctx:Ah5Parser.Non_terminatedContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by Ah5Parser#method_call_statement.
     def visitMethod_call_statement(self, ctx:Ah5Parser.Method_call_statementContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by Ah5Parser#commandtax_statement.
-    def visitCommandtax_statement(self, ctx:Ah5Parser.Commandtax_statementContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by Ah5Parser#os_statement.
-    def visitOs_statement(self, ctx:Ah5Parser.Os_statementContext):
         return self.visitChildren(ctx)
 
 
@@ -94,8 +84,8 @@ class Ah5Visitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by Ah5Parser#non_terminated.
-    def visitNon_terminated(self, ctx:Ah5Parser.Non_terminatedContext):
+    # Visit a parse tree produced by Ah5Parser#method_def_statement.
+    def visitMethod_def_statement(self, ctx:Ah5Parser.Method_def_statementContext):
         return self.visitChildren(ctx)
 
 
@@ -111,6 +101,11 @@ class Ah5Visitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by Ah5Parser#for_statement.
     def visitFor_statement(self, ctx:Ah5Parser.For_statementContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by Ah5Parser#until_statement.
+    def visitUntil_statement(self, ctx:Ah5Parser.Until_statementContext):
         return self.visitChildren(ctx)
 
 
@@ -134,6 +129,11 @@ class Ah5Visitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by Ah5Parser#range_function.
+    def visitRange_function(self, ctx:Ah5Parser.Range_functionContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by Ah5Parser#block.
     def visitBlock(self, ctx:Ah5Parser.BlockContext):
         return self.visitChildren(ctx)
@@ -146,6 +146,11 @@ class Ah5Visitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by Ah5Parser#continue_statement.
     def visitContinue_statement(self, ctx:Ah5Parser.Continue_statementContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by Ah5Parser#os_statement.
+    def visitOs_statement(self, ctx:Ah5Parser.Os_statementContext):
         return self.visitChildren(ctx)
 
 
@@ -174,8 +179,8 @@ class Ah5Visitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by Ah5Parser#create_instance.
-    def visitCreate_instance(self, ctx:Ah5Parser.Create_instanceContext):
+    # Visit a parse tree produced by Ah5Parser#atom_create_instance.
+    def visitAtom_create_instance(self, ctx:Ah5Parser.Atom_create_instanceContext):
         return self.visitChildren(ctx)
 
 
@@ -204,13 +209,18 @@ class Ah5Visitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by Ah5Parser#atom_obj_dict.
-    def visitAtom_obj_dict(self, ctx:Ah5Parser.Atom_obj_dictContext):
+    # Visit a parse tree produced by Ah5Parser#assignment_statement.
+    def visitAssignment_statement(self, ctx:Ah5Parser.Assignment_statementContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by Ah5Parser#assignment_statement.
-    def visitAssignment_statement(self, ctx:Ah5Parser.Assignment_statementContext):
+    # Visit a parse tree produced by Ah5Parser#symbol_type.
+    def visitSymbol_type(self, ctx:Ah5Parser.Symbol_typeContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by Ah5Parser#atom_obj_dict.
+    def visitAtom_obj_dict(self, ctx:Ah5Parser.Atom_obj_dictContext):
         return self.visitChildren(ctx)
 
 
@@ -241,6 +251,11 @@ class Ah5Visitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by Ah5Parser#return_statement.
     def visitReturn_statement(self, ctx:Ah5Parser.Return_statementContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by Ah5Parser#typing.
+    def visitTyping(self, ctx:Ah5Parser.TypingContext):
         return self.visitChildren(ctx)
 
 

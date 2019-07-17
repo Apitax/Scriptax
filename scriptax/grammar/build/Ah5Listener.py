@@ -35,15 +35,6 @@ class Ah5Listener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by Ah5Parser#root_level_statements.
-    def enterRoot_level_statements(self, ctx:Ah5Parser.Root_level_statementsContext):
-        pass
-
-    # Exit a parse tree produced by Ah5Parser#root_level_statements.
-    def exitRoot_level_statements(self, ctx:Ah5Parser.Root_level_statementsContext):
-        pass
-
-
     # Enter a parse tree produced by Ah5Parser#statements.
     def enterStatements(self, ctx:Ah5Parser.StatementsContext):
         pass
@@ -98,30 +89,21 @@ class Ah5Listener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by Ah5Parser#non_terminated.
+    def enterNon_terminated(self, ctx:Ah5Parser.Non_terminatedContext):
+        pass
+
+    # Exit a parse tree produced by Ah5Parser#non_terminated.
+    def exitNon_terminated(self, ctx:Ah5Parser.Non_terminatedContext):
+        pass
+
+
     # Enter a parse tree produced by Ah5Parser#method_call_statement.
     def enterMethod_call_statement(self, ctx:Ah5Parser.Method_call_statementContext):
         pass
 
     # Exit a parse tree produced by Ah5Parser#method_call_statement.
     def exitMethod_call_statement(self, ctx:Ah5Parser.Method_call_statementContext):
-        pass
-
-
-    # Enter a parse tree produced by Ah5Parser#commandtax_statement.
-    def enterCommandtax_statement(self, ctx:Ah5Parser.Commandtax_statementContext):
-        pass
-
-    # Exit a parse tree produced by Ah5Parser#commandtax_statement.
-    def exitCommandtax_statement(self, ctx:Ah5Parser.Commandtax_statementContext):
-        pass
-
-
-    # Enter a parse tree produced by Ah5Parser#os_statement.
-    def enterOs_statement(self, ctx:Ah5Parser.Os_statementContext):
-        pass
-
-    # Exit a parse tree produced by Ah5Parser#os_statement.
-    def exitOs_statement(self, ctx:Ah5Parser.Os_statementContext):
         pass
 
 
@@ -161,12 +143,12 @@ class Ah5Listener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by Ah5Parser#non_terminated.
-    def enterNon_terminated(self, ctx:Ah5Parser.Non_terminatedContext):
+    # Enter a parse tree produced by Ah5Parser#method_def_statement.
+    def enterMethod_def_statement(self, ctx:Ah5Parser.Method_def_statementContext):
         pass
 
-    # Exit a parse tree produced by Ah5Parser#non_terminated.
-    def exitNon_terminated(self, ctx:Ah5Parser.Non_terminatedContext):
+    # Exit a parse tree produced by Ah5Parser#method_def_statement.
+    def exitMethod_def_statement(self, ctx:Ah5Parser.Method_def_statementContext):
         pass
 
 
@@ -194,6 +176,15 @@ class Ah5Listener(ParseTreeListener):
 
     # Exit a parse tree produced by Ah5Parser#for_statement.
     def exitFor_statement(self, ctx:Ah5Parser.For_statementContext):
+        pass
+
+
+    # Enter a parse tree produced by Ah5Parser#until_statement.
+    def enterUntil_statement(self, ctx:Ah5Parser.Until_statementContext):
+        pass
+
+    # Exit a parse tree produced by Ah5Parser#until_statement.
+    def exitUntil_statement(self, ctx:Ah5Parser.Until_statementContext):
         pass
 
 
@@ -233,6 +224,15 @@ class Ah5Listener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by Ah5Parser#range_function.
+    def enterRange_function(self, ctx:Ah5Parser.Range_functionContext):
+        pass
+
+    # Exit a parse tree produced by Ah5Parser#range_function.
+    def exitRange_function(self, ctx:Ah5Parser.Range_functionContext):
+        pass
+
+
     # Enter a parse tree produced by Ah5Parser#block.
     def enterBlock(self, ctx:Ah5Parser.BlockContext):
         pass
@@ -257,6 +257,15 @@ class Ah5Listener(ParseTreeListener):
 
     # Exit a parse tree produced by Ah5Parser#continue_statement.
     def exitContinue_statement(self, ctx:Ah5Parser.Continue_statementContext):
+        pass
+
+
+    # Enter a parse tree produced by Ah5Parser#os_statement.
+    def enterOs_statement(self, ctx:Ah5Parser.Os_statementContext):
+        pass
+
+    # Exit a parse tree produced by Ah5Parser#os_statement.
+    def exitOs_statement(self, ctx:Ah5Parser.Os_statementContext):
         pass
 
 
@@ -305,12 +314,12 @@ class Ah5Listener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by Ah5Parser#create_instance.
-    def enterCreate_instance(self, ctx:Ah5Parser.Create_instanceContext):
+    # Enter a parse tree produced by Ah5Parser#atom_create_instance.
+    def enterAtom_create_instance(self, ctx:Ah5Parser.Atom_create_instanceContext):
         pass
 
-    # Exit a parse tree produced by Ah5Parser#create_instance.
-    def exitCreate_instance(self, ctx:Ah5Parser.Create_instanceContext):
+    # Exit a parse tree produced by Ah5Parser#atom_create_instance.
+    def exitAtom_create_instance(self, ctx:Ah5Parser.Atom_create_instanceContext):
         pass
 
 
@@ -359,21 +368,30 @@ class Ah5Listener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by Ah5Parser#atom_obj_dict.
-    def enterAtom_obj_dict(self, ctx:Ah5Parser.Atom_obj_dictContext):
-        pass
-
-    # Exit a parse tree produced by Ah5Parser#atom_obj_dict.
-    def exitAtom_obj_dict(self, ctx:Ah5Parser.Atom_obj_dictContext):
-        pass
-
-
     # Enter a parse tree produced by Ah5Parser#assignment_statement.
     def enterAssignment_statement(self, ctx:Ah5Parser.Assignment_statementContext):
         pass
 
     # Exit a parse tree produced by Ah5Parser#assignment_statement.
     def exitAssignment_statement(self, ctx:Ah5Parser.Assignment_statementContext):
+        pass
+
+
+    # Enter a parse tree produced by Ah5Parser#symbol_type.
+    def enterSymbol_type(self, ctx:Ah5Parser.Symbol_typeContext):
+        pass
+
+    # Exit a parse tree produced by Ah5Parser#symbol_type.
+    def exitSymbol_type(self, ctx:Ah5Parser.Symbol_typeContext):
+        pass
+
+
+    # Enter a parse tree produced by Ah5Parser#atom_obj_dict.
+    def enterAtom_obj_dict(self, ctx:Ah5Parser.Atom_obj_dictContext):
+        pass
+
+    # Exit a parse tree produced by Ah5Parser#atom_obj_dict.
+    def exitAtom_obj_dict(self, ctx:Ah5Parser.Atom_obj_dictContext):
         pass
 
 
@@ -428,6 +446,15 @@ class Ah5Listener(ParseTreeListener):
 
     # Exit a parse tree produced by Ah5Parser#return_statement.
     def exitReturn_statement(self, ctx:Ah5Parser.Return_statementContext):
+        pass
+
+
+    # Enter a parse tree produced by Ah5Parser#typing.
+    def enterTyping(self, ctx:Ah5Parser.TypingContext):
+        pass
+
+    # Exit a parse tree produced by Ah5Parser#typing.
+    def exitTyping(self, ctx:Ah5Parser.TypingContext):
         pass
 
 
