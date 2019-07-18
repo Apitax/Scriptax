@@ -15,6 +15,7 @@ DATA_METHOD = 'method'
 DATA_THREAD = 'thread'  # Holds python threading object
 DATA_PYTHONIC = 'pythonic'  # Some other arbitrary python class/object
 DATA_INSTANCE = 'instance'  # Holds an instance of a class/script type
+DATA_ANY = 'any'  # Holds any type
 
 # Symbol Types
 SYMBOL_VAR = 'var'

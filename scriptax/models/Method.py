@@ -1,8 +1,8 @@
 from scriptax.models.Attributes import Attributes
-from scriptax.models.Parameter import Parameter
-from typing import List
+from typing import Any
 
 
 class Method(Attributes):
-    label: str
-    parameters: List[Parameter]
+    ctx: Any
+    strict_return_type: str = None
+

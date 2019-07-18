@@ -379,7 +379,7 @@ class Ah5Parser ( Parser ):
                      "'%'", "','", "'|'", "<INVALID>", "<INVALID>", "<INVALID>", 
                      "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
                      "'{%'", "'%}'", "'{'", "'}'", "'('", "')'", "'['", 
-                     "']'", "'$'", "';'", "'#'", "'->'", "'@'", "'...'" ]
+                     "']'", "'$'", "';'", "'#'", "'->'", "'@'", "'..'" ]
 
     symbolicNames = [ "<INVALID>", "AND", "OR", "GT", "LT", "GE", "LE", 
                       "EQ", "NEQ", "SAND", "SOR", "D_PLUS", "D_MINUS", "PE", 
@@ -441,7 +441,7 @@ class Ah5Parser ( Parser ):
     RULE_dict_signal = 38
     RULE_casting = 39
     RULE_assignment_statement = 40
-    RULE_symbol_type = 41
+    RULE_data_type = 41
     RULE_atom_obj_dict = 42
     RULE_atom_obj_list = 43
     RULE_atom_obj_enum = 44
@@ -476,7 +476,7 @@ class Ah5Parser ( Parser ):
                    "log_statement", "flexible_parameter_block", "flexible_parameter", 
                    "import_statement", "extends_statement", "atom_create_instance", 
                    "ahoptions_statement", "optional_parameters_block", "optional_parameter", 
-                   "dict_signal", "casting", "assignment_statement", "symbol_type", 
+                   "dict_signal", "casting", "assignment_statement", "data_type", 
                    "atom_obj_dict", "atom_obj_list", "atom_obj_enum", "error_statement", 
                    "inject", "condition", "return_statement", "typing", 
                    "count", "delete_statement", "await_statement", "reflection", 
@@ -2047,8 +2047,8 @@ class Ah5Parser ( Parser ):
             return self.getTypedRuleContext(Ah5Parser.BlockContext,0)
 
 
-        def symbol_type(self):
-            return self.getTypedRuleContext(Ah5Parser.Symbol_typeContext,0)
+        def data_type(self):
+            return self.getTypedRuleContext(Ah5Parser.Data_typeContext,0)
 
 
         def getRuleIndex(self):
@@ -2083,7 +2083,7 @@ class Ah5Parser ( Parser ):
             _la = self._input.LA(1)
             if ((((_la - 63)) & ~0x3f) == 0 and ((1 << (_la - 63)) & ((1 << (Ah5Parser.TYPE_INT - 63)) | (1 << (Ah5Parser.TYPE_DICT - 63)) | (1 << (Ah5Parser.TYPE_LIST - 63)) | (1 << (Ah5Parser.TYPE_DEC - 63)) | (1 << (Ah5Parser.TYPE_STR - 63)) | (1 << (Ah5Parser.TYPE_BOOL - 63)) | (1 << (Ah5Parser.TYPE_HEX - 63)) | (1 << (Ah5Parser.TYPE_NONE - 63)) | (1 << (Ah5Parser.TYPE_THREAD - 63)) | (1 << (Ah5Parser.TYPE_METHOD - 63)) | (1 << (Ah5Parser.TYPE_INSTANCE - 63)) | (1 << (Ah5Parser.TYPE_PYTHONIC - 63)) | (1 << (Ah5Parser.TYPE_ANY - 63)))) != 0):
                 self.state = 289
-                self.symbol_type()
+                self.data_type()
 
 
             self.state = 292
@@ -2133,8 +2133,8 @@ class Ah5Parser ( Parser ):
             return self.getTypedRuleContext(Ah5Parser.BlockContext,0)
 
 
-        def symbol_type(self):
-            return self.getTypedRuleContext(Ah5Parser.Symbol_typeContext,0)
+        def data_type(self):
+            return self.getTypedRuleContext(Ah5Parser.Data_typeContext,0)
 
 
         def getRuleIndex(self):
@@ -2171,7 +2171,7 @@ class Ah5Parser ( Parser ):
             _la = self._input.LA(1)
             if ((((_la - 63)) & ~0x3f) == 0 and ((1 << (_la - 63)) & ((1 << (Ah5Parser.TYPE_INT - 63)) | (1 << (Ah5Parser.TYPE_DICT - 63)) | (1 << (Ah5Parser.TYPE_LIST - 63)) | (1 << (Ah5Parser.TYPE_DEC - 63)) | (1 << (Ah5Parser.TYPE_STR - 63)) | (1 << (Ah5Parser.TYPE_BOOL - 63)) | (1 << (Ah5Parser.TYPE_HEX - 63)) | (1 << (Ah5Parser.TYPE_NONE - 63)) | (1 << (Ah5Parser.TYPE_THREAD - 63)) | (1 << (Ah5Parser.TYPE_METHOD - 63)) | (1 << (Ah5Parser.TYPE_INSTANCE - 63)) | (1 << (Ah5Parser.TYPE_PYTHONIC - 63)) | (1 << (Ah5Parser.TYPE_ANY - 63)))) != 0):
                 self.state = 299
-                self.symbol_type()
+                self.data_type()
 
 
             self.state = 302
@@ -3405,8 +3405,8 @@ class Ah5Parser ( Parser ):
             return self.getTypedRuleContext(Ah5Parser.Optional_parameterContext,0)
 
 
-        def symbol_type(self):
-            return self.getTypedRuleContext(Ah5Parser.Symbol_typeContext,0)
+        def data_type(self):
+            return self.getTypedRuleContext(Ah5Parser.Data_typeContext,0)
 
 
         def getRuleIndex(self):
@@ -3441,7 +3441,7 @@ class Ah5Parser ( Parser ):
             _la = self._input.LA(1)
             if ((((_la - 63)) & ~0x3f) == 0 and ((1 << (_la - 63)) & ((1 << (Ah5Parser.TYPE_INT - 63)) | (1 << (Ah5Parser.TYPE_DICT - 63)) | (1 << (Ah5Parser.TYPE_LIST - 63)) | (1 << (Ah5Parser.TYPE_DEC - 63)) | (1 << (Ah5Parser.TYPE_STR - 63)) | (1 << (Ah5Parser.TYPE_BOOL - 63)) | (1 << (Ah5Parser.TYPE_HEX - 63)) | (1 << (Ah5Parser.TYPE_NONE - 63)) | (1 << (Ah5Parser.TYPE_THREAD - 63)) | (1 << (Ah5Parser.TYPE_METHOD - 63)) | (1 << (Ah5Parser.TYPE_INSTANCE - 63)) | (1 << (Ah5Parser.TYPE_PYTHONIC - 63)) | (1 << (Ah5Parser.TYPE_ANY - 63)))) != 0):
                 self.state = 454
-                self.symbol_type()
+                self.data_type()
 
 
             self.state = 459
@@ -4046,8 +4046,8 @@ class Ah5Parser ( Parser ):
             super().__init__(parent, invokingState)
             self.parser = parser
 
-        def symbol_type(self):
-            return self.getTypedRuleContext(Ah5Parser.Symbol_typeContext,0)
+        def data_type(self):
+            return self.getTypedRuleContext(Ah5Parser.Data_typeContext,0)
 
 
         def LPAREN(self):
@@ -4087,7 +4087,7 @@ class Ah5Parser ( Parser ):
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 531
-            self.symbol_type()
+            self.data_type()
             self.state = 532
             self.match(Ah5Parser.LPAREN)
             self.state = 533
@@ -4123,8 +4123,8 @@ class Ah5Parser ( Parser ):
         def D_MINUS(self):
             return self.getToken(Ah5Parser.D_MINUS, 0)
 
-        def symbol_type(self):
-            return self.getTypedRuleContext(Ah5Parser.Symbol_typeContext,0)
+        def data_type(self):
+            return self.getTypedRuleContext(Ah5Parser.Data_typeContext,0)
 
 
         def EQUAL(self):
@@ -4180,7 +4180,7 @@ class Ah5Parser ( Parser ):
             _la = self._input.LA(1)
             if ((((_la - 63)) & ~0x3f) == 0 and ((1 << (_la - 63)) & ((1 << (Ah5Parser.TYPE_INT - 63)) | (1 << (Ah5Parser.TYPE_DICT - 63)) | (1 << (Ah5Parser.TYPE_LIST - 63)) | (1 << (Ah5Parser.TYPE_DEC - 63)) | (1 << (Ah5Parser.TYPE_STR - 63)) | (1 << (Ah5Parser.TYPE_BOOL - 63)) | (1 << (Ah5Parser.TYPE_HEX - 63)) | (1 << (Ah5Parser.TYPE_NONE - 63)) | (1 << (Ah5Parser.TYPE_THREAD - 63)) | (1 << (Ah5Parser.TYPE_METHOD - 63)) | (1 << (Ah5Parser.TYPE_INSTANCE - 63)) | (1 << (Ah5Parser.TYPE_PYTHONIC - 63)) | (1 << (Ah5Parser.TYPE_ANY - 63)))) != 0):
                 self.state = 536
-                self.symbol_type()
+                self.data_type()
 
 
             self.state = 539
@@ -4248,75 +4248,75 @@ class Ah5Parser ( Parser ):
         return localctx
 
 
-    class Symbol_typeContext(ParserRuleContext):
+    class Data_typeContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
             super().__init__(parent, invokingState)
             self.parser = parser
 
-        def TYPE_INT(self):
-            return self.getToken(Ah5Parser.TYPE_INT, 0)
-
-        def TYPE_DEC(self):
-            return self.getToken(Ah5Parser.TYPE_DEC, 0)
+        def TYPE_ANY(self):
+            return self.getToken(Ah5Parser.TYPE_ANY, 0)
 
         def TYPE_BOOL(self):
             return self.getToken(Ah5Parser.TYPE_BOOL, 0)
 
-        def TYPE_HEX(self):
-            return self.getToken(Ah5Parser.TYPE_HEX, 0)
-
-        def TYPE_NONE(self):
-            return self.getToken(Ah5Parser.TYPE_NONE, 0)
-
-        def TYPE_THREAD(self):
-            return self.getToken(Ah5Parser.TYPE_THREAD, 0)
-
-        def TYPE_METHOD(self):
-            return self.getToken(Ah5Parser.TYPE_METHOD, 0)
-
-        def TYPE_INSTANCE(self):
-            return self.getToken(Ah5Parser.TYPE_INSTANCE, 0)
-
-        def TYPE_PYTHONIC(self):
-            return self.getToken(Ah5Parser.TYPE_PYTHONIC, 0)
-
-        def TYPE_ANY(self):
-            return self.getToken(Ah5Parser.TYPE_ANY, 0)
-
-        def TYPE_STR(self):
-            return self.getToken(Ah5Parser.TYPE_STR, 0)
-
-        def TYPE_LIST(self):
-            return self.getToken(Ah5Parser.TYPE_LIST, 0)
+        def TYPE_DEC(self):
+            return self.getToken(Ah5Parser.TYPE_DEC, 0)
 
         def TYPE_DICT(self):
             return self.getToken(Ah5Parser.TYPE_DICT, 0)
 
+        def TYPE_HEX(self):
+            return self.getToken(Ah5Parser.TYPE_HEX, 0)
+
+        def TYPE_INSTANCE(self):
+            return self.getToken(Ah5Parser.TYPE_INSTANCE, 0)
+
+        def TYPE_INT(self):
+            return self.getToken(Ah5Parser.TYPE_INT, 0)
+
+        def TYPE_LIST(self):
+            return self.getToken(Ah5Parser.TYPE_LIST, 0)
+
+        def TYPE_METHOD(self):
+            return self.getToken(Ah5Parser.TYPE_METHOD, 0)
+
+        def TYPE_NONE(self):
+            return self.getToken(Ah5Parser.TYPE_NONE, 0)
+
+        def TYPE_PYTHONIC(self):
+            return self.getToken(Ah5Parser.TYPE_PYTHONIC, 0)
+
+        def TYPE_STR(self):
+            return self.getToken(Ah5Parser.TYPE_STR, 0)
+
+        def TYPE_THREAD(self):
+            return self.getToken(Ah5Parser.TYPE_THREAD, 0)
+
         def getRuleIndex(self):
-            return Ah5Parser.RULE_symbol_type
+            return Ah5Parser.RULE_data_type
 
         def enterRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "enterSymbol_type" ):
-                listener.enterSymbol_type(self)
+            if hasattr( listener, "enterData_type" ):
+                listener.enterData_type(self)
 
         def exitRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "exitSymbol_type" ):
-                listener.exitSymbol_type(self)
+            if hasattr( listener, "exitData_type" ):
+                listener.exitData_type(self)
 
         def accept(self, visitor:ParseTreeVisitor):
-            if hasattr( visitor, "visitSymbol_type" ):
-                return visitor.visitSymbol_type(self)
+            if hasattr( visitor, "visitData_type" ):
+                return visitor.visitData_type(self)
             else:
                 return visitor.visitChildren(self)
 
 
 
 
-    def symbol_type(self):
+    def data_type(self):
 
-        localctx = Ah5Parser.Symbol_typeContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 82, self.RULE_symbol_type)
+        localctx = Ah5Parser.Data_typeContext(self, self._ctx, self.state)
+        self.enterRule(localctx, 82, self.RULE_data_type)
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)

@@ -377,12 +377,12 @@ class Ah5Listener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by Ah5Parser#symbol_type.
-    def enterSymbol_type(self, ctx:Ah5Parser.Symbol_typeContext):
+    # Enter a parse tree produced by Ah5Parser#data_type.
+    def enterData_type(self, ctx:Ah5Parser.Data_typeContext):
         pass
 
-    # Exit a parse tree produced by Ah5Parser#symbol_type.
-    def exitSymbol_type(self, ctx:Ah5Parser.Symbol_typeContext):
+    # Exit a parse tree produced by Ah5Parser#data_type.
+    def exitData_type(self, ctx:Ah5Parser.Data_typeContext):
         pass
 
 

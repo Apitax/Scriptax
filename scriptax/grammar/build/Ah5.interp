@@ -49,7 +49,7 @@ null
 '#'
 '->'
 '@'
-'...'
+'..'
 null
 null
 null
@@ -244,7 +244,7 @@ optional_parameter
 dict_signal
 casting
 assignment_statement
-symbol_type
+data_type
 atom_obj_dict
 atom_obj_list
 atom_obj_enum

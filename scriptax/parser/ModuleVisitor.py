@@ -1,8 +1,7 @@
 from apitaxcore.models.Options import Options
 
-from scriptax.grammar.build.Ah5Parser import Ah5Parser as AhParser, Ah5Parser
+from scriptax.grammar.build.Ah5Parser import Ah5Parser as AhParser
 from scriptax.parser.SymbolTable import SymbolTable
-from typing import List
 
 from scriptax.parser.Visitor import AhVisitor
 
@@ -15,10 +14,17 @@ class ModuleParser(AhVisitor):
         self.visit(ctx.script_structure())
 
     def visitScript_structure(self, ctx: AhParser.Script_structureContext):
-        self.visit(ctx.root_level_statements())
+        self.visit(ctx.statements())
 
-    def visitRoot_level_statements(self, ctx: AhParser.Root_level_statementsContext):
+    def visitStatements(self, ctx: AhParser.StatementsContext):
         i = 0
-        while ctx.method_def_atom(i):
-            self.visit(ctx.method_def_atom(i))
-            i += 1
+        while ctx.statement(i):
+            self.visit(ctx.statement(i))
+
+    def visitStatement(self, ctx: AhParser.StatementContext):
+        if ctx.non_terminated():
+            self.visit(ctx.non_terminated())
+
+    def visitNon_terminated(self, ctx: AhParser.Non_terminatedContext):
+        if ctx.method_def_statement():
+            self.visit(ctx.method_def_statement())

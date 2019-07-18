@@ -5,3 +5,4 @@ class Attributes(BaseModel):
     script: bool = False
     static: bool = False
     asynchronous: bool = False
+    strict_return_type: str = None

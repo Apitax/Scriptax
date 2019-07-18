@@ -90,9 +90,9 @@ callback_block : EXECUTEOPEN statements EXECUTECLOSE ;
 
 // seperataition between callback blocks and regular blocks
 
-method_def_atom : symbol_type? LPAREN flexible_parameter_block RPAREN ARROW block ;
+method_def_atom : data_type? LPAREN flexible_parameter_block RPAREN ARROW block ;
 
-method_def_statement : attributes symbol_type? label LPAREN flexible_parameter_block RPAREN block ;
+method_def_statement : attributes data_type? label LPAREN flexible_parameter_block RPAREN block ;
 
 flow :
       if_statement
@@ -136,7 +136,7 @@ log_statement : LOG LPAREN expr RPAREN ;
 
 flexible_parameter_block : flexible_parameter? (COMMA flexible_parameter)* ; // used to be sig
 
-flexible_parameter : symbol_type? (required_parameter | optional_parameter) ;
+flexible_parameter : data_type? (required_parameter | optional_parameter) ;
 
 import_statement : (FROM label)? IMPORT labels (AS label)? ;
 
@@ -157,10 +157,10 @@ optional_parameter : labels EQUAL expr ;
 
 dict_signal : SIGNAL (atom_obj_dict | labels) ;
 
-casting : symbol_type LPAREN expr RPAREN ;
+casting : data_type LPAREN expr RPAREN ;
 
 assignment_statement :
-      symbol_type? labels ((
+      data_type? labels ((
         (SOPEN SCLOSE)? EQUAL
         | PE
         | ME
@@ -168,20 +168,21 @@ assignment_statement :
         | DE
       ) expr | D_PLUS | D_MINUS);
 
-symbol_type :
-    TYPE_INT
-    | TYPE_DEC
+data_type :
+    TYPE_ANY
     | TYPE_BOOL
+    | TYPE_DEC
+    | TYPE_DICT
     | TYPE_HEX
-    | TYPE_NONE
-    | TYPE_THREAD
-    | TYPE_METHOD
     | TYPE_INSTANCE
-    | TYPE_PYTHONIC
-    | TYPE_ANY
-    | TYPE_STR
+    | TYPE_INT
     | TYPE_LIST
-    | TYPE_DICT ;
+    | TYPE_METHOD
+    | TYPE_NONE
+    | TYPE_PYTHONIC
+    | TYPE_STR
+    | TYPE_THREAD ;
+
 
 atom_obj_dict : BLOCKOPEN ((label | expr) COLON expr)? (COMMA ((label | expr) COLON expr)?)* BLOCKCLOSE ;
 

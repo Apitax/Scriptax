@@ -7,13 +7,14 @@ from pydantic import BaseModel
 
 from scriptax.exceptions.SymbolNotFound import SymbolNotFound
 from scriptax.exceptions.InvalidSymbolAccess import InvalidSymbolAccess
+from scriptax.exceptions.InvalidType import InvalidType
 from scriptax.models.Parameter import Parameter
 from scriptax.models.Attributes import Attributes
 from scriptax.parser.symbols.ARISymbolTable import ARISymbolTable as GenericTable
 from scriptax.parser.symbols.ARISymbolTable import create_table as create_generic_table
 from scriptax.parser.symbols.SymbolScope import SymbolScope, SCOPE_MODULE, SCOPE_BLOCK
-from scriptax.parser.symbols.Symbol import Symbol, DATA_DICT, DATA_LIST, DATA_INSTANCE, DATA_PYTHONIC, DATA_THREAD, \
-    DATA_METHOD, SYMBOL_VAR, SYMBOL_MODULE
+from scriptax.parser.symbols.Symbol import Symbol, value_to_type, DATA_DICT, DATA_LIST, DATA_INSTANCE, DATA_PYTHONIC, \
+    DATA_THREAD, DATA_METHOD, DATA_ANY, SYMBOL_VAR, SYMBOL_MODULE
 
 
 class SymbolTable(GenericTable):
@@ -152,13 +153,15 @@ class SymbolTable(GenericTable):
 
         return symbol.value
 
-    def set_symbol(self, name: str, value, type=SYMBOL_VAR):
+    def set_symbol(self, name: str, value, type=SYMBOL_VAR, strict_type=None):
         """
         Set's the value of an existing symbol, creates the symbol if it does not exist yet, handles LIST and DICT as well
         """
 
         name: list = self.make_and_verify_name(name)
         scope: SymbolScope = self.traverse_up(name)
+
+        actual_type = value_to_type(value)
 
         # See if a symbol already exists, if not, it excepts and will insert a new symbol
         try:
@@ -169,8 +172,23 @@ class SymbolTable(GenericTable):
                 raise InvalidSymbolAccess(
                     "Variable access contains too many components for uninitialized subcomponent `" + "".join(
                         name) + "`. Scriptax.SymbolTable@set_symbol")
-            scope.insert_symbol(Symbol(name=name[0], value=value))
+
+            # Sets the symbol attributes based on whether or not we are using strict typing
+            attributes = {}
+            if strict_type:
+                attributes = {'strict_type': strict_type}
+                if actual_type != strict_type and strict_type != DATA_ANY:
+                    raise InvalidType(
+                        "Variable type declared as `" + str(strict_type) + "` but value is of type `" + str(
+                            actual_type) + "`. Scriptax.SymbolTable@set_symbol")
+
+            scope.insert_symbol(Symbol(name=name[0], value=value, attributes=attributes))
             return
+
+        # If we are not inserting a brand new symbol, and we are using strict typing, then fail
+        if strict_type:
+            raise InvalidType("Variable `" + "".join(
+                name) + "` which has been declared previously cannot be retyped. Scriptax.SymbolTable@set_symbol")
 
         # If a symbol already exists, this section will modify its value
         try:
@@ -192,16 +210,24 @@ class SymbolTable(GenericTable):
                 elif symbol.data_type == DATA_DICT:
                     symbol.value[str(index)] = value
                 # If the symbol is a LIST, add it via numeric index
-                elif symbol.data_type == DATA_DICT:
+                elif symbol.data_type == DATA_LIST:
                     symbol.value[int(index)] = value
                 # If the symbol is any other type, then we should not be able to apply another name component to it,
                 #   thus it is an error
                 else:
                     raise InvalidSymbolAccess("Unsupported symbol access `" + index + "` for symbol value `" + str(
                         symbol.value) + "`. Scriptax.SymbolTable@set_symbol")
+
             else:
                 # If the name has no more components, we have already found the symbol we want to modify
                 symbol.value = value
+
+            # Deal with ensuring the type we just set is according to the strict type if applicable
+            if 'strict_type' in symbol.attributes and symbol.attributes['strict_type'] != actual_type and \
+                    symbol.attributes['strict_type'] != DATA_ANY:
+                raise InvalidType("Variable type previously declared as `" + str(
+                    symbol.attributes['strict_type']) + "` but value is of type `" + str(
+                    actual_type) + "`. Scriptax.SymbolTable@set_symbol")
         except:
             raise InvalidSymbolAccess("Altering existing symbol failed. Scriptax.SymbolTable@set_symbol")
 

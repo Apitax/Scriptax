@@ -6,3 +6,4 @@ class Parameter(BaseModel):
     name: str
     required: bool = False
     value: Any = None
+    strict_type: str = None

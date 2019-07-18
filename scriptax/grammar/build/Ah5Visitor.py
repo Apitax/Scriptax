@@ -214,8 +214,8 @@ class Ah5Visitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by Ah5Parser#symbol_type.
-    def visitSymbol_type(self, ctx:Ah5Parser.Symbol_typeContext):
+    # Visit a parse tree produced by Ah5Parser#data_type.
+    def visitData_type(self, ctx:Ah5Parser.Data_typeContext):
         return self.visitChildren(ctx)
 
 
