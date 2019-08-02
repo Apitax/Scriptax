@@ -4,7 +4,8 @@ from typing import Any
 import threading
 
 # Data Types
-DATA_NUMBER = 'number'
+DATA_INT = 'int'
+DATA_DECIMAL = 'decimal'
 DATA_BOOLEAN = 'boolean'
 DATA_HEX = 'hex'
 DATA_NONE = 'none'
@@ -39,8 +40,10 @@ def value_to_type(value):
     from scriptax.parser.symbols.SymbolScope import SymbolScope
     if type(value) is bool:
         return DATA_BOOLEAN
-    if isinstance(value, (float, int)):
-        return DATA_NUMBER
+    if isinstance(value, int):
+        return DATA_INT
+    if isinstance(value, float):
+        return DATA_DECIMAL
     if isinstance(value, str) and value[:2].lower() == '0x':
         return DATA_HEX
     if isinstance(value, str):
@@ -58,6 +61,12 @@ def value_to_type(value):
     if isinstance(value, SymbolScope):
         return DATA_INSTANCE
     return DATA_PYTHONIC
+
+
+def is_similar_types(value, strict_type: str) -> bool:
+    if strict_type != DATA_ANY and value_to_type(value) != strict_type:
+        return False
+    return True
 
 
 class Symbol:

@@ -10,10 +10,11 @@ from scriptax.exceptions.InvalidSymbolAccess import InvalidSymbolAccess
 from scriptax.exceptions.InvalidType import InvalidType
 from scriptax.models.Parameter import Parameter
 from scriptax.models.Attributes import Attributes
+from scriptax.models.Method import Method
 from scriptax.parser.symbols.ARISymbolTable import ARISymbolTable as GenericTable
 from scriptax.parser.symbols.ARISymbolTable import create_table as create_generic_table
 from scriptax.parser.symbols.SymbolScope import SymbolScope, SCOPE_MODULE, SCOPE_BLOCK
-from scriptax.parser.symbols.Symbol import Symbol, value_to_type, DATA_DICT, DATA_LIST, DATA_INSTANCE, DATA_PYTHONIC, \
+from scriptax.parser.symbols.Symbol import Symbol, value_to_type, is_similar_types, DATA_DICT, DATA_LIST, DATA_INSTANCE, DATA_PYTHONIC, \
     DATA_THREAD, DATA_METHOD, DATA_ANY, SYMBOL_VAR, SYMBOL_MODULE
 
 
@@ -177,7 +178,7 @@ class SymbolTable(GenericTable):
             attributes = {}
             if strict_type:
                 attributes = {'strict_type': strict_type}
-                if actual_type != strict_type and strict_type != DATA_ANY:
+                if not is_similar_types(value, strict_type):
                     raise InvalidType(
                         "Variable type declared as `" + str(strict_type) + "` but value is of type `" + str(
                             actual_type) + "`. Scriptax.SymbolTable@set_symbol")
@@ -223,11 +224,12 @@ class SymbolTable(GenericTable):
                 symbol.value = value
 
             # Deal with ensuring the type we just set is according to the strict type if applicable
-            if 'strict_type' in symbol.attributes and symbol.attributes['strict_type'] != actual_type and \
-                    symbol.attributes['strict_type'] != DATA_ANY:
+            if 'strict_type' in symbol.attributes and not is_similar_types(value, symbol.attributes['strict_type']):
                 raise InvalidType("Variable type previously declared as `" + str(
                     symbol.attributes['strict_type']) + "` but value is of type `" + str(
                     actual_type) + "`. Scriptax.SymbolTable@set_symbol")
+        except InvalidType as ex:
+            raise ex
         except:
             raise InvalidSymbolAccess("Altering existing symbol failed. Scriptax.SymbolTable@set_symbol")
 
@@ -326,6 +328,7 @@ class SymbolTable(GenericTable):
         Returns the method body
         """
 
+        # If the method is on a composition based variable
         if self.has_symbol(name, SYMBOL_MODULE):
             module_import: Import = self.get_symbol(name, type=SYMBOL_MODULE, as_value=False).value
             scope = module_import.scope
@@ -419,7 +422,7 @@ class SymbolTable(GenericTable):
         while isinstance(method.value, Symbol) and method.value.data_type == DATA_METHOD:
             method = method.value
 
-        if method.data_type != DATA_METHOD:
+        if not (method.data_type == DATA_PYTHONIC and isinstance(method.value, Method)) and method.data_type != DATA_METHOD:
             raise InvalidSymbolAccess(
                 "Cannot execute non executable data type `" + method.data_type + "`. Scriptax.SymbolTable@execute")
 
@@ -439,6 +442,9 @@ class SymbolTable(GenericTable):
 
         # Sets up the dynamic links from the currently executing code to the called method
         self.call(method_scope)
+
+        if method.data_type == DATA_PYTHONIC and isinstance(method.value, Method):
+            return method.value.ctx
 
         # Returns the body method such that some parser or compiler can execute its body
         return method.value

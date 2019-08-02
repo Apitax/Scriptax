@@ -224,6 +224,11 @@ class Ah5Visitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by Ah5Parser#dict_comp.
+    def visitDict_comp(self, ctx:Ah5Parser.Dict_compContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by Ah5Parser#atom_obj_list.
     def visitAtom_obj_list(self, ctx:Ah5Parser.Atom_obj_listContext):
         return self.visitChildren(ctx)

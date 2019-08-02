@@ -20,6 +20,24 @@ def test_dict_2():
                                    "test5": "0xABCDEF1234567890", "test6": True, "test7": False}
 
 
+def test_dict_3():
+    scriptax = '''
+    test = {test: "worked"};
+    return test;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == {"test": "worked"}
+
+
+def test_dict_4():
+    scriptax = '''
+    test = {test: "worked", "day": "night", yes: "no"};
+    return test;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == {"test": "worked", "day": "night", "yes": "no"}
+
+
 def test_dict_access():
     scriptax = '''
     test = {"test": "worked"};

@@ -395,6 +395,15 @@ class Ah5Listener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by Ah5Parser#dict_comp.
+    def enterDict_comp(self, ctx:Ah5Parser.Dict_compContext):
+        pass
+
+    # Exit a parse tree produced by Ah5Parser#dict_comp.
+    def exitDict_comp(self, ctx:Ah5Parser.Dict_compContext):
+        pass
+
+
     # Enter a parse tree produced by Ah5Parser#atom_obj_list.
     def enterAtom_obj_list(self, ctx:Ah5Parser.Atom_obj_listContext):
         pass

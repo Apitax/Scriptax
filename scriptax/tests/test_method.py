@@ -318,7 +318,7 @@ def test_method_22():
 
 def test_method_23():
     scriptax = '''
-    my_method = script other_test() {
+    my_method = () -> {
         return "worked";
     };
     return my_method();
@@ -333,7 +333,7 @@ def test_method_24():
     {
         return my_callback();
     }
-    my_method = script other_test() {
+    my_method = () -> {
         return "worked";
     };
     return test(my_callback=my_method);
@@ -344,7 +344,7 @@ def test_method_24():
 
 def test_method_25():
     scriptax = '''
-    script static async test_method(my_callback = script other_test() {return "worked";})
+    script static async test_method(my_callback = () -> {return "worked";})
     {
         return my_callback();
     }
@@ -356,7 +356,7 @@ def test_method_25():
 
 def test_method_26():
     scriptax = '''
-    script static async test_method(my_callback = script other_test(temp = "worked") {return temp;})
+    script static async test_method(my_callback = (temp = "worked") -> {return temp;})
     {
         return my_callback();
     }
@@ -368,7 +368,7 @@ def test_method_26():
 
 def test_method_27():
     scriptax = '''
-    script static async test_method(my_callback = script other_test(temp = "worked") {return temp;})
+    script static async test_method(my_callback = (temp = "worked") -> {return temp;})
     {
         return my_callback(temp="test");
     }
@@ -376,3 +376,47 @@ def test_method_27():
     '''
     block_status, visitor = execute(scriptax)
     assert block_status.result == "test"
+
+
+def test_method_28():
+    scriptax = '''
+    script other_test()
+    {
+        return "worked";
+    }
+    
+    my_callback = other_test;
+    
+    script static async test_method(my_callback)
+    {
+        return my_callback();
+    }
+    
+    test = test_method;
+   
+    return test(my_callback = my_callback);
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == "worked"
+
+
+def test_method_29():
+    scriptax = '''
+    script other_test()
+    {
+        return "worked";
+    }
+
+    my_callback = other_test;
+
+    script static async test_method(my_callback)
+    {
+        return my_callback();
+    }
+
+    test = test_method;
+
+    return test(my_callback = my_callback);
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == "worked"

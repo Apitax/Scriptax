@@ -120,3 +120,30 @@ def test_inheritance_11():
     '''
     block_status, visitor = execute(scriptax)
     assert block_status.result == "day and night"
+
+
+def test_inheritance_12():
+    scriptax = '''
+    from scriptax import second_layer;
+    extend second_layer;
+    script str override_me() {
+        return "child";
+    }
+    return override_me();
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == "child"
+
+
+def test_inheritance_13():
+    scriptax = '''
+    from scriptax import second_layer;
+    extend second_layer;
+    script str override_me() {
+        return "child";
+    }
+    return super.override_me();
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == "parent"
+

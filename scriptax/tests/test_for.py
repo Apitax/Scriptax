@@ -151,3 +151,71 @@ def test_for_11():
     '''
     block_status, visitor = execute(scriptax)
     assert block_status.result == [{'well': True, 'id': 1}, {'well': True, 'id': 3}]
+
+
+def test_for_12():
+    scriptax = '''
+    test = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    worked = [];
+    for i in test, 100 {
+        if(i < 10)
+            worked[] = i;
+    }
+    return worked;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+
+def test_for_13():
+    scriptax = '''
+    test = {day: "night", yes: "no"};
+    worked = [];
+    for key, value in test {
+        worked[] = key;
+    }
+    return worked;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == ["day", "yes"]
+
+
+def test_for_14():
+    scriptax = '''
+    test = {day: "night", yes: "no"};
+    worked = [];
+    for key, value in test {
+        worked[] = value;
+    }
+    return worked;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == ["night", "no"]
+
+
+def test_for_15():
+    scriptax = '''
+    test = {day: "night", yes: "no"};
+    worked = [];
+    for value in test {
+        worked[] = value;
+    }
+    return worked;
+    '''
+    try:
+        block_status, visitor = execute(scriptax)
+        assert False
+    except:
+        assert True
+
+
+def test_for_16():
+    scriptax = '''
+    worked = [];
+    for(value in range(0, 10)) {
+        worked[] = value;
+    }
+    return worked;
+    '''
+    block_status, visitor = execute(scriptax)
+    assert block_status.result == [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]

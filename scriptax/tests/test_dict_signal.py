@@ -8,7 +8,7 @@ def test_dict_signal():
         return one + two + three;
     }
     mydict = {"one": "what ", "two": "is ", "three": "this."};
-    return test(...mydict);
+    return test(..mydict);
     '''
     block_status, visitor = execute(scriptax)
     assert block_status.result == "what is this."
@@ -22,7 +22,7 @@ def test_dict_signal_2():
     }
     mydict = {"two": "is ", "four": " Neat."};
     mydict2 = {"three": "this."};
-    return test(...mydict2, one="huh what ", ...mydict);
+    return test(..mydict2, one="huh what ", ..mydict);
     '''
     block_status, visitor = execute(scriptax)
     assert block_status.result == "huh what is this. Neat."

@@ -20,6 +20,7 @@ class ModuleParser(AhVisitor):
         i = 0
         while ctx.statement(i):
             self.visit(ctx.statement(i))
+            i += 1
 
     def visitStatement(self, ctx: AhParser.StatementContext):
         if ctx.non_terminated():

@@ -35,7 +35,6 @@ expr :
       | expr (EQ | NEQ) expr
       | expr AND expr
       | expr OR expr
-      | atom_create_instance
       | runnable_statements
       | casting
       | count
@@ -80,7 +79,7 @@ non_terminated : flow | method_def_statement ;
 
 // Seperation between big chunks and callback blocks
 
-method_call_statement : (SUPER)? labels LPAREN optional_parameters_block RPAREN (DOT method_call_statement)* ;
+method_call_statement : (SUPER DOT)? labels LPAREN optional_parameters_block RPAREN (DOT method_call_statement)* ;
 
 each_statement : EACH (expr | LPAREN expr RPAREN) atom_callback ; // each loops are threaded
 
@@ -178,13 +177,15 @@ data_type :
     | TYPE_INT
     | TYPE_LIST
     | TYPE_METHOD
-    | TYPE_NONE
+    | NONE
     | TYPE_PYTHONIC
     | TYPE_STR
     | TYPE_THREAD ;
 
 
-atom_obj_dict : BLOCKOPEN ((label | expr) COLON expr)? (COMMA ((label | expr) COLON expr)?)* BLOCKCLOSE ;
+atom_obj_dict : BLOCKOPEN dict_comp? (COMMA dict_comp)* COMMA? BLOCKCLOSE ;
+
+dict_comp : ((label | expr) COLON expr) ;
 
 atom_obj_list : SOPEN expr? (COMMA expr?)* SCLOSE ;
 
@@ -332,7 +333,6 @@ TYPE_DEC : D E C ;
 TYPE_STR : S T R ;
 TYPE_BOOL : B O O L ;
 TYPE_HEX : H E X ;
-TYPE_NONE : N O N E ;
 TYPE_THREAD : T H R E A D ;
 TYPE_METHOD : M E T H O D ;
 TYPE_INSTANCE : I N S T A N C E ;

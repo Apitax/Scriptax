@@ -60,6 +60,12 @@ class Scriptax(Driver):
         if self.isDriverScriptable():
             return self.handleDriverScript(command)
 
+    def test_scriptax_access(self, param: str) -> str:
+        return param + " worked"
+
+    def test_scriptax_access_2(self) -> str:
+        return "worked"
+
     def getDriverScript(self, path: str) -> InputStream:
         path = Path(Path(__file__).resolve().parents[2]).joinpath('tests', 'scriptax', path)
         return read_file(path)

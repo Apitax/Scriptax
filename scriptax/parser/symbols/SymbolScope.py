@@ -331,7 +331,8 @@ class SymbolScope:
         """
         Prints the scope debug information
         """
-        print(self.get_scope_debug())
+        import json
+        print(json.dumps(self.get_scope_debug(), indent=2))
 
     def print_call_stack(self):
         """

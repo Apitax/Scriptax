@@ -11,4 +11,9 @@ script big_test()
     return "worked " + base_method();
 }
 
+script override_me()
+{
+    return "parent";
+}
+
 test = "worked";
