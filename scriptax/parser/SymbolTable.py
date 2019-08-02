@@ -11,11 +11,41 @@ from scriptax.exceptions.InvalidType import InvalidType
 from scriptax.models.Parameter import Parameter
 from scriptax.models.Attributes import Attributes
 from scriptax.models.Method import Method
+from scriptax.models.Label import Label
 from scriptax.parser.symbols.ARISymbolTable import ARISymbolTable as GenericTable
 from scriptax.parser.symbols.ARISymbolTable import create_table as create_generic_table
 from scriptax.parser.symbols.SymbolScope import SymbolScope, SCOPE_MODULE, SCOPE_BLOCK
-from scriptax.parser.symbols.Symbol import Symbol, value_to_type, is_similar_types, DATA_DICT, DATA_LIST, DATA_INSTANCE, DATA_PYTHONIC, \
+from scriptax.parser.symbols.Symbol import Symbol, value_to_type, is_similar_types, DATA_DICT, DATA_LIST, DATA_INSTANCE, \
+    DATA_PYTHONIC, \
     DATA_THREAD, DATA_METHOD, DATA_ANY, SYMBOL_VAR, SYMBOL_MODULE
+
+
+def resolve_label(label) -> str:
+    """
+    Resolves a name
+    """
+    name: str = ""
+    if not isinstance(label, str):
+        if isinstance(label, list):
+            for comp in label:
+                if len(name) < 1:
+                    name += comp.name
+                else:
+                    name += "." + comp.name
+        elif isinstance(label, Label):
+            name = label.name
+        else:
+            raise Exception("Invalid Label. SymbolTable@resolve_label")
+    else:
+        name = label
+    return name
+
+
+def copy_label(label: List[Label]) -> List[Label]:
+    labels: List[Label] = []
+    for l in label:
+        labels.append(Label(name=l.name, start=l.start, stop=l.stop))
+    return labels
 
 
 class SymbolTable(GenericTable):
@@ -25,40 +55,39 @@ class SymbolTable(GenericTable):
 
     def __init__(self, name=None, type=SCOPE_MODULE):
         super().__init__(name, type)
-        self.up_words = ['parent', 'self', 'this', 'me']
+        self.up_words = ['self', 'this']
 
-    def name_has_up(self, name: list) -> bool:
+    def name_has_up(self, label: List[Label]) -> bool:
         """
         Returns whether or not the name has an 'up' keyword anywhere in it
         """
-        return any(keyword in self.up_words for keyword in name)
+        return any(keyword.name in self.up_words for keyword in label)
 
-    def is_name_valid(self, name: list) -> bool:
+    def is_name_valid(self, label: List[Label]) -> bool:
         """
         Verifies a name to be valid
         Ensures that only the first name element is an 'up' keyword
         """
-        if self.name_has_up(name[1:]):
+        if self.name_has_up(label[1:]):
             return False
         return True
 
-    def make_and_verify_name(self, name: str) -> list:
+    def verify_name(self, label: List[Label]):
         """
         Splits a string name into a list name
         Also verifies the name has broadly correct syntax.
         """
-        comps = name.strip().split('.')
-        if not self.is_name_valid(comps):
-            raise InvalidSymbolAccess("Invalid symbol access `" + name + "` Scriptax.SymbolTable@make_and_verify_name")
-        return comps
+        if not self.is_name_valid(label):
+            raise InvalidSymbolAccess(
+                "Invalid symbol access `" + resolve_label(label) + "` Scriptax.SymbolTable@make_and_verify_name")
 
-    def traverse_up(self, name: list) -> SymbolScope:
+    def traverse_up(self, label: List[Label]) -> SymbolScope:
         """
         Returns the proper static parent scope based on up traversals
         Because name is a mutable list, it will return without any up traversal keywords left in it
         """
         scope = self.scope()
-        while len(name) > 0 and self.name_has_up([name[0]]):
+        while len(label) > 0 and self.name_has_up([label[0]]):
             while scope.type != SCOPE_MODULE:
                 old_scope = scope
                 scope = scope.scope_parent
@@ -66,14 +95,14 @@ class SymbolTable(GenericTable):
                     print(old_scope.name)
                     raise InvalidSymbolAccess(
                         "Invalid symbol access. Too many up traversals. Scriptax.SymbolTable@traverse_up")
-            name.pop(0)
+            label.pop(0)
         return scope
 
     def _get_parent_module(self) -> SymbolScope:
         """
         Returns the parent module within this static scope
         """
-        name = [self.up_words[0]]
+        name = [Label(name=self.up_words[0])]
         return self.traverse_up(name)
 
     def get_nearest_module(self) -> SymbolScope:
@@ -85,10 +114,12 @@ class SymbolTable(GenericTable):
             return self.scope()
         return self._get_parent_module()
 
-    def search_scope_for_symbol(self, scope: SymbolScope, name: str, type=SYMBOL_VAR) -> Symbol:
+    def search_scope_for_symbol(self, scope: SymbolScope, label: Label, type=SYMBOL_VAR) -> Symbol:
         """
         Traverses through a scope and its appropriate static parents to try and find a symbol
         """
+        name: str = label.name
+
         while scope:
             # If symbol is in current scope, then return
             if scope.has_symbol(name, symbol_type=type):
@@ -107,72 +138,93 @@ class SymbolTable(GenericTable):
                 raise SymbolNotFound(
                     "Cannot find symbol `" + name + "` inside of scope `" + scope.name + "`. Scriptax.SymbolTable@search_scope_for_symbol")
 
-    def search_symbol_for_value(self, symbol: Symbol, name: list, type=SYMBOL_VAR):
+    def search_symbol_for_value(self, symbol: Symbol, label: List[Label], type=SYMBOL_VAR):
         """
         Traverses through symbol values to try and find a value
         """
+        label = copy_label(label)
 
         # One at a time, loops through each component of the name
-        while len(name) > 0:
-            # If the current symbol is of type INSTANCE (Storing another scope)
-            if symbol.data_type == DATA_INSTANCE:
-                symbol = self.search_scope_for_symbol(symbol.value, name[0], type)
+        while len(label) > 0:
+            if label[0].name:
+                # If the current symbol is of type INSTANCE (Storing another scope)
+                if symbol.data_type == DATA_INSTANCE:
+                    symbol = self.search_scope_for_symbol(symbol.value, label[0], type)
 
-            # If current scope is of type LIST
-            elif symbol.data_type == DATA_LIST:
-                try:
-                    symbol = symbol.value[int(name[0])]
-                except:
-                    raise InvalidSymbolAccess("Invalid list access `" + name[0] + "` for symbol value `" + str(
-                        symbol.value) + "`. Scriptax.SymbolTable@search_symbol_for_value")
+                # If current scope is of type LIST
+                elif symbol.data_type == DATA_LIST:
+                    try:
+                        symbol = symbol.value[int(label[0].name)]
+                    except:
+                        raise InvalidSymbolAccess(
+                            "Invalid list access `" + label[0].name + "` for symbol value `" + str(
+                                symbol.value) + "`. Scriptax.SymbolTable@search_symbol_for_value")
+                    if not isinstance(symbol, Symbol):
+                        symbol = Symbol(name=label[0].name, value=symbol)
+
+                # If current scope is of type DICT
+                elif symbol.data_type == DATA_DICT:
+                    try:
+                        symbol = symbol.value[str(label[0].name)]
+                    except:
+                        raise InvalidSymbolAccess(
+                            "Invalid dict access `" + label[0].name + "` for symbol value `" + str(
+                                symbol.value) + "`. Scriptax.SymbolTable@search_symbol_for_value")
+                    if not isinstance(symbol, Symbol):
+                        symbol = Symbol(name=label[0].name, value=symbol)
+
+                # If current scope is of type PYTHONIC
+                elif symbol.data_type == DATA_PYTHONIC:
+                    symbol = Symbol(name=label[0].name, value=None)
+
+                # If current scope is of type THREAD
+                elif symbol.data_type == DATA_THREAD:
+                    symbol = Symbol(name=label[0].name, value=None)
+
+                else:
+                    raise InvalidSymbolAccess(
+                        "Unsupported symbol access `" + label[0].name + "` for symbol value `" + str(
+                            symbol.value) + "`. Scriptax.SymbolTable@search_symbol_for_value")
+            elif label[0].start or label[0].stop:
+                if symbol.data_type != DATA_LIST:
+                    raise Exception("Cannot slice non-lists. Scriptax.SymbolTable@search_symbol_for_value")
+                if label[0].start and label[0].stop:
+                    symbol = symbol.value[label[0].start:label[0].stop]
+                elif label[0].start:
+                    symbol = symbol.value[label[0].start:]
+                elif label[0].stop:
+                    symbol = symbol.value[:label[0].stop]
+
                 if not isinstance(symbol, Symbol):
-                    symbol = Symbol(name=name[0], value=symbol)
-
-            # If current scope is of type DICT
-            elif symbol.data_type == DATA_DICT:
-                try:
-                    symbol = symbol.value[str(name[0])]
-                except:
-                    raise InvalidSymbolAccess("Invalid dict access `" + name[0] + "` for symbol value `" + str(
-                        symbol.value) + "`. Scriptax.SymbolTable@search_symbol_for_value")
-                if not isinstance(symbol, Symbol):
-                    symbol = Symbol(name=name[0], value=symbol)
-
-            # If current scope is of type PYTHONIC
-            elif symbol.data_type == DATA_PYTHONIC:
-                symbol = Symbol(name=name[0], value=None)
-
-            # If current scope is of type THREAD
-            elif symbol.data_type == DATA_THREAD:
-                symbol = Symbol(name=name[0], value=None)
-
+                    symbol = Symbol(name="slice", value=symbol)
             else:
-                raise InvalidSymbolAccess("Unsupported symbol access `" + name[0] + "` for symbol value `" + str(
-                    symbol.value) + "`. Scriptax.SymbolTable@search_symbol_for_value")
+                raise Exception("Invalid label. Scriptax.SymbolTable@search_symbol_for_value")
 
-            name.pop(0)
+            label.pop(0)
 
         return symbol.value
 
-    def set_symbol(self, name: str, value, type=SYMBOL_VAR, strict_type=None):
+    def set_symbol(self, label: List[Label], value, type=SYMBOL_VAR, strict_type=None):
         """
         Set's the value of an existing symbol, creates the symbol if it does not exist yet, handles LIST and DICT as well
         """
 
-        name: list = self.make_and_verify_name(name)
-        scope: SymbolScope = self.traverse_up(name)
+        label = copy_label(label)
+
+        self.verify_name(label)
+        scope: SymbolScope = self.traverse_up(label)
 
         actual_type = value_to_type(value)
 
         # See if a symbol already exists, if not, it excepts and will insert a new symbol
         try:
-            symbol: Symbol = self.search_scope_for_symbol(scope, name[0], type)
+            symbol: Symbol = self.search_scope_for_symbol(scope, label[0], type)
         except:
             # If we are inserting a new symbol, then the symbol name must only have a single component
-            if len(name) > 1:
+            if len(label) > 1:
                 raise InvalidSymbolAccess(
-                    "Variable access contains too many components for uninitialized subcomponent `" + "".join(
-                        name) + "`. Scriptax.SymbolTable@set_symbol")
+                    "Variable access contains too many components for uninitialized subcomponent `" + resolve_label(
+                        label) + "`. Scriptax.SymbolTable@set_symbol")
 
             # Sets the symbol attributes based on whether or not we are using strict typing
             attributes = {}
@@ -183,24 +235,24 @@ class SymbolTable(GenericTable):
                         "Variable type declared as `" + str(strict_type) + "` but value is of type `" + str(
                             actual_type) + "`. Scriptax.SymbolTable@set_symbol")
 
-            scope.insert_symbol(Symbol(name=name[0], value=value, attributes=attributes))
+            scope.insert_symbol(Symbol(name=label[0].name, value=value, attributes=attributes))
             return
 
         # If we are not inserting a brand new symbol, and we are using strict typing, then fail
         if strict_type:
-            raise InvalidType("Variable `" + "".join(
-                name) + "` which has been declared previously cannot be retyped. Scriptax.SymbolTable@set_symbol")
+            raise InvalidType("Variable `" + resolve_label(
+                label) + "` which has been declared previously cannot be retyped. Scriptax.SymbolTable@set_symbol")
 
         # If a symbol already exists, this section will modify its value
         try:
             # Pops the name we used to find the starting symbol from the first try/except above
-            name.pop(0)
+            label.pop(0)
             # If the name still has more components, then we haven't yet found the right value to modify
-            if len(name) > 0:
+            if len(label) > 0:
                 # Index holds the last component in the name
-                index = name[-1]
+                index = label[-1].name
                 # Finds the symbol corresponding to the name excluding the last name component
-                symbol = Symbol(name="".join(name), value=self.search_symbol_for_value(symbol, name[:-1], type))
+                symbol = Symbol(name=resolve_label(label), value=self.search_symbol_for_value(symbol, label[:-1], type))
                 # If the symbol is an INSTANCE (Another scope), then find the symbol in that scope and modify its value
                 # This will not insert a brand new symbol into the scope, thus all symbols MUST be pre-defined in the
                 #   scope
@@ -233,66 +285,72 @@ class SymbolTable(GenericTable):
         except:
             raise InvalidSymbolAccess("Altering existing symbol failed. Scriptax.SymbolTable@set_symbol")
 
-    def has_symbol(self, name: str, type=SYMBOL_VAR) -> bool:
+    def has_symbol(self, label: List[Label], type=SYMBOL_VAR) -> bool:
         """
         Returns whether or not the given symbol exists
         """
 
+        label = copy_label(label)
+
         try:
-            self.get_symbol(name, type)
+            self.get_symbol(label, type)
         except:
             return False
         return True
 
-    def get_symbol(self, name: str, type=SYMBOL_VAR, as_value=True):
+    def get_symbol(self, label: List[Label], type=SYMBOL_VAR, as_value=True):
         """
         Returns a symbol object for a given name
         Returns symbol or the traversed symbol value
         """
+        label = copy_label(label)
 
         try:
-            name: list = self.make_and_verify_name(name)
-            scope: SymbolScope = self.traverse_up(name)
+            self.verify_name(label)
+            scope: SymbolScope = self.traverse_up(label)
             # Gets the symbol from the first level name component
-            symbol: Symbol = self.search_scope_for_symbol(scope, name[0], type)
-            name.pop(0)
+            symbol: Symbol = self.search_scope_for_symbol(scope, label[0], type)
+            label.pop(0)
             # Gets value out of the symbol if we desire this
             if as_value:
-                return self.search_symbol_for_value(symbol, name, type)
+                return self.search_symbol_for_value(symbol, label, type)
             return symbol
         except IndexError:
             raise SymbolNotFound
 
-    def remove_symbol(self, name: str, type=SYMBOL_VAR):
+    def remove_symbol(self, label: List[Label], type=SYMBOL_VAR):
         """
         Remove a symbol
         """
 
-        if not self.has_symbol(name, type):
-            raise InvalidSymbolAccess(
-                "Cannot remove symbol with name `" + name + "` as it does not exist within this scope. Scriptax.SymbolTable@remove_symbol")
+        label = copy_label(label)
 
-        name: list = self.make_and_verify_name(name)
-        scope: SymbolScope = self.traverse_up(name)
+        if not self.has_symbol(label, type):
+            raise InvalidSymbolAccess(
+                "Cannot remove symbol with name `" + resolve_label(
+                    label) + "` as it does not exist within this scope. Scriptax.SymbolTable@remove_symbol")
+
+        self.verify_name(label)
+        scope: SymbolScope = self.traverse_up(label)
 
         # See if a symbol already exists, if not, it excepts
         try:
-            symbol: Symbol = self.search_scope_for_symbol(scope, name[0], type)
+            symbol: Symbol = self.search_scope_for_symbol(scope, label[0], type)
         except:
             raise InvalidSymbolAccess(
-                "Cannot remove symbol with name `" + "".join(
-                    name) + "` as it does not exist within this scope. Scriptax.SymbolTable@remove_symbol")
+                "Cannot remove symbol with name `" + resolve_label(
+                    label) + "` as it does not exist within this scope. Scriptax.SymbolTable@remove_symbol")
 
         # If a symbol exists, this section will remove it
         try:
             # Pops the name we used to find the starting symbol from the first try/except above
-            name.pop(0)
+            label.pop(0)
             # If the name still has more components, then we haven't yet found the right symbol to remove
-            if len(name) > 0:
+            if len(label) > 0:
                 # Index holds the last component in the name
-                index = name[-1]
+                index = label[-1].name
                 # Finds the symbol corresponding to the name excluding the last name component
-                symbol = Symbol(name="".join(name), value=self.search_symbol_for_value(symbol, name[:-1], type))
+                symbol = Symbol(name=resolve_label(label), value=self.search_symbol_for_value(symbol, label[:-1], type))
                 # If the symbol is an INSTANCE (Another scope), then find the symbol in that scope and remove it
                 if symbol.data_type == DATA_INSTANCE:
                     symbol.value.remove_symbol(name=index)
@@ -313,34 +371,39 @@ class SymbolTable(GenericTable):
         except:
             raise InvalidSymbolAccess("Removing existing symbol failed. Scriptax.SymbolTable@remove_symbol")
 
-    def register_method(self, name: str, method_context, attributes: Attributes) -> Symbol:
+    def register_method(self, label: List[Label], method_context, attributes: Attributes) -> Symbol:
         """
         Registers a method to the symbol table
         """
-        symbol: Symbol = Symbol(name=name, data_type=DATA_METHOD, value=method_context, attributes=attributes.dict())
+        label = copy_label(label)
+
+        symbol: Symbol = Symbol(name=resolve_label(label), data_type=DATA_METHOD, value=method_context,
+                                attributes=attributes.dict())
         self.scope().insert_symbol(symbol)
         return symbol
 
     # TODO: This method is nasty, gross, and unwieldly. It needs to be refactored
-    def execute(self, name: str, parameters: List[Parameter] = None, isolated_scope: bool = False):
+    def execute(self, label: List[Label], parameters: List[Parameter] = None, isolated_scope: bool = False):
         """
         Executes a method by getting the method body, and its appropriate static parent and birthing a scope for the method to operate within
         Returns the method body
         """
+        label = copy_label(label)
 
         # If the method is on a composition based variable
-        if self.has_symbol(name, SYMBOL_MODULE):
-            module_import: Import = self.get_symbol(name, type=SYMBOL_MODULE, as_value=False).value
+        if self.has_symbol(label, SYMBOL_MODULE):
+            module_import: Import = self.get_symbol(label, type=SYMBOL_MODULE, as_value=False).value
             scope = module_import.scope
-            method_name = self.make_and_verify_name(name)[1]
+            self.verify_name(label)
+            method_name = label[1]
             tbl = create_table(scope)
-            method: Symbol = tbl.get_symbol(name=method_name, as_value=False)
+            method: Symbol = tbl.get_symbol(label=[method_name], as_value=False)
             instance_table: GenericTable = create_generic_table(scope)
-            method_scope: SymbolScope = instance_table.birth_scope(name=method_name + "_method")
+            method_scope: SymbolScope = instance_table.birth_scope(name=method_name.name + "_method")
             # Adds each parameter into the method scope
             if parameters:
                 for parameter in parameters:
-                    method_scope.insert_symbol(Symbol(name=parameter.name, value=parameter.value))
+                    method_scope.insert_symbol(Symbol(name=parameter.label.name, value=parameter.value))
 
             # Sets up the dynamic links from the currently executing code to the called method
             self.call(method_scope)
@@ -349,23 +412,24 @@ class SymbolTable(GenericTable):
             return method.value
 
         # Ensures that the method symbol exists
-        if not self.has_symbol(name) and self.has_symbol(name, SYMBOL_MODULE):
+        if not self.has_symbol(label) and self.has_symbol(label, SYMBOL_MODULE):
             raise SymbolNotFound(
-                "Cannot execute `" + name + "` as it does not exist within scope. Scriptax.SymbolTable@execute")
+                "Cannot execute `" + resolve_label(
+                    label) + "` as it does not exist within scope. Scriptax.SymbolTable@execute")
 
         # Breaks apart the name into the scope name and the method name
         # The scope name is everything before the method name
-        name = self.make_and_verify_name(name)
+        self.verify_name(label)
 
         # Get the scope accessing name which is everything but the last component of the name
-        scope_name = name[:-1]
+        scope_name = label[:-1]
 
         # If scope_name only contains an up_word, then clear out the scope_name entirely
         if len(scope_name) == 1 and self.name_has_up(scope_name):
             scope_name = []
 
         # Get the Method name which is just the last component of the name
-        method_name = name[-1]
+        method_name = label[-1]
 
         # print("mn:" + str(method_name))
         # print("sn:" + str(scope_name))
@@ -380,12 +444,13 @@ class SymbolTable(GenericTable):
         if len(scope_name) > 0:
             # Attempts to find the symbol on instances
             try:
-                instance_scope = self.get_symbol(name=".".join(scope_name))
+                instance_scope = self.get_symbol(label=scope_name)
             except:
                 # If we cant find an instance with the name, then try and see if we have imported this name
                 if not self.name_has_up(scope_name):
-                    scope_name.insert(0, self.up_words[0])
-                instance_scope = self.get_symbol(name=".".join(scope_name), type=SYMBOL_MODULE)
+                    scope_name.insert(0, Label(name=self.up_words[0]))
+
+                instance_scope = self.get_symbol(label=scope_name, type=SYMBOL_MODULE)
 
         else:
             # Perhaps we are trying to call a function stored in a variable
@@ -394,7 +459,7 @@ class SymbolTable(GenericTable):
             # Let's see whether the instance_scope contains the method
             tbl = create_table(instance_scope)
             try:
-                method: Symbol = tbl.get_symbol(name=method_name, as_value=False)
+                method: Symbol = tbl.get_symbol(label=[method_name], as_value=False)
             except:
                 # If one doesnt exist, then we must be trying to call a function on our own instance
                 instance_scope = self._get_parent_module()
@@ -402,7 +467,7 @@ class SymbolTable(GenericTable):
         # Gets the method symbol from the scope
         tbl = create_table(instance_scope)
         try:
-            method: Symbol = tbl.get_symbol(name=method_name, as_value=False)
+            method: Symbol = tbl.get_symbol(label=[method_name], as_value=False)
         except:
             # print(instance_scope.scope_parent.scope_children[1].symbols[0].name)
             # try:
@@ -415,30 +480,31 @@ class SymbolTable(GenericTable):
             #     print(tbl.current.print_scope_debug())
             #     method: Symbol = tbl.get_symbol(name=method_name, as_value=False)
             # except Exception:
-            raise SymbolNotFound("Method `" + ".".join(name) + "` does not exist. Scriptax.SymbolTable@execute")
+            raise SymbolNotFound("Method `" + resolve_label(label) + "` does not exist. Scriptax.SymbolTable@execute")
 
         # Used in a weird edge case where we pass a default parameter which is a method atom
         # TODO: Hopefully in Scriptax 5 this will no longer be required
         while isinstance(method.value, Symbol) and method.value.data_type == DATA_METHOD:
             method = method.value
 
-        if not (method.data_type == DATA_PYTHONIC and isinstance(method.value, Method)) and method.data_type != DATA_METHOD:
+        if not (method.data_type == DATA_PYTHONIC and isinstance(method.value,
+                                                                 Method)) and method.data_type != DATA_METHOD:
             raise InvalidSymbolAccess(
                 "Cannot execute non executable data type `" + method.data_type + "`. Scriptax.SymbolTable@execute")
 
         # Spawns an anonymous scope if this should be executed in isolation, otherwise use the existing
         #   static scope
         if isolated_scope:
-            method_scope = SymbolTable(name=method_name + "_isolated_method", type=SCOPE_BLOCK).scope()
+            method_scope = SymbolTable(name=method_name.name + "_isolated_method", type=SCOPE_BLOCK).scope()
         else:
             # Births a new scope for the method body inside of its static parent scope
             instance_table: GenericTable = create_generic_table(instance_scope)
-            method_scope: SymbolScope = instance_table.birth_scope(name=method_name + "_method")
+            method_scope: SymbolScope = instance_table.birth_scope(name=method_name.name + "_method")
 
         # Adds each parameter into the method scope
         if parameters:
             for parameter in parameters:
-                method_scope.insert_symbol(Symbol(name=parameter.name, value=parameter.value))
+                method_scope.insert_symbol(Symbol(name=resolve_label(parameter.label), value=parameter.value))
 
         # Sets up the dynamic links from the currently executing code to the called method
         self.call(method_scope)
@@ -470,7 +536,7 @@ class SymbolTable(GenericTable):
         """
         self.exit_scope()
 
-    def import_module(self, name: str, module: Import) -> Symbol:
+    def import_module(self, label: List[Label], module: Import) -> Symbol:
         """
         Imports a new module to the symbol table
         This does not handle the parse tree or the static method scoping and that should be done prior to calling this
@@ -479,65 +545,77 @@ class SymbolTable(GenericTable):
         :param module:
         :return:
         """
-        return self.scope().insert_symbol(Symbol(name=name, symbol_type=SYMBOL_MODULE, value=module))
+        label = copy_label(label)
 
-    def _get_import(self, name: str) -> Symbol:
+        return self.scope().insert_symbol(Symbol(name=resolve_label(label), symbol_type=SYMBOL_MODULE, value=module))
+
+    def _get_import(self, label: List[Label]) -> Symbol:
         """
         Finds an import and returns it's symbol
         If it does not exist, it will throw an exception.
         """
 
+        label = copy_label(label)
+
         # Checks if a script has been imported with this name
-        if not self.has_symbol(name, type=SYMBOL_MODULE):
+        if not self.has_symbol(label, type=SYMBOL_MODULE):
             # Perhaps it is in the parent module scope, let's try
-            up_name = self.up_words[0] + "." + name
+            up_name: List[Label] = Label(name=self.up_words[0]) + label
             if not self.has_symbol(up_name, type=SYMBOL_MODULE):
                 raise SymbolNotFound(
-                    "Cannot find symbol with name `" + name + "` to create instance from. Scriptax.SymbolTable@copy")
+                    "Cannot find symbol with name `" + resolve_label(
+                        label) + "` to create instance from. Scriptax.SymbolTable@copy")
             else:
                 name = up_name
 
         # If we imported module exists, then return the symbol for it
-        return self.get_symbol(name, type=SYMBOL_MODULE, as_value=False)
+        return self.get_symbol(label, type=SYMBOL_MODULE, as_value=False)
 
-    def new_instance(self, import_name: str) -> Import:
+    def new_instance(self, label: List[Label]) -> Import:
         """
         Used to create new instances without requiring a var name
         :param import_name:
         :return:
         """
+
+        label = copy_label(label)
+
         # If we imported module exists, then get the symbol for it
-        symbol: Symbol = self._get_import(import_name)
+        symbol: Symbol = self._get_import(label)
 
         # Generate a fresh symbol table for the new instance
-        instance_table = SymbolTable(name=import_name + "_" + str(uuid.uuid4()) + "_instance")
+        instance_table = SymbolTable(name=resolve_label(label) + "_" + str(uuid.uuid4()) + "_instance")
 
         return Import(scope=instance_table.scope(), tree=symbol.value.tree)
 
-    def extends(self, import_name: str) -> Import:
+    def extends(self, label: List[Label]) -> Import:
         """
         Extends the current scope by an imported scope.
         Returns the SymbolTable of the extended scope (the copy of the imported scope) in order to parse using it
         """
 
+        label = copy_label(label)
+
         # If we imported module exists, then get the symbol for it
-        symbol: Symbol = self._get_import(import_name)
+        symbol: Symbol = self._get_import(label)
 
         # Generate a fresh symbol table for the new instance
-        instance_table = SymbolTable(name=import_name + "_extended_instance")
+        instance_table = SymbolTable(name=resolve_label(label) + "_extended_instance")
 
         # Injects the extended scope into the static link chain
         self.scope().extends(instance_table.scope())
 
         return Import(tree=symbol.value.tree, scope=instance_table.scope())
 
-    def implements(self, import_name: str):
+    def implements(self, label: List[Label]):
         """
         Implements static method symbols from the imported scope into this scope
         """
 
+        label = copy_label(label)
+
         # If we imported module exists, then get the symbol for it
-        symbol: Symbol = self._get_import(import_name)
+        symbol: Symbol = self._get_import(label)
 
         # Get the symbols inside of the imported module symbol and loop through them
         for sym in symbol.value.scope.symbols:

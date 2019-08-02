@@ -215,7 +215,15 @@ required_parameter : labels ;
 
 labels : label_comp (DOT label_comp)* ;
 
-label_comp : label (SOPEN (expr | expr COLON | COLON expr | expr COLON expr) SCLOSE)? | inject ;
+label_comp : label (SOPEN slicer SCLOSE)* | inject ;
+
+slicer : expr | left_slice | right_slice | full_slice ;
+
+left_slice : expr COLON ;
+
+right_slice : COLON expr ;
+
+full_slice : expr COLON expr ;
 
 label : LABEL ;
 

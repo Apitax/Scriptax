@@ -17,10 +17,12 @@ from scriptax.models.CaseStatus import CaseStatus
 from scriptax.models.Callback import Callback
 from scriptax.models.Method import Method
 from scriptax.models.Range import Range
+from scriptax.models.Label import Label
 
 from scriptax.parser.utils.BoilerPlate import generate_parse_tree, read_file, read_string, customizable_tree_parser
 
 from scriptax.parser.SymbolTable import SymbolTable, create_table, Import
+from scriptax.parser.SymbolTable import resolve_label as basic_resolve_label
 from scriptax.parser.symbols.SymbolScope import SymbolScope, SCOPE_GLOBAL, SCOPE_MODULE
 from scriptax.parser.symbols.Symbol import Symbol, value_to_type, is_similar_types, DATA_INT, DATA_DECIMAL, \
     DATA_BOOLEAN, DATA_HEX, \
@@ -230,21 +232,33 @@ class AhVisitor(AhVisitorOriginal):
         if char:
             self.state['char'] = char
 
-    def resolve_label(self, label):
+    def resolve_label(self, label) -> str:
         """
         Resolves a name
         """
-        name = label
-        if not isinstance(name, str):
-            name = self.visit(label)
+        name: str = ""
+        if not isinstance(label, str):
+            if isinstance(label, list) or isinstance(label, Label):
+                name = basic_resolve_label(label)
+            else:
+                name = self.resolve_label(self.visit(label))
+        else:
+            name = label
         return name
 
-    # TODO
-    def execute_os(self):
+    def simple_resolve_label(self, label) -> List[Label]:
         """
-        Executes an OS line
+        Resolves a name
         """
-        pass
+        if not isinstance(label, list):
+            if isinstance(label, Label):
+                return [label]
+            if isinstance(label, str):
+                return [Label(name=label)]
+            return self.visit(label)
+
+        return label
+
 
     def execute_callback(self, callback: Callback = None, parameters: List[Parameter] = None,
                          symbol_table: SymbolTable = None) -> BlockStatus:
@@ -254,7 +268,7 @@ class AhVisitor(AhVisitorOriginal):
         if not symbol_table:
             symbol_table = self.symbol_table
 
-        symbol_table.execute(name=callback.name, parameters=parameters + callback.parameters, isolated_scope=True)
+        symbol_table.execute(label=callback.name, parameters=parameters + callback.parameters, isolated_scope=True)
         if not callback.block:
             # TODO: This should throw exception
             symbol_table.complete_execution()
@@ -271,8 +285,8 @@ class AhVisitor(AhVisitorOriginal):
         if not symbol_table:
             symbol_table = self.symbol_table
 
-        label = self.resolve_label(label)
-        symbol_table.set_symbol(name=label, value=value, strict_type=strict_type)
+        label = self.simple_resolve_label(label)
+        symbol_table.set_symbol(label=label, value=value, strict_type=strict_type)
 
     # TODO exceptions
     def get_variable(self, label=None, symbol_table: SymbolTable = None):
@@ -282,8 +296,8 @@ class AhVisitor(AhVisitorOriginal):
         if not symbol_table:
             symbol_table = self.symbol_table
 
-        label = self.resolve_label(label)
-        return symbol_table.get_symbol(name=label)
+        label = self.simple_resolve_label(label)
+        return symbol_table.get_symbol(label=label)
 
     # TODO exceptions
     def delete_variable(self, label, symbol_table: SymbolTable = None):
@@ -293,8 +307,8 @@ class AhVisitor(AhVisitorOriginal):
         if not symbol_table:
             symbol_table = self.symbol_table
 
-        label = self.resolve_label(label)
-        symbol_table.remove_symbol(name=label)
+        label = self.simple_resolve_label(label)
+        symbol_table.remove_symbol(label=label)
 
     def get_symbol(self, label, symbol_table: SymbolTable = None) -> Symbol:
         """
@@ -305,12 +319,12 @@ class AhVisitor(AhVisitorOriginal):
         if not symbol_table:
             symbol_table = self.symbol_table
 
-        label = self.resolve_label(label)
+        label = self.simple_resolve_label(label)
         try:
-            return symbol_table.get_symbol(name=label, as_value=False)
+            return symbol_table.get_symbol(label=label, as_value=False)
         except SymbolNotFound:
             try:
-                return symbol_table.get_symbol(name=label, type=SYMBOL_MODULE, as_value=False)
+                return symbol_table.get_symbol(label=label, type=SYMBOL_MODULE, as_value=False)
             except SymbolNotFound:
                 raise SymbolNotFound("Could not find symbol")
 
@@ -329,7 +343,7 @@ class AhVisitor(AhVisitorOriginal):
         from scriptax.parser.ModuleVisitor import ModuleParser
 
         if as_label:
-            as_label = self.resolve_label(as_label)
+            as_label = self.simple_resolve_label(as_label)
 
         driver_instance: Driver = LoadedDrivers.getPrimaryDriver()
         if driver:
@@ -339,11 +353,11 @@ class AhVisitor(AhVisitorOriginal):
         scriptax: InputStream = driver_instance.getDriverScript(path)
         tree = generate_parse_tree(scriptax)
 
-        import_table = SymbolTable(name=as_label + "_import")
+        import_table = SymbolTable(name=basic_resolve_label(as_label) + "_import")
         module_parser = ModuleParser(symbol_table=import_table)
         module_parser.visit(tree)
         module = Import(tree=tree, scope=module_parser.symbol_table.scope())
-        symbol_table.import_module(name=as_label, module=module)
+        symbol_table.import_module(label=as_label, module=module)
 
     def import_module_string(self, label, scriptax: str, symbol_table: SymbolTable = None):
         """
@@ -358,13 +372,13 @@ class AhVisitor(AhVisitorOriginal):
         # Avoids circular dependencies
         from scriptax.parser.ModuleVisitor import ModuleParser
 
-        label = self.resolve_label(label)
+        label = self.simple_resolve_label(label)
         tree = generate_parse_tree(read_string(scriptax))
         import_table = SymbolTable(name=label + "_import")
         module_parser = ModuleParser(symbol_table=import_table)
         module_parser.visit(tree)
         module = Import(tree=tree, scope=module_parser.symbol_table.scope())
-        symbol_table.import_module(name=label, module=module)
+        symbol_table.import_module(label=label, module=module)
 
     def extend(self, import_name, symbol_table: SymbolTable = None):
         """
@@ -373,8 +387,8 @@ class AhVisitor(AhVisitorOriginal):
         if not symbol_table:
             symbol_table = self.symbol_table
 
-        import_name = self.resolve_label(import_name)
-        module: Import = symbol_table.extends(import_name=import_name)
+        import_name = self.simple_resolve_label(import_name)
+        module: Import = symbol_table.extends(label=import_name)
         module_table = create_table(module.scope)
         customizable_tree_parser(tree=module.tree, symbol_table=module_table, options=self.appOptions)
         # never call the constructor here. never ever ever
@@ -387,8 +401,8 @@ class AhVisitor(AhVisitorOriginal):
         if not symbol_table:
             symbol_table = self.symbol_table
 
-        label = self.resolve_label(label)
-        symbol_table.implements(import_name=label)
+        label = self.simple_resolve_label(label)
+        symbol_table.implements(label=label)
 
     def new_instance(self, import_name, parameters: List[Parameter] = None,
                      symbol_table: SymbolTable = None) -> SymbolScope:
@@ -398,8 +412,8 @@ class AhVisitor(AhVisitorOriginal):
         if not symbol_table:
             symbol_table = self.symbol_table
 
-        import_name = self.resolve_label(import_name)
-        instance: Import = symbol_table.new_instance(import_name=import_name)
+        import_name = self.simple_resolve_label(import_name)
+        instance: Import = symbol_table.new_instance(label=import_name)
         instance_table = create_table(instance.scope)
         returned, visitor = customizable_tree_parser(tree=instance.tree, symbol_table=instance_table,
                                                      options=self.appOptions,
@@ -419,8 +433,8 @@ class AhVisitor(AhVisitorOriginal):
         if not symbol_table:
             symbol_table = self.symbol_table
 
-        label = self.resolve_label(label)
-        return symbol_table.register_method(name=label, method_context=method_context, attributes=attributes)
+        label = self.simple_resolve_label(label)
+        return symbol_table.register_method(label=label, method_context=method_context, attributes=attributes)
 
     def execute_method(self, label, parameters: List[Parameter], symbol_table: SymbolTable = None) -> BlockStatus:
         """
@@ -429,27 +443,27 @@ class AhVisitor(AhVisitorOriginal):
         if not symbol_table:
             symbol_table = self.symbol_table
 
-        label = self.resolve_label(label)
-        method_context: AhParser.Method_def_atomContext = symbol_table.execute(name=label, parameters=parameters)
+        label = self.simple_resolve_label(label)
+        method_context: AhParser.Method_def_atomContext = symbol_table.execute(label=label, parameters=parameters)
         if not method_context:
             symbol_table.complete_execution()
             raise InvalidSymbolAccess(
-                "Cannot execute something which is not a method " + label + ". Scriptax.Visitor@execute_method")
+                "Cannot execute something which is not a method " + self.resolve_label(label) + ". Scriptax.Visitor@execute_method")
 
         # Add in optional parameters and verify that the two parameter lists (defined & passed) match
         parameter_names = []
         for parameter in parameters:
-            parameter_names.append(parameter.name)
+            parameter_names.append(basic_resolve_label(parameter.label))
         defined_parameters = self.visit(method_context.flexible_parameter_block())
         defined_parameter_names: list = []
         defined_parameter_types: dict = {}
 
         # Check defined parameters against passed in parameters and add in optional ones
         for parameter in defined_parameters:
-            if parameter.required and parameter.name not in parameter_names:
+            if parameter.required and basic_resolve_label(parameter.label) not in parameter_names:
                 raise InvalidParameters(
                     "Required parameter " + parameter.name + " not found in parameter list. Scriptax.Visitor@execute_method")
-            if not parameter.required and parameter.name not in parameter_names:
+            if not parameter.required and basic_resolve_label(parameter.label) not in parameter_names:
                 if parameter.strict_type:
                     parameter_type: str = value_to_type(parameter.value)
                     if not is_similar_types(parameter.value, parameter.strict_type):
@@ -459,21 +473,21 @@ class AhVisitor(AhVisitorOriginal):
                     symbol_table.current.insert_symbol(
                         Symbol(name=parameter.name, value=parameter.value, attributes={'strict_type': parameter_type}))
                 else:
-                    symbol_table.current.insert_symbol(Symbol(name=parameter.name, value=parameter.value))
-            defined_parameter_names.append(parameter.name)
+                    symbol_table.current.insert_symbol(Symbol(name=basic_resolve_label(parameter.label), value=parameter.value))
+            defined_parameter_names.append(basic_resolve_label(parameter.label))
             if parameter.strict_type:
-                defined_parameter_types.update({parameter.name: parameter.strict_type})
+                defined_parameter_types.update({basic_resolve_label(parameter.label): parameter.strict_type})
 
         # Check passed in parameters to ensure there aren't extra ones which were not defined
         for parameter in parameters:
-            if parameter.name not in defined_parameter_names:
+            if basic_resolve_label(parameter.label) not in defined_parameter_names:
                 raise InvalidParameters(
-                    "Unexpected parameter " + parameter.name + ". Scriptax.Visitor@execute_method")
+                    "Unexpected parameter " + basic_resolve_label(parameter.label) + ". Scriptax.Visitor@execute_method")
             # Check for strict types
-            if parameter.name in defined_parameter_types:
-                if not is_similar_types(parameter.value, defined_parameter_types[parameter.name]):
+            if basic_resolve_label(parameter.label) in defined_parameter_types:
+                if not is_similar_types(parameter.value, defined_parameter_types[basic_resolve_label(parameter.label)]):
                     raise InvalidType("Variable type declared as `" + str(
-                        defined_parameter_types[parameter.name]) + "` but value is of type `" + str(
+                        defined_parameter_types[basic_resolve_label(parameter.label)]) + "` but value is of type `" + str(
                         value_to_type(parameter.value)) + "`. Scriptax.Visitor@execute_method")
 
         # TODO: If async attribute is true, then this needs to be launched in a thread
@@ -752,7 +766,8 @@ class AhVisitor(AhVisitorOriginal):
         return result
 
     def visitMethod_call_statement(self, ctx: AhParser.Method_call_statementContext) -> BlockStatus:
-        name = self.resolve_label(ctx.labels())
+        name = self.visit(ctx.labels())
+
         old_table: SymbolTable = None
         if ctx.SUPER():
             old_table: SymbolTable = self.symbol_table
@@ -782,7 +797,7 @@ class AhVisitor(AhVisitorOriginal):
 
         parameters_dict: dict = {}
         for parameter in parameters:
-            parameters_dict[parameter.name] = parameter.value
+            parameters_dict[basic_resolve_label(parameter.label)] = parameter.value
 
         try:
             driver_instance = LoadedDrivers.getDriver(driver_name)
@@ -829,7 +844,7 @@ class AhVisitor(AhVisitorOriginal):
 
     def visitMethod_def_statement(self, ctx: AhParser.Method_def_statementContext) -> Symbol:
         attributes: Attributes = self.visit(ctx.attributes())
-        label: str = self.resolve_label(ctx.label())
+        label = self.visit(ctx.label())
         if ctx.data_type():
             attributes.strict_return_type = self.visit(ctx.data_type())
         return self.register_method(label=label, method_context=ctx, attributes=attributes)
@@ -885,11 +900,11 @@ class AhVisitor(AhVisitorOriginal):
                 timeout = float(self.visit(ctx.expr(1))) / 1000.0
 
         if isinstance(loop_range, list):
-            self.log('Looping through list with var ' + key)
+            self.log('Looping through list with var ' + self.resolve_label(key))
 
             i = 0
             for item in loop_range:
-                self.log('> Assigning ' + key + ' = ' + str(item))
+                self.log('> Assigning ' + self.resolve_label(key) + ' = ' + str(item))
 
                 self.symbol_table.enter_block_scope()
 
@@ -912,10 +927,10 @@ class AhVisitor(AhVisitorOriginal):
                 i += 1
 
         elif isinstance(loop_range, float) or isinstance(loop_range, int):
-            self.log('Looping through iterations with var ' + key)
+            self.log('Looping through iterations with var ' + self.resolve_label(key))
 
             for i in range(0, int(loop_range)):
-                self.log('> Assigning ' + key + ' = ' + str(i))
+                self.log('> Assigning ' + self.resolve_label(key) + ' = ' + str(i))
 
                 self.symbol_table.enter_block_scope()
 
@@ -938,10 +953,10 @@ class AhVisitor(AhVisitorOriginal):
         elif isinstance(loop_range, dict):
             if not value:
                 raise InvalidParameters("To loop over a dict, you must use both a key and a value")
-            self.log('Looping through dict with var ' + key)
+            self.log('Looping through dict with var ' + self.resolve_label(key))
             for p_key, p_value in loop_range.items():
-                self.log('> Assigning ' + key + ' = ' + str(p_key))
-                self.log('> Assigning ' + value + ' = ' + str(p_value))
+                self.log('> Assigning ' + self.resolve_label(key) + ' = ' + str(p_key))
+                self.log('> Assigning ' + self.resolve_label(value) + ' = ' + str(p_value))
 
                 self.symbol_table.enter_block_scope()
 
@@ -959,10 +974,10 @@ class AhVisitor(AhVisitorOriginal):
                     time.sleep(timeout)
 
         elif isinstance(loop_range, Range):
-            self.log('Looping through range with var ' + key)
+            self.log('Looping through range with var ' + self.resolve_label(key))
 
             for i in range(loop_range.start, loop_range.stop, loop_range.step):
-                self.log('> Assigning ' + key + ' = ' + str(i))
+                self.log('> Assigning ' + self.resolve_label(key) + ' = ' + str(i))
 
                 self.symbol_table.enter_block_scope()
 
@@ -998,7 +1013,6 @@ class AhVisitor(AhVisitorOriginal):
             delay = float(self.visit(ctx.expr(1))) / 1000.0
 
         i: int = 0
-        print('what')
         print(timeout == -1 or timeout > i, flush=True)
         while (not self.visit(ctx.condition())) and (timeout == -1 or timeout > i):
             block_status: BlockStatus = self.visit(ctx.block())
@@ -1104,7 +1118,7 @@ class AhVisitor(AhVisitorOriginal):
             driver = self.visit(ctx.label(0))
             label_index += 1
 
-        path = self.visit(ctx.labels())
+        path = basic_resolve_label(self.visit(ctx.labels()))
 
         if ctx.AS():
             name = self.visit(ctx.label(label_index))
@@ -1118,7 +1132,7 @@ class AhVisitor(AhVisitorOriginal):
     def visitExtends_statement(self, ctx: AhParser.Extends_statementContext):
         if not ctx.WITH():
             # Inheritance only
-            self.extend(import_name=self.resolve_label(ctx.label(0)))
+            self.extend(import_name=self.visit(ctx.label(0)))
         else:
             label_count = 0
             comma_count = 0
@@ -1132,11 +1146,11 @@ class AhVisitor(AhVisitorOriginal):
             i = 0
             if label_count > (comma_count + 1):
                 # If the first label is for inheritance
-                self.extend(import_name=self.resolve_label(ctx.label(0)))
+                self.extend(import_name=self.visit(ctx.label(0)))
                 i = 1
 
             while ctx.label(i):
-                self.implements(self.resolve_label(ctx.label(i)))
+                self.implements(self.visit(ctx.label(i)))
                 i += 1
 
     def visitAtom_create_instance(self, ctx: Ah5Parser.Atom_create_instanceContext):
@@ -1144,7 +1158,7 @@ class AhVisitor(AhVisitorOriginal):
 
         parameters = self.visit(ctx.optional_parameters_block())
 
-        symbol_scope: SymbolScope = self.new_instance(import_name=label, parameters=parameters)
+        symbol_scope: SymbolScope = self.new_instance(import_name=basic_resolve_label(label), parameters=parameters)
 
         if ctx.method_call_statement():
             old_table: SymbolTable = self.symbol_table
@@ -1173,11 +1187,11 @@ class AhVisitor(AhVisitorOriginal):
         return parameters
 
     def visitOptional_parameter(self, ctx: AhParser.Optional_parameterContext) -> Parameter:
-        return Parameter(name=self.visit(ctx.labels()), value=self.visit(ctx.expr()), required=False)
+        return Parameter(label=self.visit(ctx.labels()), value=self.visit(ctx.expr()), required=False)
 
     def visitDict_signal(self, ctx: AhParser.Dict_signalContext) -> List[Parameter]:
         if ctx.labels():
-            data = self.get_variable(label=ctx.labels())
+            data = self.get_variable(label=self.visit(ctx.labels()))
         else:
             data = self.visit(ctx.atom_obj_dict())
 
@@ -1186,7 +1200,7 @@ class AhVisitor(AhVisitorOriginal):
 
         parameters: List[Parameter] = []
         for key, value in data.items():
-            parameters.append(Parameter(name=key, value=value))
+            parameters.append(Parameter(label=[Label(name=key)], value=value))
 
         return parameters
 
@@ -1286,15 +1300,15 @@ class AhVisitor(AhVisitorOriginal):
             value = var
             self.set_variable(label=label, value=value, strict_type=data_type)
             if isinstance(tval, threading.Thread):
-                tval.label = label + "." + str(len(value) - 1)
+                tval.label.name = label + "." + str(len(value) - 1)
                 tval.start()
         else:
             self.set_variable(label=label, value=value, strict_type=data_type)
             if isinstance(value, threading.Thread):
-                value.label = label
+                value.label.name = label
                 value.start()
 
-        self.log('Assigning Variable: ' + label + ' = ' + str(value))
+        self.log('Assigning Variable: ' + self.resolve_label(label) + ' = ' + str(value))
 
     def visitData_type(self, ctx: Ah5Parser.Data_typeContext) -> str:
         if ctx.TYPE_ANY():
@@ -1330,14 +1344,14 @@ class AhVisitor(AhVisitorOriginal):
         i = 0
         while ctx.dict_comp(i):
             comp: Parameter = self.visit(ctx.dict_comp(i))
-            dictionary[comp.name] = comp.value
+            dictionary[self.resolve_label(comp.label)] = comp.value
             i += 1
         return dictionary
 
     def visitDict_comp(self, ctx: Ah5Parser.Dict_compContext) -> Parameter:
         if ctx.label():
-            return Parameter(name=self.resolve_label(ctx.label()), value=self.visit(ctx.expr(0)))
-        return Parameter(name=self.visit(ctx.expr(0)), value=self.visit(ctx.expr(1)))
+            return Parameter(label=self.visit(ctx.label()), value=self.visit(ctx.expr(0)))
+        return Parameter(label=[Label(name=self.visit(ctx.expr(0)))], value=self.visit(ctx.expr(1)))
 
     def visitAtom_obj_list(self, ctx: AhParser.Atom_obj_listContext) -> list:
         parameters = []
@@ -1355,16 +1369,16 @@ class AhVisitor(AhVisitorOriginal):
         if ctx.expr(0):
             # Using the arrow format
             if ctx.label(0):
-                parameters[self.visit(ctx.label(0))] = self.visit(ctx.expr(0))
+                parameters[basic_resolve_label(self.visit(ctx.label(0)))] = self.visit(ctx.expr(0))
             while ctx.COMMA(i) and ctx.label(i + 1):
-                parameters[self.visit(ctx.label(i + 1))] = self.visit(ctx.expr(i + 1))
+                parameters[basic_resolve_label(self.visit(ctx.label(i + 1)))] = self.visit(ctx.expr(i + 1))
                 i += 1
         else:
             # Not using the arrow format
             if ctx.label(0):
-                parameters[self.visit(ctx.label(0))] = i
+                parameters[basic_resolve_label(self.visit(ctx.label(0)))] = i
             while ctx.COMMA(i) and ctx.label(i + 1):
-                parameters[self.visit(ctx.label(i + 1))] = i + 1
+                parameters[basic_resolve_label(self.visit(ctx.label(i + 1)))] = i + 1
                 i += 1
 
         return parameters
@@ -1375,10 +1389,13 @@ class AhVisitor(AhVisitorOriginal):
             message = self.visit(ctx.expr())
         self.error(message)
 
-    def visitInject(self, ctx: AhParser.InjectContext):
-        returner = self.visit(ctx.expr())
-        self.log('Injecting into: ' + ctx.getText() + ' with the value ' + str(returner))
-        return returner
+    def visitInject(self, ctx: AhParser.InjectContext) -> [Label]:
+        returner: str = str(self.visit(ctx.expr()))
+        self.log('Injecting into: ' + ctx.getText() + ' with the value ' + returner)
+        labels: List[Label] = []
+        for comp in returner.split('.'):
+            labels.append(Label(name=comp))
+        return labels
 
     def visitCondition(self, ctx: AhParser.ConditionContext) -> bool:
         condition = self.visit(ctx.expr())
@@ -1406,52 +1423,82 @@ class AhVisitor(AhVisitorOriginal):
         return len(self.visit(ctx.expr()))
 
     def visitDelete_statement(self, ctx: AhParser.Delete_statementContext):
-        label = self.resolve_label(ctx.labels())
+        label = self.visit(ctx.labels())
         self.delete_variable(label=label)
-        self.log('Deleteing variable: ' + label)
+        self.log('Deleteing variable: ' + self.resolve_label(label))
 
     def visitAwait_statement(self, ctx: AhParser.Await_statementContext):
-        label = self.resolve_label(ctx.labels())
+        label = self.visit(ctx.labels())
         var = self.get_variable(label=label)
         if isinstance(var, GenericExecution):
             var.join()
         return var
 
     def visitReflection(self, ctx: AhParser.ReflectionContext) -> dict:
-        label = self.resolve_label(ctx.labels())
+        label = self.visit(ctx.labels())
         try:
             reflection = self.get_symbol(label=label).get_symbol_debug()
         except SymbolNotFound:
-            if label in self.symbol_table.up_words:
+            if self.simple_resolve_label(label)[0].name in self.symbol_table.up_words:
                 reflection = self.symbol_table.get_nearest_module().get_scope_debug()
             else:
                 raise SymbolError
         return reflection
 
     def visitRequired_parameter(self, ctx: AhParser.Required_parameterContext) -> Parameter:
-        label = self.resolve_label(ctx.labels())
-        return Parameter(name=label, required=True)
+        label = self.visit(ctx.labels())
+        return Parameter(label=label, required=True)
 
-    def visitLabels(self, ctx: AhParser.LabelsContext) -> str:
+    def visitLabels(self, ctx: AhParser.LabelsContext) -> List[Label]:
+        labels: List[Label] = []
 
-        label = [self.visit(ctx.label_comp(0))]
         i = 0
-        while ctx.DOT(i):
-            label.append(str(self.visit(ctx.label_comp(i + 1))))
+        while ctx.label_comp(i):
+            labels += self.visit(ctx.label_comp(i))
             i += 1
 
-        label = '.'.join(label)
+        return labels
 
-        return label.replace('$', '')
+    def visitLabel_comp(self, ctx: AhParser.Label_compContext) -> List[Label]:
 
-    def visitLabel_comp(self, ctx: AhParser.Label_compContext) -> str:
         if ctx.label():
-            return self.visit(ctx.label())
+            labels: List[Label] = self.visit(ctx.label())
+            i = 0
+            while ctx.slicer(i):
+                labels.append(self.visit(ctx.slicer(i)))
+                i += 1
+            return labels
         else:
             return self.visit(ctx.inject())
 
-    def visitLabel(self, ctx: AhParser.LabelContext) -> str:
-        return ctx.LABEL().getText()
+    def visitSlicer(self, ctx: Ah5Parser.SlicerContext) -> Label:
+        label: Label = Label()
+        if ctx.expr():
+            label.name = str(self.visit(ctx.expr()))
+        elif ctx.left_slice():
+            label.start = self.visit(ctx.left_slice())
+        elif ctx.right_slice():
+            label.stop = self.visit(ctx.right_slice())
+        elif ctx.full_slice():
+            start, stop = self.visit(ctx.full_slice())
+            label.start = start
+            label.stop = stop
+        return label
+
+    def visitLeft_slice(self, ctx: Ah5Parser.Left_sliceContext) -> int:
+        return self.visit(ctx.expr())
+
+    def visitRight_slice(self, ctx: Ah5Parser.Right_sliceContext) -> int:
+        return self.visit(ctx.expr())
+
+    def visitFull_slice(self, ctx: Ah5Parser.Full_sliceContext) -> Tuple[int, int]:
+        return self.visit(ctx.expr(0)), self.visit(ctx.expr(1))
+
+    def visitLabel(self, ctx: AhParser.LabelContext) -> List[Label]:
+        labels: List[Label] = []
+        for comp in ctx.LABEL().getText().replace('$', '').split('.'):
+            labels.append(Label(name=comp))
+        return labels
 
     def visitAttributes(self, ctx: AhParser.AttributesContext) -> Attributes:
         attributes = Attributes()

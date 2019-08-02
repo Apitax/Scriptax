@@ -299,6 +299,26 @@ class Ah5Visitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by Ah5Parser#slicer.
+    def visitSlicer(self, ctx:Ah5Parser.SlicerContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by Ah5Parser#left_slice.
+    def visitLeft_slice(self, ctx:Ah5Parser.Left_sliceContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by Ah5Parser#right_slice.
+    def visitRight_slice(self, ctx:Ah5Parser.Right_sliceContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by Ah5Parser#full_slice.
+    def visitFull_slice(self, ctx:Ah5Parser.Full_sliceContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by Ah5Parser#label.
     def visitLabel(self, ctx:Ah5Parser.LabelContext):
         return self.visitChildren(ctx)

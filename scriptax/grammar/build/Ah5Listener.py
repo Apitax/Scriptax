@@ -530,6 +530,42 @@ class Ah5Listener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by Ah5Parser#slicer.
+    def enterSlicer(self, ctx:Ah5Parser.SlicerContext):
+        pass
+
+    # Exit a parse tree produced by Ah5Parser#slicer.
+    def exitSlicer(self, ctx:Ah5Parser.SlicerContext):
+        pass
+
+
+    # Enter a parse tree produced by Ah5Parser#left_slice.
+    def enterLeft_slice(self, ctx:Ah5Parser.Left_sliceContext):
+        pass
+
+    # Exit a parse tree produced by Ah5Parser#left_slice.
+    def exitLeft_slice(self, ctx:Ah5Parser.Left_sliceContext):
+        pass
+
+
+    # Enter a parse tree produced by Ah5Parser#right_slice.
+    def enterRight_slice(self, ctx:Ah5Parser.Right_sliceContext):
+        pass
+
+    # Exit a parse tree produced by Ah5Parser#right_slice.
+    def exitRight_slice(self, ctx:Ah5Parser.Right_sliceContext):
+        pass
+
+
+    # Enter a parse tree produced by Ah5Parser#full_slice.
+    def enterFull_slice(self, ctx:Ah5Parser.Full_sliceContext):
+        pass
+
+    # Exit a parse tree produced by Ah5Parser#full_slice.
+    def exitFull_slice(self, ctx:Ah5Parser.Full_sliceContext):
+        pass
+
+
     # Enter a parse tree produced by Ah5Parser#label.
     def enterLabel(self, ctx:Ah5Parser.LabelContext):
         pass
