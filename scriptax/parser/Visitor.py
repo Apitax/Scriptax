@@ -254,7 +254,11 @@ class AhVisitor(AhVisitorOriginal):
             if isinstance(label, Label):
                 return [label]
             if isinstance(label, str):
-                return [Label(name=label)]
+                comps = label.split('.')
+                my_label = []
+                for comp in comps:
+                    my_label.append(Label(name=comp))
+                return my_label #[Label(name=label)]
             return self.visit(label)
 
         return label
